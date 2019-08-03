@@ -2,18 +2,21 @@ package org.firstinspires.ftc.teamcode.RookieCamp;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 @Autonomous(name = "Rookiecamp Auto", group = "LinearOpMode")
 public class AutoRookie extends LinearOpMode {
 
 
-    CustomAuto Auto = new CustomAuto(this);
+
 
     @Override
-    public void runOpMode() throws InterruptedException {
+    public void runOpMode() {
+        CustomAuto Auto = new CustomAuto(this);
         waitForStart();
-        Auto.moveForward( 0.5, 0.5);
-        Auto.jeweldump();
+        sleep(1000);
+        Auto.moveForward( 0.5, 7);
+
 
     }
 

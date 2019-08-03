@@ -18,7 +18,8 @@ import java.util.Locale;
 public class CustomAuto {
     public DcMotor LM;
     public DcMotor RM;
-    private DcMotor BL = null;
+    public DcMotor LBL = null;
+    public DcMotor RBL = null;
     ElapsedTime timer = new ElapsedTime();
     double lastAngle;
     LinearOpMode opMode;
@@ -31,6 +32,8 @@ public class CustomAuto {
     public CustomAuto(LinearOpMode AutoRookie) {
         LM = AutoRookie.hardwareMap.dcMotor.get("LM");
         RM = AutoRookie.hardwareMap.dcMotor.get("RM");
+        LBL = AutoRookie.hardwareMap.dcMotor.get("LBL");
+        RBL = AutoRookie.hardwareMap.dcMotor.get("RBL");
 
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
@@ -50,16 +53,16 @@ public class CustomAuto {
         imu.initialize(parameters);
 
         // Set up our telemetry dashboard
-        composeTelemetry();
+        //composeTelemetry();
 
     }
 
     public void moveForward(double power, double time) {
-        timer.reset();
-        while (timer.seconds() < time) {
-            LM.setPower(power);
-            RM.setPower(-power);
-        }
+            timer.reset();
+            while (timer.seconds() < time) {
+                LM.setPower(-power);
+                RM.setPower(power);
+            }
 
     }
 
@@ -86,68 +89,72 @@ public class CustomAuto {
         }
 
     }
-    public void jeweldump(){
-        moveForward(.5,3);
-        BL.setDirection(DcMotor.Direction.FORWARD);
-        BL.setPower(.5);
-        wait(1000);
-        BL.setDirection(DcMotor.Direction.REVERSE);
-        wait(1000);
-        BL.setPower(0);
-
+    public void liftDown(double power, double time) {
+        timer.reset();
+        while (timer.seconds() < time) {
+            LBL.setPower(power);
+            RBL.setPower(power);
+        }
+    }
+    public void liftUp (double power,double time){
+        timer.reset();
+        while (timer.seconds() < time){
+            LBL.setPower(-power);
+            RBL.setPower(-power);
+        }
     }
 
-    void composeTelemetry() {
+//    void composeTelemetry() {
+//
+//        // At the beginning of each telemetry update, grab a bunch of data
+//        // from the IMU that we will then display in separate lines.
+//        opMode.telemetry.addAction(new Runnable() {
+//            @Override
+//            public void run() {
+//                // Acquiring the angles is relatively expensive; we don't want
+//                // to do that in each of the three items that need that info, as that's
+//                // three times the necessary expense.
+//                angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+//
+//            }
+//        });
+//
+//        opMode.telemetry.addLine()
+//                .addData("status", new Func<String>() {
+//                    @Override
+//                    public String value() {
+//                        return imu.getSystemStatus().toShortString();
+//                    }
+//                })
+//                .addData("calib", new Func<String>() {
+//                    @Override
+//                    public String value() {
+//                        return imu.getCalibrationStatus().toString();
+//                    }
+//                });
+//
+//        opMode.telemetry.addLine()
+//                .addData("heading", new Func<String>() {
+//                    @Override
+//                    public String value() {
+//                        return formatAngle(angles.angleUnit, angles.firstAngle);
+//                  //  }
+//             //   })
+//                .addData("roll", new Func<String>() {
+//                    @Override
+//                    public String value() {
+//                        return formatAngle(angles.angleUnit, angles.secondAngle);
+//                    }
+//                })
+//                .addData("pitch", new Func<String>() {
+//                    @Override
+//                    public String value() {
+//                        return formatAngle(angles.angleUnit, angles.thirdAngle);
+//                    }
+//                });
+//
 
-        // At the beginning of each telemetry update, grab a bunch of data
-        // from the IMU that we will then display in separate lines.
-        opMode.telemetry.addAction(new Runnable() {
-            @Override
-            public void run() {
-                // Acquiring the angles is relatively expensive; we don't want
-                // to do that in each of the three items that need that info, as that's
-                // three times the necessary expense.
-                angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-            }
-        });
-
-        opMode.telemetry.addLine()
-                .addData("status", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return imu.getSystemStatus().toShortString();
-                    }
-                })
-                .addData("calib", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return imu.getCalibrationStatus().toString();
-                    }
-                });
-
-        opMode.telemetry.addLine()
-                .addData("heading", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return formatAngle(angles.angleUnit, angles.firstAngle);
-                    }
-                })
-                .addData("roll", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return formatAngle(angles.angleUnit, angles.secondAngle);
-                    }
-                })
-                .addData("pitch", new Func<String>() {
-                    @Override
-                    public String value() {
-                        return formatAngle(angles.angleUnit, angles.thirdAngle);
-                    }
-                });
-
-
-    }
+  //  }
 
     String formatAngle(AngleUnit angleUnit, double angle) {
         return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
@@ -158,6 +165,7 @@ public class CustomAuto {
     }
 
     public double getAngle() {
+
         return angles.firstAngle;
     }
 
