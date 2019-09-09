@@ -27,9 +27,77 @@ public class Drivetrain {
         bl.setDirection(DcMotor.Direction.FORWARD);
         fl.setDirection(DcMotor.Direction.FORWARD);
 
-
-
+        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
     }
+    public void startMotors(double power) {
+        fl.setPower(power);
+        fr.setPower(power);
+        bl.setPower(power);
+        br.setPower(power);
 
+    }
+    public void stopMotors() {
+        fl.setPower(0);
+        fr.setPower(0);
+        bl.setPower(0);
+        br.setPower(0);
+
+    }
+    public void turn (double power, double target) {
+        int angle; // Replacement for getting gyro angles
+        if (target > 0) {           // Boolean to check which direction the turn occurs and set motors accordingly
+            while (angle < target) {
+                fl.setPower(power);
+                fr.setPower(-power);
+                bl.setPower(power);
+                br.setPower(-power);
+            }
+        }
+        else {
+            while (angle < target) {
+                fl.setPower(-power);
+                fr.setPower(power);
+                bl.setPower(-power);
+                br.setPower(power);
+            }
+        }
+    }
+    public double encoderAverage (){
+        double average = 0;
+        double counter = 0;
+        if (fl.getCurrentPosition() != 0){      // Checks whether encoder outputs zero
+            average += fl.getCurrentPosition(); //If not zero, adds to average
+            counter += 1 ;                      // Counter to tell what to divide by
+        }
+        if (fr.getCurrentPosition() != 0){      //Repeated for all encoders
+            average += fr.getCurrentPosition();
+            counter += 1;
+        }
+        if (bl.getCurrentPosition() != 0) {
+            average += bl.getCurrentPosition();
+            counter += 1;
+        }
+        if (br.getCurrentPosition() != 0) {
+            average += br.getCurrentPosition();
+            counter += 1;
+        }
+        average /= counter; //The total sum of all encoders that aren't zero, divided by number of encoders that didn't output zero
+        return average;
+
+    }
+    public void moveForward (double encoderDistance, double power, double timeout){
+        int currentPos = 0; //replacement for current encoder measurement
+        int timer = 0; // placeholder for timer
+        startMotors(power); // starts motor
+        while  (timer < timeout) {      //timer loop, to stop motors after time reaches timeout
+            if (currentPos >= encoderDistance) { //checks if destination was reached, and if so stops motors
+                stopMotors();
+            }
+        }
+        stopMotors();
+    }
 }
