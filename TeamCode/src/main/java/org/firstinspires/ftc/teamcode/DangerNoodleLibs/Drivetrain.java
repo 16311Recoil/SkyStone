@@ -50,7 +50,7 @@ public class Drivetrain {
     public void turn (double power, double target) {
         int angle; // Replacement for getting gyro angles
         if (target > 0) {           // Boolean to check which direction the turn occurs and set motors accordingly
-            while (angle < target) {
+            while (angle < target) {      //left turn
                 fl.setPower(power);
                 fr.setPower(-power);
                 bl.setPower(power);
@@ -58,7 +58,7 @@ public class Drivetrain {
             }
         }
         else {
-            while (angle < target) {
+            while (angle > target) {   //right turn
                 fl.setPower(-power);
                 fr.setPower(power);
                 bl.setPower(-power);
