@@ -47,8 +47,13 @@ public class Drivetrain {
         br.setPower(0);
 
     }
-    public void turn (double power, double target) {
-        int angle; // Replacement for getting gyro angles
+    public void turn(double power)
+    {
+
+    }
+    // needs to be edited; will go over with Aditya!
+    public void turnGyro (double power, double target) {
+        int angle = 0; // Replacement for getting gyro angles
         if (target > 0) {           // Boolean to check which direction the turn occurs and set motors accordingly
             while (angle < target) {
                 fl.setPower(power);
@@ -70,10 +75,10 @@ public class Drivetrain {
         double average = 0;
         double counter = 0;
         if (fl.getCurrentPosition() != 0){      // Checks whether encoder outputs zero
-            average += fl.getCurrentPosition(); //If not zero, adds to average
+            average += fl.getCurrentPosition(); // If not zero, adds to average
             counter += 1 ;                      // Counter to tell what to divide by
         }
-        if (fr.getCurrentPosition() != 0){      //Repeated for all encoders
+        if (fr.getCurrentPosition() != 0){      // Repeated for all encoders
             average += fr.getCurrentPosition();
             counter += 1;
         }
