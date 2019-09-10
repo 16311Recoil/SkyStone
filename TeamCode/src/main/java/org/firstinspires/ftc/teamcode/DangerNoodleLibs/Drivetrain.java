@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.DangerNoodleLibs;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class Drivetrain {
 
@@ -47,31 +48,31 @@ public class Drivetrain {
         br.setPower(0);
 
     }
-    public void turn(double power)
-    {
-
-    }
-    // needs to be edited; will go over with Aditya!
-    public void turnGyro (double power, double target) {
-        int angle = 0; // Replacement for getting gyro angles
-        if (target > 0) {           // Boolean to check which direction the turn occurs and set motors accordingly
-            while (angle < target) {
-                fl.setPower(power);
-                fr.setPower(-power);
-                bl.setPower(power);
-                br.setPower(-power);
-            }
+    public void turn(double power, boolean right) {
+        if (right){
+            fl.setPower(-power);
+            fr.setPower(power);
+            bl.setPower(-power);
+            br.setPower(power);
         }
         else {
-            while (angle < target) {
-                fl.setPower(-power);
-                fr.setPower(power);
-                bl.setPower(-power);
-                br.setPower(power);
-            }
+            fl.setPower(power);
+            fr.setPower(-power);
+            bl.setPower(power);
+            br.setPower(-power);
         }
     }
-    public double encoderAverage (){
+
+    public void turnGyro (double power, double target, boolean right) {
+        int angle = 0; // Replacement for getting gyro angles
+        while (angle < target && right) {
+                turn(power, true)
+            }
+        while( !right && angle < target) {
+                turn(power,false);
+            }
+    }
+    public double getEncoderAverage (){
         double average = 0;
         double counter = 0;
         if (fl.getCurrentPosition() != 0){      // Checks whether encoder outputs zero
@@ -95,13 +96,10 @@ public class Drivetrain {
 
     }
     public void moveForward (double encoderDistance, double power, double timeout){
-        int currentPos = 0; //replacement for current encoder measurement
-        int timer = 0; // placeholder for timer
-        startMotors(power); // starts motor
-        while  (timer < timeout) {      //timer loop, to stop motors after time reaches timeout
-            if (currentPos >= encoderDistance) { //checks if destination was reached, and if so stops motors
-                stopMotors();
-            }
+        double currentPos = getEncoderAverage();
+        ElapsedTime timer = new ElapsedTime();
+        while  (timer.seconds() < timeout && currentPos < encoderDistance) { //timer loop to stop motors after time reaches timeout or if destination is reached
+            startMotors(power);
         }
         stopMotors();
     }
