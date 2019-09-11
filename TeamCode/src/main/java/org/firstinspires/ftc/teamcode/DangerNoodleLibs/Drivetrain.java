@@ -34,6 +34,7 @@ public class Drivetrain {
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
     }
+    /* ============================ UTILITY METHODS ==============================================*/
     public void startMotors(double power) {
         fl.setPower(power);
         fr.setPower(power);
@@ -62,16 +63,9 @@ public class Drivetrain {
             br.setPower(-power);
         }
     }
-
-    public void turnGyro (double power, double target, boolean right) {
-        int angle = 0; // Replacement for getting gyro angles
-        while (angle < target && right) {
-                turn(power, true)
-            }
-        while( !right && angle < target) {
-                turn(power,false);
-            }
-    }
+    // ADITYA !!!
+    // Modify this method; instead of counting encoders that aren't zero, count encoders that are 0.
+    // It will take away one variable.
     public double getEncoderAverage (){
         double average = 0;
         double counter = 0;
@@ -103,4 +97,36 @@ public class Drivetrain {
         }
         stopMotors();
     }
+    /* ============================ MOVEMENT METHODS =============================================*/
+
+    public void turnGyro (double power, double target, boolean right) {
+        int angle = 0; // Replacement for getting gyro angles
+        while (angle < target && right) {
+            turn(power, true)
+        }
+        while (!right && angle < target) {
+            turn(power, false);
+        }
+    }
+    /**
+     *  PID move straight method:
+     *  Feedback using gyro.
+     *  Target is always 0.
+     */
+    public void movePID(int encoderDistance, double k_p, double k_i, double k_d, double correction, int timeout){
+        ElapsedTime t_i = new ElapsedTime();
+
+
+
+    }
+    /**
+     *  PID turning:
+     *  Feedback using gyro.
+     *  Target is always 0.
+     */
+    public void turnPID(double targetAngle, double k_p, double k_i, double k_d, double bias, int timeout){
+        ElapsedTime time;
+    }
+
+
 }
