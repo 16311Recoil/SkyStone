@@ -63,31 +63,22 @@ public class Drivetrain {
             br.setPower(-power);
         }
     }
-    // ADITYA !!!
-    // Modify this method; instead of counting encoders that aren't zero, count encoders that are 0.
-    // It will take away one variable.
-    public double getEncoderAverage (){
-        double average = 0;
-        double counter = 0;
-        if (fl.getCurrentPosition() != 0){      // Checks whether encoder outputs zero
-            average += fl.getCurrentPosition(); // If not zero, adds to average
-            counter += 1 ;                      // Counter to tell what to divide by
-        }
-        if (fr.getCurrentPosition() != 0){      // Repeated for all encoders
-            average += fr.getCurrentPosition();
-            counter += 1;
-        }
-        if (bl.getCurrentPosition() != 0) {
-            average += bl.getCurrentPosition();
-            counter += 1;
-        }
-        if (br.getCurrentPosition() != 0) {
-            average += br.getCurrentPosition();
-            counter += 1;
-        }
-        average /= counter; //The total sum of all encoders that aren't zero, divided by number of encoders that didn't output zero
-        return average;
 
+    public double getEncoderAverage (){
+        double counter = 0;
+        if (fl.getCurrentPosition() == 0) {
+            counter += 1;
+        }
+        if (fr.getCurrentPosition() == 0) {
+            counter += 1;
+        }
+        if (bl.getCurrentPosition() == 0) {
+            counter += 1;
+        }
+        if (br.getCurrentPosition() == 0) {
+            counter += 1;
+        }
+        return (fl.getCurrentPosition() + bl.getCurrentPosition() + fr.getCurrentPosition() + br.getCurrentPosition()) / (4 - counter)
     }
     public void moveForward (double encoderDistance, double power, double timeout){
         double currentPos = getEncoderAverage();
@@ -96,6 +87,38 @@ public class Drivetrain {
             startMotors(power);
         }
         stopMotors();
+    }
+    public void strafeSide(double power, boolean right){
+        if (right) {
+            fl.setPower(power);
+            fr.setPower(-power);
+            bl.setPower(-power);
+            br.setPower(power);
+        }
+        else {
+            fl.setPower(-power);
+            fr.setPower(power);
+            bl.setPower(power);
+            br.setPower(-power);
+        }
+    }
+    public void strafeDiagonal (double power, String direction) {
+        if (direction == "ul"){   //Strafes Up and to the Left
+            fr.setPower(power);
+            bl.setPower(power);
+        }
+        if (direction == "ur"){  //Strafes Up and to the Right
+            fl.setPower(power);
+            br.setPower(power);
+        }
+        if (direction == "dl" ){ //Strafes Down and to the Left
+            fr.setPower(-power);
+            bl.setPower(-power);
+        }
+        if (direction == "dr"){ //Strafes Down and to the Right
+            fl.setPower(-power);
+            br.setPower(-power);
+        }
     }
     /* ============================ MOVEMENT METHODS =============================================*/
 
