@@ -111,11 +111,11 @@ public class Drivetrain {
             fl.setPower(power);
             br.setPower(power);
         }
-        if (direction == "dl" ){ //Strafes Down and to the Left
+        if (direction == "dr" ){ //Strafes Down and to the Right
             fr.setPower(-power);
             bl.setPower(-power);
         }
-        if (direction == "dr"){ //Strafes Down and to the Right
+        if (direction == "dl"){ //Strafes Down and to the Left
             fl.setPower(-power);
             br.setPower(-power);
         }
