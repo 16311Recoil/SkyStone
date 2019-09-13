@@ -78,7 +78,7 @@ public class Drivetrain {
         if (br.getCurrentPosition() == 0) {
             counter += 1;
         }
-        return (fl.getCurrentPosition() + bl.getCurrentPosition() + fr.getCurrentPosition() + br.getCurrentPosition()) / (4 - counter)
+        return (fl.getCurrentPosition() + bl.getCurrentPosition() + fr.getCurrentPosition() + br.getCurrentPosition()) / (4 - counter);
     }
     public void moveForward (double encoderDistance, double power, double timeout){
         double currentPos = getEncoderAverage();
@@ -125,7 +125,7 @@ public class Drivetrain {
     public void turnGyro (double power, double target, boolean right) {
         int angle = 0; // Replacement for getting gyro angles
         while (angle < target && right) {
-            turn(power, true)
+            turn(power, true);
         }
         while (!right && angle < target) {
             turn(power, false);
