@@ -4,10 +4,18 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+import java.lang.Math;
+
+
 
 public class Drivetrain {
 
     private LinearOpMode opMode;
+
+    private final double WHEEL_DIAMETER_MM = 100.0;
+    private final double WHEEL_DIAMETER_FEET = 0.328084;
+    private final double ENCODER_PER_REVOLOUTION = 537.6;
 
     // Instance Variables
     private DcMotor fl;
@@ -78,54 +86,35 @@ public class Drivetrain {
         if (br.getCurrentPosition() == 0) {
             counter += 1;
         }
-        return (fl.getCurrentPosition() + bl.getCurrentPosition() + fr.getCurrentPosition() + br.getCurrentPosition()) / (4 - counter)
+        return (fl.getCurrentPosition() + bl.getCurrentPosition() + fr.getCurrentPosition() + br.getCurrentPosition()) / (4 - counter);
     }
-    public void moveForward (double encoderDistance, double power, double timeout){
+    public void moveForward (double distance, double power, double timeout){
         double currentPos = getEncoderAverage();
         ElapsedTime timer = new ElapsedTime();
-        while  (timer.seconds() < timeout && currentPos < encoderDistance) { //timer loop to stop motors after time reaches timeout or if destination is reached
+        while  (timer.seconds() < timeout && currentPos < feetToEncoder(distance)) { //timer loop to stop motors after time reaches timeout or if destination is reached
             startMotors(power);
         }
         stopMotors();
     }
-    public void strafeSide(double power, boolean right){
-        if (right) {
-            fl.setPower(power);
-            fr.setPower(-power);
-            bl.setPower(-power);
-            br.setPower(power);
-        }
-        else {
-            fl.setPower(-power);
-            fr.setPower(power);
-            bl.setPower(power);
-            br.setPower(-power);
-        }
+    public double actualPower (double desiredPower, double input){
+        return (desiredPower / input);
     }
-    public void strafeDiagonal (double power, String direction) {
-        if (direction == "ul"){   //Strafes Up and to the Left
-            fr.setPower(power);
-            bl.setPower(power);
-        }
-        if (direction == "ur"){  //Strafes Up and to the Right
-            fl.setPower(power);
-            br.setPower(power);
-        }
-        if (direction == "dr" ){ //Strafes Down and to the Right
-            fr.setPower(-power);
-            bl.setPower(-power);
-        }
-        if (direction == "dl"){ //Strafes Down and to the Left
-            fl.setPower(-power);
-            br.setPower(-power);
-        }
+    public void move (double desiredPower, double bias, double angle){
+        fl.setPower((actualPower(desiredPower, Math.sin(angle - Math.PI / 4))) * (Math.sin(angle - Math.PI / 4)) + bias);
+        fr.setPower((actualPower(desiredPower, Math.cos(angle - Math.PI / 4))) * (Math.cos(angle - Math.PI / 4)) + bias);
+        br.setPower((actualPower(desiredPower, Math.sin(angle - Math.PI / 4))) * (Math.sin(angle - Math.PI / 4)) + bias);
+        bl.setPower((actualPower(desiredPower, Math.cos(angle - Math.PI / 4))) * (Math.cos(angle - Math.PI / 4)) + bias);
     }
+    public double feetToEncoder (double distance){
+        return ENCODER_PER_REVOLOUTION * (distance / WHEEL_DIAMETER_FEET);
+    }
+
     /* ============================ MOVEMENT METHODS =============================================*/
 
     public void turnGyro (double power, double target, boolean right) {
         int angle = 0; // Replacement for getting gyro angles
         while (angle < target && right) {
-            turn(power, true)
+            turn(power, true);
         }
         while (!right && angle < target) {
             turn(power, false);
