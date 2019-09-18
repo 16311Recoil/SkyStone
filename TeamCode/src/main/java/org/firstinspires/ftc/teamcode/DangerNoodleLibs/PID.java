@@ -56,7 +56,7 @@ public class PID {
              p = k_p * error;
              t_sum = 0.5 * (error +  previousError) * deltaTime;
              if (t_sum > MAX_SUM)
-                 t_sum = MAX_SUM;
+                 t_sum = MAX_SUM;// test for maxSum
              i = k_i * t_sum;
              d = k_d * (error - previousError) / deltaTime;
 

@@ -23,8 +23,13 @@ public class Drivetrain {
     private DcMotor bl;
     private DcMotor br;
 
-    public Drivetrain(LinearOpMode opMode) {
+    private PID pidControlller;
+    private Sensors sensors;
+
+    public Drivetrain(LinearOpMode opMode) throws InterruptedException {
         this.opMode = opMode;
+        sensors = new Sensors(opMode);
+
 
         fl = this.opMode.hardwareMap.dcMotor.get("fl");
         fr = this.opMode.hardwareMap.dcMotor.get("fr");
@@ -40,6 +45,9 @@ public class Drivetrain {
         fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        pidControlller = new PID();
+        pidControlller.setReset(true);
 
     }
     /* ============================ UTILITY METHODS ==============================================*/
@@ -136,8 +144,19 @@ public class Drivetrain {
      *  Feedback using gyro.
      *  Target is always 0.
      */
-    public void turnPID(double targetAngle, double k_p, double k_i, double k_d, double bias, int timeout){
-        ElapsedTime time;
+    public void turnPID(double dTheta, double k_p, double k_i, double k_d, int timeout, boolean right){
+        pidControlller.setReset(true);
+        pidControlller.setCoeffs(k_p, k_i, k_d);
+
+        double theta_i = sensors.getFirstAngle();
+        ElapsedTime t_i = new ElapsedTime();
+        pidControlller.setT_i(t_i.seconds());
+        pidControlller.setTarget(dTheta);
+
+        while(Math.abs(theta_i - sensors.getFirstAngle()) < dTheta && t_i.seconds() < timeout && opMode.opModeIsActive()){
+            turn(pidControlller.iteration(Math.abs(theta_i - sensors.getFirstAngle()), t_i.seconds()), right);
+        }
+
     }
 
 
