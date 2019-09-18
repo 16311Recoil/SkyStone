@@ -56,6 +56,7 @@ import org.firstinspires.ftc.robotcontroller.external.samples.HardwarePushbot;
  */
 
 @TeleOp(name="Pushbot: Teleop Arcade", group="Pushbot")
+@Disabled
 public class RookieCampTeleOp extends OpMode{
 
     public DcMotor LM;
