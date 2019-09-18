@@ -58,15 +58,15 @@ public class IntakePrototype extends OpMode  {
     @Override
     public void loop() {
        if(gamepad1.a) {
-           intakeMotor.setPower(0.75);
+           intakeMotor.setPower(-1);
        }
-       else{
+       if(gamepad1.x){
            intakeMotor.setPower(0);
        }
        if(gamepad1.b){
-           intakeMotor2.setPower(0.75);
+           intakeMotor2.setPower(1);
        }
-       else{
+       if(gamepad1.y){
            intakeMotor2.setPower(0);
        }
     }
