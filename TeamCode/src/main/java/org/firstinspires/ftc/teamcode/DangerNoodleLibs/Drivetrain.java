@@ -7,15 +7,19 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import java.lang.Math;
 
-
-
 public class Drivetrain {
 
+    private static final int NUM_MOTORS = 4;
     private LinearOpMode opMode;
 
     private final double WHEEL_DIAMETER_MM = 100.0;
     private final double WHEEL_DIAMETER_FEET = 0.328084;
     private final double ENCODER_PER_REVOLOUTION = 537.6;
+
+    private final int FRONT_LEFT = 0;
+    private final int FRONT_RIGHT = 1;
+    private final int BACK_LEFT = 2;
+    private final int BACK_RIGHT = 3;
 
     // Instance Variables
     private DcMotor fl;
@@ -25,6 +29,7 @@ public class Drivetrain {
 
     private PID pidControlller;
     private Sensors sensors;
+    private final double MAX_POWER = 1;
 
     public Drivetrain(LinearOpMode opMode) throws InterruptedException {
         this.opMode = opMode;
@@ -79,6 +84,10 @@ public class Drivetrain {
             br.setPower(-power);
         }
     }
+    //FIXME : Update getEncoderAverage() to better calibrate encoder movements: create a measure for
+    // ensuring that the change of the change in encocer movements- indicates that the encoder is
+    // consistently reporting a motion-dependent value rather than a static value or 0 due to wire
+    // entanglement, broken encoder, etc,
 
     public double getEncoderAverage (){
         double counter = 0;
@@ -104,14 +113,38 @@ public class Drivetrain {
         }
         stopMotors();
     }
-    public double actualPower (double desiredPower, double input){
-        return (desiredPower / input);
-    }
-    public void move (double desiredPower, double bias, double angle){
-        fl.setPower((actualPower(desiredPower, Math.sin(angle - Math.PI / 4))) * (Math.sin(angle - Math.PI / 4)) + bias);
-        fr.setPower((actualPower(desiredPower, Math.cos(angle - Math.PI / 4))) * (Math.cos(angle - Math.PI / 4)) + bias);
-        br.setPower((actualPower(desiredPower, Math.sin(angle - Math.PI / 4))) * (Math.sin(angle - Math.PI / 4)) + bias);
-        bl.setPower((actualPower(desiredPower, Math.cos(angle - Math.PI / 4))) * (Math.cos(angle - Math.PI / 4)) + bias);
+
+    public void move (double v_d, double v_theta, double angle){
+        // Calculates required motor powers based on direction of the rollers on the Mecanum wheel,
+        // Desired Velocity, Desired Angle, and Desired Rotational Velocity.
+
+        // Note that the plane formed by the force vectors of the mecanum wheels rotates the cartesian
+        // plane by pi/4, thus creating the shift in the trig function.
+        double[] powers = new double[NUM_MOTORS];
+        powers[FRONT_LEFT] =  v_d *Math.sin(angle + Math.PI/4) + v_theta;
+        powers[FRONT_RIGHT] =  v_d * Math.cos(angle + Math.PI/4) - v_theta;
+        powers[BACK_LEFT] = v_d * Math.sin(angle + Math.PI/4) + v_theta;
+        powers[BACK_RIGHT] =  v_d * Math.cos(angle + Math.PI/4) - v_theta;
+
+        // Range of above methods is [-2, 2]; in order to scale to [-1, 1], the maximum is found, and
+        // it is used to divide each motor power, conserving the ratio between motor powers, but bringing
+        // motor power within desired range.
+        double maxPower = powers[0];
+
+        for (int i = 1; i < powers.length; i++)
+            maxPower = Math.max(Math.abs(maxPower), Math.abs(powers[i]));
+
+
+        powers[FRONT_LEFT] /= maxPower;
+        powers[FRONT_RIGHT] /=  maxPower;
+        powers[BACK_LEFT] /= maxPower;
+        powers[BACK_RIGHT] /= maxPower;
+
+        // Set Motor Power
+        fl.setPower(powers[FRONT_LEFT]);
+        fr.setPower(powers[FRONT_RIGHT]);
+        bl.setPower(powers[BACK_LEFT]);
+        br.setPower(powers[BACK_RIGHT]);
     }
     public double feetToEncoder (double distance){
         return ENCODER_PER_REVOLOUTION * (distance / WHEEL_DIAMETER_FEET);
