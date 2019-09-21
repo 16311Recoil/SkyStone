@@ -2,9 +2,7 @@ package org.firstinspires.ftc.teamcode.DangerNoodleLibs;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 import java.lang.Math;
 
 public class Drivetrain {
@@ -56,18 +54,12 @@ public class Drivetrain {
 
     }
     /* ============================ UTILITY METHODS ==============================================*/
-    public void startMotors(double power) {
+
+    public void setAllMotors(double power) {
         fl.setPower(power);
         fr.setPower(power);
         bl.setPower(power);
         br.setPower(power);
-
-    }
-    public void stopMotors() {
-        fl.setPower(0);
-        fr.setPower(0);
-        bl.setPower(0);
-        br.setPower(0);
 
     }
     public void turn(double power, boolean right) {
@@ -109,9 +101,9 @@ public class Drivetrain {
         double currentPos = getEncoderAverage();
         ElapsedTime timer = new ElapsedTime();
         while  (timer.seconds() < timeout && currentPos < feetToEncoder(distance)) { //timer loop to stop motors after time reaches timeout or if destination is reached
-            startMotors(power);
+            setAllMotors(power);
         }
-        stopMotors();
+        setAllMotors(0);
     }
 
     public void move (double v_d, double v_theta, double angle){
@@ -146,6 +138,10 @@ public class Drivetrain {
         bl.setPower(powers[BACK_LEFT]);
         br.setPower(powers[BACK_RIGHT]);
     }
+    // TODO: Account for Mecanum wheel drive
+    // Experimentally determine constant multiplier to multiply by; the multiplier will change
+    // with the addition of weight on the robot; the current method also does not account for
+    // gearing the drive motors.
     public double feetToEncoder (double distance){
         return ENCODER_PER_REVOLOUTION * (distance / WHEEL_DIAMETER_FEET);
     }
