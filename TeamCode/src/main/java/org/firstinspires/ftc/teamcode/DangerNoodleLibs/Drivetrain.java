@@ -57,8 +57,8 @@ public class Drivetrain {
     /* ============================ UTILITY METHODS ==============================================*/
 
     /**
+     * Method to set all motors to a certain power
      * @param power - power for all motors;
-     *  Method to set all motors to a certain power
      */
     public void setAllMotors(double power) {
         fl.setPower(power);
@@ -69,6 +69,7 @@ public class Drivetrain {
     }
 
     /**
+     * Basic turn method to turn left or right
      * @param power - power for all motors;
      * @param right - boolean to left or right
      */
