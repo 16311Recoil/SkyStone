@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import java.lang.Math;
 
 public class Drivetrain {
+    // Instance Variables
 
     private static final int NUM_MOTORS = 4;
     private LinearOpMode opMode;
@@ -55,6 +56,10 @@ public class Drivetrain {
     }
     /* ============================ UTILITY METHODS ==============================================*/
 
+    /**
+     * @param power - power for all motors;
+     *  Method to set all motors to a certain power
+     */
     public void setAllMotors(double power) {
         fl.setPower(power);
         fr.setPower(power);
@@ -62,6 +67,11 @@ public class Drivetrain {
         br.setPower(power);
 
     }
+
+    /**
+     * @param power - power for all motors;
+     * @param right - boolean to left or right
+     */
     public void turn(double power, boolean right) {
         if (right){
             fl.setPower(-power);
@@ -97,6 +107,13 @@ public class Drivetrain {
         }
         return (fl.getCurrentPosition() + bl.getCurrentPosition() + fr.getCurrentPosition() + br.getCurrentPosition()) / (4 - counter);
     }
+
+    /**
+     * Move forward using Encoder Feedback
+     * @param distance - target distance in feet
+     * @param power - power for all motors
+     * @param timeout - time before timeout
+     */
     public void moveForward (double distance, double power, double timeout){
         double currentPos = getEncoderAverage();
         ElapsedTime timer = new ElapsedTime();
@@ -106,9 +123,15 @@ public class Drivetrain {
         setAllMotors(0);
     }
 
+    /**
+     * Move or strafe in the cardinal directions with the option to turn while doing so
+     * @param v_d - Desired Velocity
+     * @param v_theta - Desired Rotational Velocity
+     * @param angle - Desired Angle
+     */
     public void move (double v_d, double v_theta, double angle){
         // Calculates required motor powers based on direction of the rollers on the Mecanum wheel,
-        // Desired Velocity, Desired Angle, and Desired Rotational Velocity.
+        // Desired Velocity, Desired Rotational Velocity, and Desired Angle
 
         // Note that the plane formed by the force vectors of the mecanum wheels rotates the cartesian
         // plane by pi/4, thus creating the shift in the trig function.
@@ -142,12 +165,24 @@ public class Drivetrain {
     // Experimentally determine constant multiplier to multiply by; the multiplier will change
     // with the addition of weight on the robot; the current method also does not account for
     // gearing the drive motors.
+
+    /**
+     * Converts distance in feet to distance in encoders ticks
+     * @param distance - distance in feet
+     * @return - distance in encoder ticks
+     */
     public double feetToEncoder (double distance){
         return ENCODER_PER_REVOLOUTION * (distance / WHEEL_DIAMETER_FEET);
     }
 
     /* ============================ MOVEMENT METHODS =============================================*/
 
+    /**
+     * Turning Right or Left using Gyro feedback
+     * @param power - power for all motors
+     * @param target - target angle
+     * @param right - boolean to right or left
+     */
     public void turnGyro (double power, double target, boolean right) {
         int angle = 0; // Replacement for getting gyro angles
         while (angle < target && right) {
@@ -160,8 +195,14 @@ public class Drivetrain {
     /**
      *  PID move straight method:
      *  Feedback using gyro.
-     *  Target is always 0.
-     */
+     *  Target is always 0
+     * @param encoderDistance - distance from target in encoder ticks
+     * @param k_p - constant for Proportional (P) in PID
+     * @param k_i - constant for Integral (I) in PID
+     * @param k_d - constant for Derivative (D) in PID
+     * @param correction - additional change in output to achieve desired goal
+     * @param timeout - time in seconds before timeout
+     **/
     public void movePID(int encoderDistance, double k_p, double k_i, double k_d, double correction, int timeout){
         ElapsedTime t_i = new ElapsedTime();
 
@@ -172,6 +213,12 @@ public class Drivetrain {
      *  PID turning:
      *  Feedback using gyro.
      *  Target is always 0.
+     * @param dTheta - desired change in angle
+     * @param k_p - constant for Proportional (P) in PID
+     * @param k_i - constant for Integral (I) in PID
+     * @param k_d - constant for Derivative (D) in PID
+     * @param timeout - time in seconds before timeout
+     * @param right - boolean to turn left or right
      */
     public void turnPID(double dTheta, double k_p, double k_i, double k_d, int timeout, boolean right){
         pidControlller.setReset(true);
