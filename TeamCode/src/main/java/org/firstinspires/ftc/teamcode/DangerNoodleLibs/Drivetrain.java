@@ -3,6 +3,8 @@ package org.firstinspires.ftc.teamcode.DangerNoodleLibs;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
+
 import java.lang.Math;
 
 public class Drivetrain {
@@ -130,7 +132,8 @@ public class Drivetrain {
      * @param v_theta - Desired Rotational Velocity
      * @param angle - Desired Angle
      */
-    public void move (double v_d, double v_theta, double angle){
+    public void move (double v_d, double v_theta, double angle, double distance, double timeout){
+
         // Calculates required motor powers based on direction of the rollers on the Mecanum wheel,
         // Desired Velocity, Desired Rotational Velocity, and Desired Angle
 
@@ -156,11 +159,18 @@ public class Drivetrain {
         powers[BACK_LEFT] /= maxPower;
         powers[BACK_RIGHT] /= maxPower;
 
-        // Set Motor Power
-        fl.setPower(powers[FRONT_LEFT]);
-        fr.setPower(powers[FRONT_RIGHT]);
-        bl.setPower(powers[BACK_LEFT]);
-        br.setPower(powers[BACK_RIGHT]);
+        // Set Motor Powers for set time
+        ElapsedTime timer = new ElapsedTime();
+        double currentPos = getEncoderAverage();
+        while (currentPos < feetToEncoder(distance) && timer.seconds() < timeout ) {
+            currentPos = getEncoderAverage();
+            fl.setPower(powers[FRONT_LEFT]);
+            fr.setPower(powers[FRONT_RIGHT]);
+            bl.setPower(powers[BACK_LEFT]);
+            br.setPower(powers[BACK_RIGHT]);
+        }
+        setAllMotors(0);
+
     }
     // TODO: Account for Mecanum wheel drive
     // Experimentally determine constant multiplier to multiply by; the multiplier will change
@@ -238,3 +248,19 @@ public class Drivetrain {
 
 
 }
+
+// ================================ Tele-Op Methods =======================================================================
+ //TODO Finish the telop move methods
+    /**
+     * Tele-OP Move method
+     * @param x -
+     * @param y -
+     * @param z -
+     * @param rotation -
+     */
+    public void moveTelop( double x, double y, double z, double rotation) {
+    fr.setPower (Range.clip(y - x + z,-1, 1)) ;
+    fl.setPower (Range.clip(y + x - z,-1,1)) ;
+    br.setPower (Range.clip(y + x + z, -1, 1)) ;
+    bl.setPower (Range.clip(y - x - z, -1, 1)) ;
+ }
