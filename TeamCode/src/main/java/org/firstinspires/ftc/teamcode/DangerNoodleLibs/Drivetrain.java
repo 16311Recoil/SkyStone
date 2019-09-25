@@ -60,6 +60,7 @@ public class Drivetrain {
 
     /**
      * Method to set all motors to a certain power
+     *
      * @param power - power for all motors;
      */
     public void setAllMotors(double power) {
@@ -72,17 +73,17 @@ public class Drivetrain {
 
     /**
      * Basic turn method to turn left or right
+     *
      * @param power - power for all motors;
      * @param right - boolean to left or right
      */
     public void turn(double power, boolean right) {
-        if (right){
+        if (right) {
             fl.setPower(-power);
             fr.setPower(power);
             bl.setPower(-power);
             br.setPower(power);
-        }
-        else {
+        } else {
             fl.setPower(power);
             fr.setPower(-power);
             bl.setPower(power);
@@ -94,7 +95,7 @@ public class Drivetrain {
     // consistently reporting a motion-dependent value rather than a static value or 0 due to wire
     // entanglement, broken encoder, etc,
 
-    public double getEncoderAverage (){
+    public double getEncoderAverage() {
         double counter = 0;
         if (fl.getCurrentPosition() == 0) {
             counter += 1;
@@ -113,14 +114,15 @@ public class Drivetrain {
 
     /**
      * Move forward using Encoder Feedback
+     *
      * @param distance - target distance in feet
-     * @param power - power for all motors
-     * @param timeout - time before timeout
+     * @param power    - power for all motors
+     * @param timeout  - time before timeout
      */
-    public void moveForward (double distance, double power, double timeout){
+    public void moveForward(double distance, double power, double timeout) {
         double currentPos = getEncoderAverage();
         ElapsedTime timer = new ElapsedTime();
-        while  (timer.seconds() < timeout && currentPos < feetToEncoder(distance)) { //timer loop to stop motors after time reaches timeout or if destination is reached
+        while (timer.seconds() < timeout && currentPos < feetToEncoder(distance)) { //timer loop to stop motors after time reaches timeout or if destination is reached
             setAllMotors(power);
         }
         setAllMotors(0);
@@ -128,11 +130,12 @@ public class Drivetrain {
 
     /**
      * Move or strafe in the cardinal directions with the option to turn while doing so
-     * @param v_d - Desired Velocity
+     *
+     * @param v_d     - Desired Velocity
      * @param v_theta - Desired Rotational Velocity
-     * @param angle - Desired Angle
+     * @param angle   - Desired Angle
      */
-    public void move (double v_d, double v_theta, double angle, double distance, double timeout){
+    public void move(double v_d, double v_theta, double angle, double distance, double timeout) {
 
         // Calculates required motor powers based on direction of the rollers on the Mecanum wheel,
         // Desired Velocity, Desired Rotational Velocity, and Desired Angle
@@ -140,10 +143,10 @@ public class Drivetrain {
         // Note that the plane formed by the force vectors of the mecanum wheels rotates the cartesian
         // plane by pi/4, thus creating the shift in the trig function.
         double[] powers = new double[NUM_MOTORS];
-        powers[FRONT_LEFT] =  v_d *Math.sin(angle + Math.PI/4) + v_theta;
-        powers[FRONT_RIGHT] =  v_d * Math.cos(angle + Math.PI/4) - v_theta;
-        powers[BACK_LEFT] = v_d * Math.sin(angle + Math.PI/4) + v_theta;
-        powers[BACK_RIGHT] =  v_d * Math.cos(angle + Math.PI/4) - v_theta;
+        powers[FRONT_LEFT] = v_d * Math.sin(angle + Math.PI / 4) + v_theta;
+        powers[FRONT_RIGHT] = v_d * Math.cos(angle + Math.PI / 4) - v_theta;
+        powers[BACK_LEFT] = v_d * Math.sin(angle + Math.PI / 4) + v_theta;
+        powers[BACK_RIGHT] = v_d * Math.cos(angle + Math.PI / 4) - v_theta;
 
         // Range of above methods is [-2, 2]; in order to scale to [-1, 1], the maximum is found, and
         // it is used to divide each motor power, conserving the ratio between motor powers, but bringing
@@ -155,14 +158,14 @@ public class Drivetrain {
 
 
         powers[FRONT_LEFT] /= maxPower;
-        powers[FRONT_RIGHT] /=  maxPower;
+        powers[FRONT_RIGHT] /= maxPower;
         powers[BACK_LEFT] /= maxPower;
         powers[BACK_RIGHT] /= maxPower;
 
         // Set Motor Powers for set time
         ElapsedTime timer = new ElapsedTime();
         double currentPos = getEncoderAverage();
-        while (currentPos < feetToEncoder(distance) && timer.seconds() < timeout ) {
+        while (currentPos < feetToEncoder(distance) && timer.seconds() < timeout) {
             currentPos = getEncoderAverage();
             fl.setPower(powers[FRONT_LEFT]);
             fr.setPower(powers[FRONT_RIGHT]);
@@ -179,10 +182,11 @@ public class Drivetrain {
 
     /**
      * Converts distance in feet to distance in encoders ticks
+     *
      * @param distance - distance in feet
      * @return - distance in encoder ticks
      */
-    public double feetToEncoder (double distance){
+    public double feetToEncoder(double distance) {
         return ENCODER_PER_REVOLOUTION * (distance / WHEEL_DIAMETER_FEET);
     }
 
@@ -190,11 +194,12 @@ public class Drivetrain {
 
     /**
      * Turning Right or Left using Gyro feedback
-     * @param power - power for all motors
+     *
+     * @param power  - power for all motors
      * @param target - target angle
-     * @param right - boolean to right or left
+     * @param right  - boolean to right or left
      */
-    public void turnGyro (double power, double target, boolean right) {
+    public void turnGyro(double power, double target, boolean right) {
         int angle = 0; // Replacement for getting gyro angles
         while (angle < target && right) {
             turn(power, true);
@@ -203,35 +208,38 @@ public class Drivetrain {
             turn(power, false);
         }
     }
+
     /**
-     *  PID move straight method:
-     *  Feedback using gyro.
-     *  Target is always 0
+     * PID move straight method:
+     * Feedback using gyro.
+     * Target is always 0
+     *
      * @param encoderDistance - distance from target in encoder ticks
-     * @param k_p - constant for Proportional (P) in PID
-     * @param k_i - constant for Integral (I) in PID
-     * @param k_d - constant for Derivative (D) in PID
-     * @param correction - additional change in output to achieve desired goal
-     * @param timeout - time in seconds before timeout
+     * @param k_p             - constant for Proportional (P) in PID
+     * @param k_i             - constant for Integral (I) in PID
+     * @param k_d             - constant for Derivative (D) in PID
+     * @param correction      - additional change in output to achieve desired goal
+     * @param timeout         - time in seconds before timeout
      **/
-    public void movePID(int encoderDistance, double k_p, double k_i, double k_d, double correction, int timeout){
+    public void movePID(int encoderDistance, double k_p, double k_i, double k_d, double correction, int timeout) {
         ElapsedTime t_i = new ElapsedTime();
 
 
-
     }
+
     /**
-     *  PID turning:
-     *  Feedback using gyro.
-     *  Target is always 0.
-     * @param dTheta - desired change in angle
-     * @param k_p - constant for Proportional (P) in PID
-     * @param k_i - constant for Integral (I) in PID
-     * @param k_d - constant for Derivative (D) in PID
+     * PID turning:
+     * Feedback using gyro.
+     * Target is always 0.
+     *
+     * @param dTheta  - desired change in angle
+     * @param k_p     - constant for Proportional (P) in PID
+     * @param k_i     - constant for Integral (I) in PID
+     * @param k_d     - constant for Derivative (D) in PID
      * @param timeout - time in seconds before timeout
-     * @param right - boolean to turn left or right
+     * @param right   - boolean to turn left or right
      */
-    public void turnPID(double dTheta, double k_p, double k_i, double k_d, int timeout, boolean right){
+    public void turnPID(double dTheta, double k_p, double k_i, double k_d, int timeout, boolean right) {
         pidControlller.setReset(true);
         pidControlller.setCoeffs(k_p, k_i, k_d);
 
@@ -240,27 +248,27 @@ public class Drivetrain {
         pidControlller.setT_i(t_i.seconds());
         pidControlller.setTarget(dTheta);
 
-        while(Math.abs(theta_i - sensors.getFirstAngle()) < dTheta && t_i.seconds() < timeout && opMode.opModeIsActive()){
+        while (Math.abs(theta_i - sensors.getFirstAngle()) < dTheta && t_i.seconds() < timeout && opMode.opModeIsActive()) {
             turn(pidControlller.iteration(Math.abs(theta_i - sensors.getFirstAngle()), t_i.seconds()), right);
         }
 
     }
 
 
-}
-
 // ================================ Tele-Op Methods =======================================================================
- //TODO Finish the telop move methods
+
     /**
      * Tele-OP Move method
-     * @param x -
-     * @param y -
-     * @param z -
-     * @param rotation -
+     *
+     * @param x - input variable for strafing - opMode.gamepad1.left_stick_x - x value of the left joystick
+     * @param y - input variable for strafing - opMode.gamepad1.left_stick_y - y value of the left joystick
+     * @param z - input variable for turning - opMode.gamepad1.right_stick_x - x value of the right joystick
      */
-    public void moveTelop( double x, double y, double z, double rotation) {
-    fr.setPower (Range.clip(y - x + z,-1, 1)) ;
-    fl.setPower (Range.clip(y + x - z,-1,1)) ;
-    br.setPower (Range.clip(y + x + z, -1, 1)) ;
-    bl.setPower (Range.clip(y - x - z, -1, 1)) ;
- }
+    public void moveTelop(double x, double y, double z,) {
+        fr.setPower(Range.clip(y - x + z, -1, 1));
+        fl.setPower(Range.clip(y + x - z, -1, 1));
+        br.setPower(Range.clip(y + x + z, -1, 1));
+        bl.setPower(Range.clip(y - x - z, -1, 1));
+    }
+
+}
