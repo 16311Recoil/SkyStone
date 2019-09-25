@@ -21,6 +21,8 @@ public class Drivetrain {
     private final int FRONT_RIGHT = 1;
     private final int BACK_LEFT = 2;
     private final int BACK_RIGHT = 3;
+    double scale[] = {1, 0.5};
+    int a_ButtonCount = 0;
 
     // Instance Variables
     private DcMotor fl;
@@ -35,6 +37,8 @@ public class Drivetrain {
     public Drivetrain(LinearOpMode opMode) throws InterruptedException {
         this.opMode = opMode;
         sensors = new Sensors(opMode);
+
+
 
 
         fl = this.opMode.hardwareMap.dcMotor.get("fl");
@@ -265,10 +269,14 @@ public class Drivetrain {
      * @param z - input variable for turning - opMode.gamepad1.right_stick_x - x value of the right joystick
      */
     public void moveTelop(double x, double y, double z,) {
-        fr.setPower(Range.clip(y - x + z, -1, 1));
-        fl.setPower(Range.clip(y + x - z, -1, 1));
-        br.setPower(Range.clip(y + x + z, -1, 1));
-        bl.setPower(Range.clip(y - x - z, -1, 1));
+        if (opMode.gamepad1.a){
+            a_ButtonCount ++;
+        }
+        double scaleSpeed = scale[a_ButtonCount % 2];
+        fr.setPower((scaleSpeed) * (Range.clip(y - x + z, -1, 1)));
+        fl.setPower((scaleSpeed) * (Range.clip(y + x - z, -1, 1)));
+        br.setPower((scaleSpeed) * (Range.clip(y + x + z, -1, 1)));
+        bl.setPower((scaleSpeed) * (Range.clip(y - x - z, -1, 1)));
     }
 
 }
