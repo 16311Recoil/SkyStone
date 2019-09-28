@@ -7,6 +7,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.BitmapVision;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
+import org.openftc.revextensions2.RevBulkData;
+import org.openftc.revextensions2.ExpansionHubEx;
+import org.openftc.revextensions2.ExpansionHubMotor;
 
 public class DangerNoodle implements Robot {
 
@@ -19,13 +22,14 @@ public class DangerNoodle implements Robot {
     private LinearOpMode opMode;
 
     private boolean isMoving;
-    private ElapsedTime timer;
-    private double prevEncoder;
+    public ElapsedTime timer;
 
-    private double change2Encoder;
 
     private Servo lFang;
     private Servo rFang;
+
+
+
 
     /*
         Constructor includes
@@ -33,9 +37,10 @@ public class DangerNoodle implements Robot {
     // TODO: Add Exception Handling/Logging using RobotLog.i();
     public DangerNoodle(LinearOpMode opMode){
         try {
+            timer = new ElapsedTime();
             this.opMode = opMode;
-            drivetrain = new Drivetrain(opMode);
-            manipulator = new Stacker();
+            drivetrain = new Drivetrain(opMode, timer);
+            manipulator = new Stacker(opMode);
             bmv = new BitmapVision(opMode);
 
             lFang = this.opMode.hardwareMap.servo.get("lFang");
@@ -46,12 +51,13 @@ public class DangerNoodle implements Robot {
             e.printStackTrace();
         }
         isMoving = false;
-        timer = new ElapsedTime();
-        prevEncoder = drivetrain.getEncoderAverage();
     }
     // Wait for robot
     @Override
     public void scan() {
+        while(!opMode.opModeIsActive()){
+
+        }
 
     }
 
@@ -97,11 +103,11 @@ public class DangerNoodle implements Robot {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        drivetrain.move(1, 0,0);
+        drivetrain.move(1, 0,0,0,0);
         if (inside)
-            drivetrain.move(0.85, 0, (Math.PI / 4));
+            drivetrain.move(0.85, 0, Math.PI/4,0,0);
          else
-             drivetrain.move(1, 0, 0 );
+             drivetrain.move(1, 0, 0 ,0,0);
 
 
     }
@@ -110,24 +116,13 @@ public class DangerNoodle implements Robot {
     public void placeSkystone() {
 
     }
-    /*
-        monitorEncoders();
-        - Monitors encoders during every bulk read.
-        -  change in change in encoder ticks > 0.
-        - Value of Encoder ticks != 0.
-     */
-    public void monitorEncoders(double encoderAverage){
-        if (isMoving) {
-            //double changeEncoder = drivetrain.sensorsVals.get("PrevEncoderAverage") - drivetrain.sensprVals.get("CurrentEnc");
 
-
-        }
-
-
-    }
     // TODO: Edit Drivetrain class to accomodate dynamic moinitoring of drivetrain.
     public double getVelocityEncoder(){
         // return drivetrain.sensorsVal.get("CurrentEncoderVal") - drivetrain.sensorsVal.get("Previous Encoder Val");
         return 0.0;
+    }
+    public void bulkRead(){
+
     }
 }
