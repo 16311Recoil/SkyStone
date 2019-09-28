@@ -11,6 +11,7 @@ import org.openftc.revextensions2.RevBulkData;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.ExpansionHubMotor;
 
+// edit
 public class DangerNoodle implements Robot {
 
     private static final double SERVO_LOCK = 0.0; // Needs to be tested;
@@ -63,9 +64,9 @@ public class DangerNoodle implements Robot {
 
     @Override
     public void retrieval(double distance) {
-        manipulator.intake(1);
+        manipulator.setIntakePower(1);
         drivetrain.moveForward(distance, 0.8,3);
-        manipulator.intake(0);
+        manipulator.setIntakePower(0);
 
     }
 
