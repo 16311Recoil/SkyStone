@@ -63,13 +63,22 @@ public class Stacker {
         }
     }
 
+<<<<<<< HEAD
     public void rotateArmTime (double power, double time) {
+=======
+    public void rotateArmTime (double power, double time){
+>>>>>>> 19258ab73991c90480f3e320181e4e9c8cda3da4
         ElapsedTime timer = new ElapsedTime();
         while (timer.seconds() < time) {
             armRotater.setPower(power);
         }
+<<<<<<< HEAD
         armRotater.setPower(0);
     }
+=======
+       armRotater.setPower(0);
+
+>>>>>>> 19258ab73991c90480f3e320181e4e9c8cda3da4
 
     public void setLiftPosition (double power, boolean up){
         double currentPos = getLiftEncoderAverage();
@@ -87,7 +96,11 @@ public class Stacker {
         }
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+<<<<<<< HEAD
     public double getLiftEncoderAverage(){
+=======
+    public double getLiftEncoderAverage() {
+>>>>>>> 19258ab73991c90480f3e320181e4e9c8cda3da4
         double counter = 0;
         if (ll.getCurrentPosition() == 0) {
             counter += 1;
