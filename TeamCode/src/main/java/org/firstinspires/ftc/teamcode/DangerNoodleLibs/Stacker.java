@@ -24,7 +24,8 @@ public class Stacker {
         armRotater = this.opMode.hardwareMap.servo.get("armRotater");
         pincher = this.opMode.hardwareMap.servo.get("pincher");
 
-        public void intake(double power){}
+
     }
+    public void intake(double power){}
 
 }

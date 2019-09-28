@@ -135,6 +135,11 @@ public class BitmapVision {
             skyPos[1] = 5;
         }
     }
+    public int[] getSkyPos(){
+        getSkyPos();
+        return skyPos;
+    }
+
     // Never used- needs to be tested.
     private Bitmap getBitmapVuf() throws InterruptedException {
         return vuforia.convertFrameToBitmap(vuforia.getFrameQueue().take());

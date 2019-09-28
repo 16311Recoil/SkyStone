@@ -5,7 +5,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.openftc.revextensions2.ExpansionHubEx;
+import org.openftc.revextensions2.ExpansionHubMotor;
+import org.openftc.revextensions2.RevBulkData;
+
 import java.lang.Math;
+import java.util.TreeMap;
 
 public class Drivetrain {
     // Instance Variables
@@ -25,26 +30,31 @@ public class Drivetrain {
     int a_ButtonCount = 0;
 
     // Instance Variables
-    private DcMotor fl;
-    private DcMotor fr;
-    private DcMotor bl;
-    private DcMotor br;
+    private ExpansionHubMotor fl, fr, bl, br;
+
+    public TreeMap<String, Double> sensorVals;
+    private double prevTime;
 
     private PID pidControlller;
     private Sensors sensors;
     private final double MAX_POWER = 1;
+    private double prevEncoder;
+    private boolean revertToTime;
+    private boolean isMoving;
+    private ExpansionHubEx expansionHub;
+    private RevBulkData bulkdata;
 
-    public Drivetrain(LinearOpMode opMode) throws InterruptedException {
+    public Drivetrain(LinearOpMode opMode, ElapsedTime timer) throws InterruptedException {
         this.opMode = opMode;
         sensors = new Sensors(opMode);
 
+        // Tracks Sensor Vals.
+        sensorVals = new TreeMap<String, Double>();
 
-
-
-        fl = this.opMode.hardwareMap.dcMotor.get("fl");
-        fr = this.opMode.hardwareMap.dcMotor.get("fr");
-        bl = this.opMode.hardwareMap.dcMotor.get("bl");
-        br = this.opMode.hardwareMap.dcMotor.get("br");
+        fl = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("fl");
+        fr = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("fr");
+        bl = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("bl");
+        br = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("br");
 
         fr.setDirection(DcMotor.Direction.FORWARD);
         br.setDirection(DcMotor.Direction.FORWARD);
@@ -59,6 +69,8 @@ public class Drivetrain {
         pidControlller = new PID();
         pidControlller.setReset(true);
 
+        prevTime = timer.milliseconds();
+        prevEncoder = getEncoderAverage();
     }
     /* ============================ UTILITY METHODS ==============================================*/
 
@@ -94,6 +106,16 @@ public class Drivetrain {
             br.setPower(-power);
         }
     }
+    public void bulkRead(ElapsedTime timer){
+        double currTime = timer.milliseconds();
+        sensorVals.put("Current Angle", sensors.getFirstAngle());
+        sensorVals.put("TimeStamp", currTime);
+        sensorVals.put("Current Encoder", getEncoderAverage());;
+        
+        prevTime = currTime;
+
+
+    }
     //FIXME : Update getEncoderAverage() to better calibrate encoder movements: create a measure for
     // ensuring that the change of the change in encocer movements- indicates that the encoder is
     // consistently reporting a motion-dependent value rather than a static value or 0 due to wire
@@ -101,20 +123,26 @@ public class Drivetrain {
 
     public double getEncoderAverage() {
         double counter = 0;
-        if (fl.getCurrentPosition() == 0) {
-            counter += 1;
+        if (fl.getCurrentPosition() == 0)
+            counter ++;
+
+        if (fr.getCurrentPosition() == 0)
+            counter ++;
+
+        if (bl.getCurrentPosition() == 0)
+            counter++;
+
+        if (br.getCurrentPosition() == 0)
+            counter++;
+
+        try{
+            return (fl.getCurrentPosition() + bl.getCurrentPosition() + fr.getCurrentPosition() + br.getCurrentPosition()) / (4 - counter);
+        } catch(ArithmeticException E){
+            return 0.0;
         }
-        if (fr.getCurrentPosition() == 0) {
-            counter += 1;
-        }
-        if (bl.getCurrentPosition() == 0) {
-            counter += 1;
-        }
-        if (br.getCurrentPosition() == 0) {
-            counter += 1;
-        }
-        return (fl.getCurrentPosition() + bl.getCurrentPosition() + fr.getCurrentPosition() + br.getCurrentPosition()) / (4 - counter);
     }
+
+
 
     /**
      * Move forward using Encoder Feedback
@@ -257,6 +285,30 @@ public class Drivetrain {
         }
 
     }
+    /*
+     monitorEncoders();
+     - Monitors encoders during every bulk read.
+     -  change in change in encoder ticks > 0.
+     - Value of Encoder ticks != 0.
+  */
+    public void monitorEncoders(double encoderAverage){
+        if (isMoving) {
+            //double changeEncoder = drivetrain.sensorsVals.get("PrevEncoderAverage") - drivetrain.sensprVals.get("CurrentEnc");
+            try{
+                double prevEncoderChange = Math.abs(getEncoderAverage() - sensorVals.get("Current Encoder"));
+            } catch(NullPointerException E){
+                return;
+            }
+
+            double currEncoderChange = Math.abs(getEncoderAverage()  - sensorVals.get("Current Encoder"));
+
+
+
+
+        }
+
+
+    }
 
 
 // ================================ Tele-Op Methods =======================================================================
@@ -268,9 +320,9 @@ public class Drivetrain {
      * @param y - input variable for strafing - opMode.gamepad1.left_stick_y - y value of the left joystick
      * @param z - input variable for turning - opMode.gamepad1.right_stick_x - x value of the right joystick
      */
-    public void moveTelop(double x, double y, double z,) {
+    public void moveTelop(double x, double y, double z) {
         if (opMode.gamepad1.a){
-            a_ButtonCount ++;
+            a_ButtonCount++;
         }
         double scaleSpeed = scale[a_ButtonCount % 2];
         fr.setPower((scaleSpeed) * (Range.clip(y - x + z, -1, 1)));
