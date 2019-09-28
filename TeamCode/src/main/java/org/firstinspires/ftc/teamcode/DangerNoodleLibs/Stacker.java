@@ -35,18 +35,19 @@ public class Stacker {
         pincher = this.opMode.hardwareMap.servo.get("pincher");
 
     }
+
     //////////////////////////////////////////////////////////////////////////////////////////////
-    public void setIntakePower ( double power){
+    public void setIntakePower(double power) {
         il.setPower(power);
         ir.setPower(power);
     }
 
-    public void setLiftPower (double power){
+    public void setLiftPower(double power) {
         ll.setPower(power);
         lr.setPower(power);
     }
 
-    public void intakeTime (double power){
+    public void intakeTime(double power) {
         ElapsedTime timer = new ElapsedTime();
         while (timer.seconds() < TIME_FOR_INTAKE) {
             setIntakePower(power);
@@ -54,61 +55,49 @@ public class Stacker {
         setIntakePower(0);
     }
 
-    public void setIntakePosition ( boolean closed){
+    public void setIntakePosition(boolean closed) {
         if (closed) {
             pincher.setPosition(CLOSED_PINCHER_SERVO_POSITION);
-        }
-        else {
+        } else {
             pincher.setPosition(OPEN_PICHER_SERVO_POSITION);
         }
     }
 
-<<<<<<< HEAD
-    public void rotateArmTime (double power, double time) {
-=======
-    public void rotateArmTime (double power, double time){
->>>>>>> 19258ab73991c90480f3e320181e4e9c8cda3da4
+    public void rotateArmTime(double power, double time) {
         ElapsedTime timer = new ElapsedTime();
         while (timer.seconds() < time) {
             armRotater.setPower(power);
         }
-<<<<<<< HEAD
         armRotater.setPower(0);
+
     }
-=======
-       armRotater.setPower(0);
 
->>>>>>> 19258ab73991c90480f3e320181e4e9c8cda3da4
-
-    public void setLiftPosition (double power, boolean up){
+    public void setLiftPosition(double power, boolean up) {
         double currentPos = getLiftEncoderAverage();
-            if (up) {
-            while (currentPos < ENCODER_LIFT_UP){
+        if (up) {
+            while (currentPos < ENCODER_LIFT_UP) {
                 setLiftPower(power);
             }
             setLiftPower(0);
-        }
-        else {
-            while (currentPos < ENCODER_LIFT_DOWN){
+        } else {
+            while (currentPos < ENCODER_LIFT_DOWN) {
                 setLiftPower(-power);
             }
             setLiftPower(0);
         }
     }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-<<<<<<< HEAD
-    public double getLiftEncoderAverage(){
-=======
-    public double getLiftEncoderAverage() {
->>>>>>> 19258ab73991c90480f3e320181e4e9c8cda3da4
-        double counter = 0;
-        if (ll.getCurrentPosition() == 0) {
-            counter += 1;
-        }
-        if (lr.getCurrentPosition() == 0) {
-            counter += 1;
-        }
-        return (ll.getCurrentPosition() + lr.getCurrentPosition() / (2 - counter));
-    }
 
-}
+
+    public double getLiftEncoderAverage() {
+            double counter = 0;
+            if (ll.getCurrentPosition() == 0) {
+                counter += 1;
+            }
+            if (lr.getCurrentPosition() == 0) {
+                counter += 1;
+            }
+            return (ll.getCurrentPosition() + lr.getCurrentPosition() / (2 - counter));
+        }
+
+    }
