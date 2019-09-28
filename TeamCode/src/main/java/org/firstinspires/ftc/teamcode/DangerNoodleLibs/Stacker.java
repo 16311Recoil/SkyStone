@@ -17,6 +17,8 @@ public class Stacker {
     private DcMotor ir; //intake right
     private DcMotor ll; //lift left
     private DcMotor lr; //lift right
+    private Servo gr; // gantry right
+    private Servo gl; // gantry left
     private CRServo armRotater;
     private Servo pincher;
     private final double TIME_FOR_INTAKE = 3;
@@ -24,6 +26,7 @@ public class Stacker {
     private final double ENCODER_LIFT_DOWN = 1.5;
     private final double CLOSED_PINCHER_SERVO_POSITION = 0; //TODO: Test for Servo Positions
     private final double OPEN_PICHER_SERVO_POSITION = 90;
+    private final double INCHES_TO_SERVO = 0;//TODO: Test conversions for inches in gantry movement to servo position
 
     public Stacker(LinearOpMode opMode) {
         il = this.opMode.hardwareMap.dcMotor.get("il");
@@ -33,6 +36,8 @@ public class Stacker {
         armRotater = this.opMode.hardwareMap.crservo.get("armRotater");
         armRotater.setDirection(DcMotorSimple.Direction.FORWARD);
         pincher = this.opMode.hardwareMap.servo.get("pincher");
+        gl = this.opMode.hardwareMap.servo.get("gl");
+        gr = this.opMode.hardwareMap.servo.get("gr");
 
     }
 
@@ -47,6 +52,7 @@ public class Stacker {
         lr.setPower(power);
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void intakeTime(double power) {
         ElapsedTime timer = new ElapsedTime();
         while (timer.seconds() < TIME_FOR_INTAKE) {
@@ -55,8 +61,8 @@ public class Stacker {
         setIntakePower(0);
     }
 
-    public void setIntakePosition(boolean closed) {
-        if (closed) {
+    public void setPincherPosition(boolean close) {
+        if (close) {
             pincher.setPosition(CLOSED_PINCHER_SERVO_POSITION);
         } else {
             pincher.setPosition(OPEN_PICHER_SERVO_POSITION);
@@ -86,18 +92,26 @@ public class Stacker {
             setLiftPower(0);
         }
     }
+
+    public void setGantryPosition(double inches) {
+        gl.setPosition(inchToServo(inches));
+        gr.setPosition(inchToServo(inches));
+    }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
     public double getLiftEncoderAverage() {
-            double counter = 0;
-            if (ll.getCurrentPosition() == 0) {
-                counter += 1;
-            }
-            if (lr.getCurrentPosition() == 0) {
-                counter += 1;
-            }
-            return (ll.getCurrentPosition() + lr.getCurrentPosition() / (2 - counter));
+        double counter = 0;
+        if (ll.getCurrentPosition() == 0) {
+            counter += 1;
         }
-
+        if (lr.getCurrentPosition() == 0) {
+            counter += 1;
+        }
+        return (ll.getCurrentPosition() + lr.getCurrentPosition() / (2 - counter));
     }
+    public double inchToServo(double inches){
+        return (inches * INCHES_TO_SERVO);
+    }
+}
+

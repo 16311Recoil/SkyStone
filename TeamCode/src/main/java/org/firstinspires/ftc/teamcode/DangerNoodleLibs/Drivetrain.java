@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.ExpansionHubMotor;
@@ -123,24 +124,19 @@ public class Drivetrain {
     // consistently reporting a motion-dependent value rather than a static value or 0 due to wire
     // entanglement, broken encoder, etc,
 
-    public double getEncoderAverage() {
-        double counter = 0;
-        if (fl.getCurrentPosition() == 0)
-            counter ++;
-
-        if (fr.getCurrentPosition() == 0)
-            counter ++;
-
-        if (bl.getCurrentPosition() == 0)
-            counter++;
-
-        if (br.getCurrentPosition() == 0)
-            counter++;
-
+    public double getEncoderAverage(double[] encoderValues) {
+        double encoderAverage = 0;
+        int counter = 0;
+        for(double encoder: encoderValues) {
+            if (encoder == 0){
+                counter ++;
+            }
+            encoderAverage += encoder;
+        }
         try{
-            return (fl.getCurrentPosition() + bl.getCurrentPosition() + fr.getCurrentPosition() + br.getCurrentPosition()) / (4 - counter);
+            return (encoderAverage / (4 - counter);
         } catch(ArithmeticException E){
-            return 0.0;
+            RobotLog.i("All Encoders equal Zero");
         }
     }
 
@@ -234,7 +230,7 @@ public class Drivetrain {
      * @param right  - boolean to right or left
      */
     public void turnGyro(double power, double target, boolean right) {
-        int angle = 0; // Replacement for getting gyro angles
+        int angle = 0; //TODO: Replacement for getting gyro angles
         while (angle < target && right) {
             turn(power, true);
         }
@@ -324,13 +320,15 @@ public class Drivetrain {
      */
     public void moveTelop(double x, double y, double z) {
         if (opMode.gamepad1.a){
-            a_ButtonCount++;
+            a_ButtonCount++;                                          //left side -z right side +z
         }
         double scaleSpeed = scale[a_ButtonCount % 2];
-        fr.setPower((scaleSpeed) * (Range.clip(y - x + z, -1, 1)));
-        fl.setPower((scaleSpeed) * (Range.clip(y + x - z, -1, 1)));
-        br.setPower((scaleSpeed) * (Range.clip(y + x + z, -1, 1)));
-        bl.setPower((scaleSpeed) * (Range.clip(y - x - z, -1, 1)));
+        double netTheta = Math.atan2(x,y) - sensors.getFirstAngle();
+        double v_d = Math.hypot(x,y);
+        fl.setPower( (v_d * (Math.sin( (netTheta) + Math.PI / 4) )) - z );
+        fr.setPower( (v_d * (Math.cos( (netTheta) + Math.PI / 4) )) + z );
+        bl.setPower( (v_d * (Math.sin( (netTheta) + Math.PI / 4) )) - z );
+        br.setPower( (v_d * (Math.cos( (netTheta) + Math.PI / 4) )) + z );
     }
 
 }
