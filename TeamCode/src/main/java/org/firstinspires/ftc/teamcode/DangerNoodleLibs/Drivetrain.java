@@ -13,6 +13,7 @@ import org.openftc.revextensions2.RevBulkData;
 
 
 import java.lang.Math;
+import java.util.Map;
 import java.util.TreeMap;
 
 public class Drivetrain {
@@ -34,30 +35,44 @@ public class Drivetrain {
 
     // Instance Variables
     private ExpansionHubMotor fl, fr, bl, br;
+    private ElapsedTime drivetrainClock;
 
-    public TreeMap<String, Double> sensorVals;
-    private double prevTime;
+    public Map<String, Double> sensorVals;
+    public double[] encoderVals;
 
     private PID pidControlller;
     private Sensors sensors;
     private final double MAX_POWER = 1;
     private double prevEncoder;
-    private boolean revertToTime;
     private boolean isMoving;
     private ExpansionHubEx expansionHub;
     private RevBulkData bulkdata;
+    private boolean reset;
 
     public Drivetrain(LinearOpMode opMode, ElapsedTime timer) throws InterruptedException {
         this.opMode = opMode;
         sensors = new Sensors(opMode);
+        encoderVals = new double[4];
 
         // Tracks Sensor Vals.
         sensorVals = new TreeMap<String, Double>();
+        drivetrainClock = new ElapsedTime();
+
 
         fl = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("fl");
         fr = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("fr");
         bl = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("bl");
         br = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("br");
+
+
+        encoderVals[FRONT_LEFT] = expansionHub.getBulkInputData().getMotorCurrentPosition(fl);
+        encoderVals[FRONT_RIGHT] = expansionHub.getBulkInputData().getMotorCurrentPosition(fr);
+        encoderVals[BACK_LEFT] = expansionHub.getBulkInputData().getMotorCurrentPosition(bl);
+        encoderVals[BACK_RIGHT] = expansionHub.getBulkInputData().getMotorCurrentPosition(br);
+
+
+        sensorVals.put("Current Encoder", getEncoderAverage(encoderVals));
+        sensorVals.put("Timestamp", 0.0);
 
         fr.setDirection(DcMotor.Direction.FORWARD);
         br.setDirection(DcMotor.Direction.FORWARD);
@@ -71,9 +86,6 @@ public class Drivetrain {
 
         pidControlller = new PID();
         pidControlller.setReset(true);
-
-        prevTime = timer.milliseconds();
-        prevEncoder = getEncoderAverage();
     }
     /* ============================ UTILITY METHODS ==============================================*/
 
@@ -112,12 +124,18 @@ public class Drivetrain {
     public void bulkRead(ElapsedTime timer){
         double currTime = timer.milliseconds();
         sensorVals.put("Current Angle", sensors.getFirstAngle());
+        sensorVals.put("Previous Encoder", sensorVals.get("Current Encoder"));
+
+        bulkdata = expansionHub.getBulkInputData();
+
+        this.encoderVals[FRONT_LEFT] = bulkdata.getMotorCurrentPosition(fl);
+        this.encoderVals[FRONT_RIGHT] = bulkdata.getMotorCurrentPosition(fr);
+        this.encoderVals[BACK_LEFT] = bulkdata.getMotorCurrentPosition(bl);
+        this.encoderVals[BACK_RIGHT] = bulkdata.getMotorCurrentPosition(br);
+
+        sensorVals.put("Previous Time", sensorVals.get("Timestamp"));
         sensorVals.put("TimeStamp", currTime);
-        sensorVals.put("Current Encoder", getEncoderAverage());;
-        
-        prevTime = currTime;
-
-
+        sensorVals.put("Current Encoder", getEncoderAverage(encoderVals));
     }
     //FIXME : Update getEncoderAverage() to better calibrate encoder movements: create a measure for
     // ensuring that the change of the change in encocer movements- indicates that the encoder is
@@ -134,9 +152,12 @@ public class Drivetrain {
             encoderAverage += encoder;
         }
         try{
-            return (encoderAverage / (4 - counter);
+            return (encoderAverage / (4 - counter));
         } catch(ArithmeticException E){
+            reset = true;
             RobotLog.i("All Encoders equal Zero");
+            return 0.0;
+
         }
     }
 
@@ -150,13 +171,15 @@ public class Drivetrain {
      * @param timeout  - time before timeout
      */
     public void moveForward(double distance, double power, double timeout) {
-        double currentPos = getEncoderAverage();
+        double currentPos = getEncoderAverage(encoderVals);
         ElapsedTime timer = new ElapsedTime();
         while (timer.seconds() < timeout && currentPos < feetToEncoder(distance)) { //timer loop to stop motors after time reaches timeout or if destination is reached
+            currentPos = sensorVals.get("Current Encoder");
             setAllMotors(power);
         }
         setAllMotors(0);
     }
+
 
     /**
      * Move or strafe in the cardinal directions with the option to turn while doing so
@@ -194,9 +217,9 @@ public class Drivetrain {
 
         // Set Motor Powers for set time
         ElapsedTime timer = new ElapsedTime();
-        double currentPos = getEncoderAverage();
+        double currentPos = getEncoderAverage(encoderVals);
         while (currentPos < feetToEncoder(distance) && timer.seconds() < timeout) {
-            currentPos = getEncoderAverage();
+            currentPos = getEncoderAverage(encoderVals);
             fl.setPower(powers[FRONT_LEFT]);
             fr.setPower(powers[FRONT_RIGHT]);
             bl.setPower(powers[BACK_LEFT]);
@@ -290,20 +313,6 @@ public class Drivetrain {
      - Value of Encoder ticks != 0.
   */
     public void monitorEncoders(double encoderAverage){
-        if (isMoving) {
-            //double changeEncoder = drivetrain.sensorsVals.get("PrevEncoderAverage") - drivetrain.sensprVals.get("CurrentEnc");
-            try{
-                double prevEncoderChange = Math.abs(getEncoderAverage() - sensorVals.get("Current Encoder"));
-            } catch(NullPointerException E){
-                return;
-            }
-
-            double currEncoderChange = Math.abs(getEncoderAverage()  - sensorVals.get("Current Encoder"));
-
-
-
-
-        }
 
 
     }
