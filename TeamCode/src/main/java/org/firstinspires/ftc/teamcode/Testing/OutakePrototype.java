@@ -1,20 +1,17 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name="IntakePrototype", group="Iterative Opmode")
-public class IntakePrototype extends OpMode  {
+@TeleOp(name="OutakePrototype", group="Iterative Opmode")
+public class OutakePrototype extends OpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
-    private DcMotor intakeMotor = null;
-    private DcMotor intakeMotor2 = null;
-    private double[] power = {-1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, .1};
-    private int counter = 10;
+    private Servo pincher = null;
+    private Servo armRotater;
 
 
     /*
@@ -27,13 +24,12 @@ public class IntakePrototype extends OpMode  {
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        intakeMotor  = hardwareMap.get(DcMotor.class, "intakeMotor");
-        intakeMotor2 = hardwareMap.get(DcMotor.class, "intakeMotor2");
+        pincher  = hardwareMap.get(Servo.class, "pincher");
+        armRotater = hardwareMap.get(Servo.class, "armRotater");
 
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
-        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -59,25 +55,26 @@ public class IntakePrototype extends OpMode  {
      */
     @Override
     public void loop() {
-       if(gamepad1.b) {
-           intakeMotor.setPower(power[10]);
-           intakeMotor2.setPower(power[10]);
-       }
-       if(gamepad1.a){
-           intakeMotor.setPower(power[15]);
-           intakeMotor2.setPower(power[15]);
-       }
-       if(gamepad1.dpad_up && counter < 20) {
-           while (gamepad1.dpad_up){}
-           counter += 1;
-
-       }
-       if(gamepad1.dpad_down && counter > 0){
-           while (gamepad1.dpad_down){}
-           counter -= 1;
-       }
-       intakeMotor.setPower(power[counter]);
-       intakeMotor2.setPower(power[counter]);
+        double counterA = 0;
+        double counterB = 0;
+        if (gamepad1.a){
+            counterA += 1;
+        }
+        if ((counterA % 2) == 0){
+           pincher.setPosition(0);
+        }
+        else{
+            pincher.setPosition(90);
+        }
+        if (gamepad1.b){
+            counterB ++;
+        }
+        if ((counterB % 2) == 0){
+            armRotater.setPosition(0);
+        }
+        else {
+            armRotater.setPosition(180);
+        }
     }
 
     /*
