@@ -13,8 +13,9 @@ public class IntakePrototype extends OpMode  {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor intakeMotor = null;
     private DcMotor intakeMotor2 = null;
-    private double[] power = {-1, -.9, -.8, -.7, -.6, -.5, -.4, -.3, -.2, -1, 0, .1, .2, .3, .4, .5, .6, .7, .8, .9, .1};
-    private int counter = 10;
+    private double power = 0;
+    private boolean changeX = false;
+    private boolean changeY = false;
 
 
     /*
@@ -59,25 +60,16 @@ public class IntakePrototype extends OpMode  {
      */
     @Override
     public void loop() {
-       if(gamepad1.b) {
-           intakeMotor.setPower(power[10]);
-           intakeMotor2.setPower(power[10]);
+       if(gamepad1.x ^ changeX && power < 1) {
+           power += .1;
        }
-       if(gamepad1.a){
-           intakeMotor.setPower(power[15]);
-           intakeMotor2.setPower(power[15]);
+       else if(gamepad1.y ^ changeY && power > -1){
+           power -= .1;
        }
-       if(gamepad1.dpad_up && counter < 20) {
-           while (gamepad1.dpad_up){}
-           counter += 1;
-
-       }
-       if(gamepad1.dpad_down && counter > 0){
-           while (gamepad1.dpad_down){}
-           counter -= 1;
-       }
-       intakeMotor.setPower(power[counter]);
-       intakeMotor2.setPower(power[counter]);
+       intakeMotor.setPower(power);
+       intakeMotor2.setPower(power);
+       changeX = gamepad1.x;
+       changeY = gamepad1.y;
     }
 
     /*
@@ -86,5 +78,6 @@ public class IntakePrototype extends OpMode  {
     @Override
     public void stop() {
     }
+
 
 }
