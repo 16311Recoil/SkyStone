@@ -18,6 +18,8 @@ public class DrivetrainPrototype {
         private DcMotor fl = null;
         private DcMotor bl;
         private DcMotor br;
+        private boolean changeDpadD;
+
 
 
         /*
@@ -68,7 +70,7 @@ public class DrivetrainPrototype {
         @Override
         public void loop() {
            double counter = 0;
-           if (gamepad1.dpad_down){
+           if (gamepad1.dpad_down ^ changeDpadD){
                counter += 1;
            }
            if ((counter % 2) == 0){ //toggling move tele-op method by pressing down on the d pad
@@ -98,7 +100,7 @@ public class DrivetrainPrototype {
                bl.setPower(-.75);
                br.setPower(.75);
            }
-
+           changeDpadD = gamepad1.dpad_down;
         }
 
         /*
@@ -113,6 +115,7 @@ public class DrivetrainPrototype {
             br.setPower(Range.clip(y + x + z, -1, 1));
             bl.setPower(Range.clip(y - x - z, -1, 1));
         }
+
     }
 
 }

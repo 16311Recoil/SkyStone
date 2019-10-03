@@ -12,6 +12,8 @@ public class OutakePrototype extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private Servo pincher = null;
     private Servo armRotater;
+    private boolean changeA = false;
+    private boolean changeB = false;
 
 
     /*
@@ -57,7 +59,7 @@ public class OutakePrototype extends OpMode {
     public void loop() {
         double counterA = 0;
         double counterB = 0;
-        if (gamepad1.a){
+        if (gamepad1.a ^ changeA){
             counterA += 1;
         }
         if ((counterA % 2) == 0){
@@ -66,7 +68,7 @@ public class OutakePrototype extends OpMode {
         else{
             pincher.setPosition(90);
         }
-        if (gamepad1.b){
+        if (gamepad1.b ^ changeB){
             counterB ++;
         }
         if ((counterB % 2) == 0){
@@ -75,6 +77,8 @@ public class OutakePrototype extends OpMode {
         else {
             armRotater.setPosition(180);
         }
+        changeA = gamepad1.a;
+        changeB = gamepad1.b;
     }
 
     /*
