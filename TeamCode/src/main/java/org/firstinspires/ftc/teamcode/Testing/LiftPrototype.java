@@ -17,6 +17,9 @@ public class LiftPrototype {
         private ElapsedTime runtime = new ElapsedTime();
         private DcMotor ll = null; //lift left
         private DcMotor lr = null; //lift right
+        private double power = 0;
+        private boolean changeDpad_D = false;
+        private boolean changeDpad_U = false;
 
         /*
          * Code to run ONCE when the driver hits INIT
@@ -61,17 +64,25 @@ public class LiftPrototype {
         @Override
         public void loop() {
             if (gamepad1.a){
-                ll.setPower(.5);
-                lr.setPower(.5);
+                ll.setPower(power);
+                lr.setPower(power);
             }
             if (gamepad1.b){
                 ll.setPower(0);
                 lr.setPower(0);
             }
             if (gamepad1.x){
-                ll.setPower(-0.5);
-                lr.setPower(-0.5);
+                ll.setPower(-power);
+                lr.setPower(-power);
             }
+            if(gamepad1.dpad_up ^ changeDpad_U && power < 1) {
+                power += .1;
+            }
+            else if(gamepad1.dpad_down ^ changeDpad_D && power > 0){
+                power -= .1;
+            }
+            changeDpad_D = gamepad1.dpad_down;
+            changeDpad_U = gamepad1.dpad_up;
 
         }
 
