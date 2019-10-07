@@ -6,6 +6,10 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
+
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 
 public class DrivetrainPrototype {
     @TeleOp(name="Basic: DrivetrainPrototype", group="Iterative Opmode")
@@ -19,6 +23,7 @@ public class DrivetrainPrototype {
         private DcMotor bl;
         private DcMotor br;
         private boolean changeDpadD;
+        private Drivetrain tele;
 
 
 

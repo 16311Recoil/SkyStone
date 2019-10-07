@@ -9,6 +9,11 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.PID;
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Sensors;
+import com.qualcomm.robotcore.util.RobotLog;
+
 @Autonomous(name="Basic: PIDPrototype", group="Linear Opmode")
 @Disabled
 public class PIDPrototype extends LinearOpMode {
@@ -20,20 +25,11 @@ public class PIDPrototype extends LinearOpMode {
     private DcMotor fl = null;
     private DcMotor bl;
     private DcMotor br;
-    private double k_i;
-    private double k_p;
-    private double k_d;
-    private double t_sum;
-    private double previousError;
-    private double p = 0;
-    private double i = 0;
-    private double d = 0;
-
-    private double target;
-    private boolean reset;
-    private double t_i;
-
-    private double MAX_SUM = 0.0; // test sum
+    private boolean changeA;
+    private double error;
+    private double TURN_DEGREES = 90;
+    Sensors gyro;
+    Drivetrain drivetrainPID;
 
     @Override
     public void runOpMode() {
@@ -58,35 +54,35 @@ public class PIDPrototype extends LinearOpMode {
         waitForStart();
         runtime.reset();
 
+        PID pid = new PID();
+        try{
+            gyro = new Sensors(this);
+            drivetrainPID = new Drivetrain(this, runtime);
+
+        }
+        catch(InterruptedException E) {
+            RobotLog.i(E.getMessage());
+        }
+
+
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
-
-            if(gamepad1.a) {
-                iterationPID(90, timerPID.seconds() ) ; //TODO Check with Anish what error is measured in
+            if(gamepad1.a ^ changeA) {
+                double target = gyro.getFirstAngle() + TURN_DEGREES;
+                error = TURN_DEGREES;
+                while (error > 0){
+                    drivetrainPID.turn(pid.iteration(error, runtime.seconds()), true);
+                    error = target - gyro.getFirstAngle();
+                }
+                drivetrainPID.setAllMotors(0);
             }
-
+            changeA = gamepad1.a;
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
             telemetry.addData("Motors", "left (%.2f), right (%.2f)", fl, fr);
             telemetry.update();
         }
-
-    }
-    //TODO Get Anish to double check the PID and make sure that it works as intended
-    public double iterationPID(double error, double currentTime) {
-        double deltaTime = currentTime - t_i;
-        p = k_p * error;
-        t_sum = 0.5 * (error + previousError) * deltaTime;
-        if (t_sum > MAX_SUM) {
-            t_sum = MAX_SUM;// test for maxSum
-        }
-        i = k_i * t_sum;
-        d = k_d * (error - previousError) / deltaTime;
-      // Add this??  t_i = currentTime;
-        return (p + i + d);
-    }
-    }
 
     }
 }

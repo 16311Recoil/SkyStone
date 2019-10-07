@@ -8,6 +8,11 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.util.RobotLog;
+
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Sensors;
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 
 
 /**
@@ -37,6 +42,8 @@ public class AutoPrototype extends LinearOpMode {
     private DcMotor lr = null; //lift right
     private DcMotor il = null;
     private DcMotor ir = null;
+    private Drivetrain auto;
+    private Stacker intake_outake;
 
     @Override
     public void runOpMode() {
@@ -60,11 +67,32 @@ public class AutoPrototype extends LinearOpMode {
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
         runtime.reset();
+        try{
+             auto = new Drivetrain( this, runtime);
+             intake_outake = new Stacker(this);
+        }
+        catch (InterruptedException E){
+            RobotLog.i(E.getMessage());
+        }
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
 
             // Setup a variable for each drive wheel to save power level for telemetry
+            /*auto.setAllMotors(1);
+            this.sleep(1000);
+            auto.setAllMotors(0);
+            auto.turn(1,true);
+            this.sleep(1000);
+            auto.setAllMotors(0);
+            intake_outake.setIntakePower(1);
+            this.sleep(1000);
+            intake_outake.setIntakePower(0);
+            intake_outake.setLiftPower(.25);
+            this.sleep(250);
+            intake_outake.setLiftPower(-.25);
+            this.sleep(250);
+            intake_outake.setLiftPower(0); */
 
 
             // Show the elapsed game time and wheel power.
@@ -73,33 +101,5 @@ public class AutoPrototype extends LinearOpMode {
             telemetry.update();
         }
 
-    }
-    public void setAllMotors (double power) {
-        fl.setPower(power);
-        fr.setPower(power);
-        bl.setPower(power);
-        br.setPower(power);
-    }
-    public void turn (double power, boolean right) {
-        if (right){
-            fl.setPower(-power);
-            fr.setPower(power);
-            bl.setPower(-power);
-            br.setPower(power);
-        }
-        else{
-            fl.setPower(power);
-            fr.setPower(-power);
-            bl.setPower(power);
-            br.setPower(-power);
-        }
-    }
-    public void setLiftPower(double power) {
-        ll.setPower(power);
-        lr.setPower(power);
-    }
-    public void setIntakePower(double power) {
-        il.setPower(power);
-        ir.setPower(power);
     }
 }
