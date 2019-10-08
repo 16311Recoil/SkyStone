@@ -20,7 +20,7 @@ public class Drivetrain {
     // Instance Variables
 
     private static final int NUM_MOTORS = 4;
-    private LinearOpMode opMode;
+    public LinearOpMode opMode;
 
     private final double WHEEL_DIAMETER_MM = 100.0;
     private final double WHEEL_DIAMETER_FEET = 0.328084;
@@ -36,10 +36,8 @@ public class Drivetrain {
     // Instance Variables
     private ExpansionHubMotor fl, fr, bl, br;
     private ElapsedTime drivetrainClock;
-
     public Map<String, Double> sensorVals;
     public double[] encoderVals;
-
     private PID pidControlller;
     private Sensors sensors;
     private final double MAX_POWER = 1;
@@ -49,14 +47,16 @@ public class Drivetrain {
     private RevBulkData bulkdata;
     private boolean reset;
 
-    public Drivetrain(LinearOpMode opMode, ElapsedTime timer) throws InterruptedException {
+    public Drivetrain(LinearOpMode opMode, ElapsedTime timer, Map<String, Double> sensorVals) throws InterruptedException {
         this.opMode = opMode;
         sensors = new Sensors(opMode);
         encoderVals = new double[4];
 
         // Tracks Sensor Vals.
-        sensorVals = new TreeMap<String, Double>();
+        this.sensorVals = sensorVals;
         drivetrainClock = new ElapsedTime();
+
+
 
 
         fl = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("fl");
@@ -121,21 +121,50 @@ public class Drivetrain {
             br.setPower(-power);
         }
     }
-    public void bulkRead(ElapsedTime timer){
-        double currTime = timer.milliseconds();
-        sensorVals.put("Current Angle", sensors.getFirstAngle());
-        sensorVals.put("Previous Encoder", sensorVals.get("Current Encoder"));
+    public ExpansionHubMotor getFl() {
+        return fl;
+    }
 
-        bulkdata = expansionHub.getBulkInputData();
+    public void setFl(ExpansionHubMotor fl) {
+        this.fl = fl;
+    }
 
-        this.encoderVals[FRONT_LEFT] = bulkdata.getMotorCurrentPosition(fl);
-        this.encoderVals[FRONT_RIGHT] = bulkdata.getMotorCurrentPosition(fr);
-        this.encoderVals[BACK_LEFT] = bulkdata.getMotorCurrentPosition(bl);
-        this.encoderVals[BACK_RIGHT] = bulkdata.getMotorCurrentPosition(br);
+    public ExpansionHubMotor getFr() {
+        return fr;
+    }
 
-        sensorVals.put("Previous Time", sensorVals.get("Timestamp"));
-        sensorVals.put("TimeStamp", currTime);
-        sensorVals.put("Current Encoder", getEncoderAverage(encoderVals));
+    public void setFr(ExpansionHubMotor fr) {
+        this.fr = fr;
+    }
+
+    public ExpansionHubMotor getBl() {
+        return bl;
+    }
+
+    public void setBl(ExpansionHubMotor bl) {
+        this.bl = bl;
+    }
+
+    public ExpansionHubMotor getBr() {
+        return br;
+    }
+    public double[] getEncoderVals() {
+        return encoderVals;
+    }
+
+    public void setEncoderVals(double[] encoderVals) {
+        this.encoderVals = encoderVals;
+    }
+
+    public void setBr(ExpansionHubMotor br) {
+        this.br = br;
+    }
+    public Sensors getSensors() {
+        return sensors;
+    }
+
+    public void setSensors(Sensors sensors) {
+        this.sensors = sensors;
     }
     //FIXME : Update getEncoderAverage() to better calibrate encoder movements: create a measure for
     // ensuring that the change of the change in encocer movements- indicates that the encoder is

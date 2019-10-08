@@ -6,16 +6,17 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.BitmapVision;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.HardwareThread;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 import org.openftc.revextensions2.RevBulkData;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.ExpansionHubMotor;
 
+import java.util.Map;
+import java.util.TreeMap;
+
 // edit
 public class DangerNoodle implements Robot {
-
-    private static final double SERVO_LOCK = 0.0; // Needs to be tested;
-    private static final double SERVO_UNLOCK = 0.0; // Needs to be tested;
     // Instance Variables
     private Drivetrain drivetrain;
     private Stacker manipulator;
@@ -24,14 +25,16 @@ public class DangerNoodle implements Robot {
 
     private boolean isMoving;
     public ElapsedTime timer;
+    private Map<String, Double> sensorVals;
+
+    private HardwareThread hardwareThread;
+
 
 
     private Servo lFang;
     private Servo rFang;
-
-
-
-
+    private static final double SERVO_LOCK = 0.0; // Needs to be tested;
+    private static final double SERVO_UNLOCK = 0.0; // Needs to be tested;
     /*
         Constructor includes
      */
@@ -40,9 +43,13 @@ public class DangerNoodle implements Robot {
         try {
             timer = new ElapsedTime();
             this.opMode = opMode;
-            drivetrain = new Drivetrain(opMode, timer);
+            this.sensorVals = new TreeMap<String, Double>();
+            drivetrain = new Drivetrain(opMode, timer, sensorVals);
             manipulator = new Stacker(opMode);
             bmv = new BitmapVision(opMode);
+
+            hardwareThread = new HardwareThread(this, sensorVals);
+            hardwareThread.run();
 
             lFang = this.opMode.hardwareMap.servo.get("lFang");
             rFang = this.opMode.hardwareMap.servo.get("rFang");
@@ -61,6 +68,7 @@ public class DangerNoodle implements Robot {
         }
 
     }
+
 
     @Override
     public void retrieval(double distance) {
@@ -125,5 +133,44 @@ public class DangerNoodle implements Robot {
     }
     public void bulkRead(){
 
+    }
+
+    public Drivetrain getDrivetrain() {
+        return drivetrain;
+    }
+
+    public void setDrivetrain(Drivetrain drivetrain) {
+        this.drivetrain = drivetrain;
+    }
+
+    public Stacker getManipulator() {
+        return manipulator;
+    }
+
+    public void setManipulator(Stacker manipulator) {
+        this.manipulator = manipulator;
+    }
+
+    public BitmapVision getBmv() {
+        return bmv;
+    }
+
+    public void setBmv(BitmapVision bmv) {
+        this.bmv = bmv;
+    }
+
+    public LinearOpMode getOpMode() {
+        return opMode;
+    }
+
+    public void setOpMode(LinearOpMode opMode) {
+        this.opMode = opMode;
+    }
+    public Map<String, Double> getSensorVals() {
+        return sensorVals;
+    }
+
+    public void setSensorVals(Map<String, Double> sensorVals) {
+        this.sensorVals = sensorVals;
     }
 }

@@ -16,6 +16,55 @@ public class Stacker {
     private DcMotor il; //intake left
     private DcMotor ir; //intake right
     private DcMotor ll; //lift left
+
+    public DcMotor getIl() {
+        return il;
+    }
+
+    public void setIl(DcMotor il) {
+        this.il = il;
+    }
+
+    public DcMotor getIr() {
+        return ir;
+    }
+
+    public void setIr(DcMotor ir) {
+        this.ir = ir;
+    }
+
+    public DcMotor getLl() {
+        return ll;
+    }
+
+    public void setLl(DcMotor ll) {
+        this.ll = ll;
+    }
+
+    public DcMotor getLr() {
+        return lr;
+    }
+
+    public void setLr(DcMotor lr) {
+        this.lr = lr;
+    }
+
+    public Servo getGr() {
+        return gr;
+    }
+
+    public void setGr(Servo gr) {
+        this.gr = gr;
+    }
+
+    public Servo getGl() {
+        return gl;
+    }
+
+    public void setGl(Servo gl) {
+        this.gl = gl;
+    }
+
     private DcMotor lr; //lift right
     private Servo gr; // gantry right
     private Servo gl; // gantry left
