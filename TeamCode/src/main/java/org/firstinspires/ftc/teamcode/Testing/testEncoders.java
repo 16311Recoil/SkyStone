@@ -10,10 +10,12 @@ import com.qualcomm.robotcore.util.RobotLog;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 
-public class testEncoders {
-    @Autonomous(name="Basic: AutoPrototype", group="Linear Opmode")
-    @Disabled
-    public class AutoPrototype extends LinearOpMode {
+import java.util.TreeMap;
+
+@Autonomous(name="Basic: AutoPrototype", group="Linear Opmode")
+//@Disabled
+public class testEncoders extends LinearOpMode{
+
 
         // Declare OpMode members.
         private ElapsedTime runtime = new ElapsedTime();
@@ -26,6 +28,7 @@ public class testEncoders {
         private double encoder_E;
         private boolean changeA;
         private boolean changeB;
+        private TreeMap<String, Double> sensorVals;
 
         @Override
         public void runOpMode() {
@@ -50,7 +53,7 @@ public class testEncoders {
             waitForStart();
             runtime.reset();
             try{
-                encoder = new Drivetrain( this, runtime);
+                encoder = new Drivetrain( this, runtime, new TreeMap<String, Double>());
             }
             catch (InterruptedException E){
                 RobotLog.i(E.getMessage());
@@ -67,10 +70,10 @@ public class testEncoders {
 
                 // Show the elapsed game time and wheel power.
                 telemetry.addData("Status", "Run Time: " + runtime.toString());
-                telemetry.addData("Motors", "left (%.2f), right (%.2f)", fl, fr);
+                telemetry.addData("Motors", "left %.2f, right %.2f", fl, fr);
                 telemetry.update();
             }
 
         }
     }
-}
+
