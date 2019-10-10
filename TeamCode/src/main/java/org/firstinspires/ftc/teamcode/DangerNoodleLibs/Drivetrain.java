@@ -31,7 +31,7 @@ public class Drivetrain {
     private final int BACK_LEFT = 2;
     private final int BACK_RIGHT = 3;
     double scale[] = {1, 0.5};
-    int a_ButtonCount = 0;
+    int dpadd_ButtonCount = 0;
 
     // Instance Variables
     private ExpansionHubMotor fl, fr, bl, br;
@@ -346,6 +346,22 @@ public class Drivetrain {
 
     }
 
+    /**
+     *
+     * @param  - inputted number to angleWrap in degrees
+     * @param radians - boolean on whether to output in radians or degrees
+     * @return
+     */
+    public double angleWrap(double input, boolean radians){
+        if (input > 180 ){
+            input -= 360;
+        }
+        if (radians){
+            input = Math.toRadians(input);
+        }
+        return input;
+    }
+
 
 // ================================ Tele-Op Methods =======================================================================
 
@@ -357,16 +373,16 @@ public class Drivetrain {
      * @param z - input variable for turning - opMode.gamepad1.right_stick_x - x value of the right joystick
      */
     public void moveTelop(double x, double y, double z) {
-        if (opMode.gamepad1.a){
-            a_ButtonCount++;                                          //left side -z right side +z
+        if (opMode.gamepad1.dpad_down){
+            dpadd_ButtonCount++;                                          //left side -z right side +z
         }
-        double scaleSpeed = scale[a_ButtonCount % 2];
+        double scaleSpeed = scale[dpadd_ButtonCount % 2];
         double netTheta = Math.atan2(x,y) - sensors.getFirstAngle();
         double v_d = Math.hypot(x,y);
-        fl.setPower( (v_d * (Math.sin( (netTheta) + Math.PI / 4) )) - z );
-        fr.setPower( (v_d * (Math.cos( (netTheta) + Math.PI / 4) )) + z );
-        bl.setPower( (v_d * (Math.sin( (netTheta) + Math.PI / 4) )) - z );
-        br.setPower( (v_d * (Math.cos( (netTheta) + Math.PI / 4) )) + z );
+        fl.setPower( scaleSpeed * (v_d * (Math.sin( (netTheta) + Math.PI / 4) )) - z );
+        fr.setPower( scaleSpeed * (v_d * (Math.cos( (netTheta) + Math.PI / 4) )) + z );
+        bl.setPower( scaleSpeed * (v_d * (Math.sin( (netTheta) + Math.PI / 4) )) - z );
+        br.setPower( scaleSpeed * (v_d * (Math.cos( (netTheta) + Math.PI / 4) )) + z );
     }
 
 }
