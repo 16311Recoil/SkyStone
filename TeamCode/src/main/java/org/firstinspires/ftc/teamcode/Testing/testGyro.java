@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Sensors;
 
 @TeleOp(name="Basic: testGyro", group="Iterative Opmode")
-@Disabled
+//@Disabled
 public class testGyro extends BasicOpMode_Iterative {
 
     private double currentPos_1;
@@ -45,9 +45,10 @@ public class testGyro extends BasicOpMode_Iterative {
             currentPos_1 = gyro1.getFirstAngle();
             currentPos_2 = gyro1.getSecondAngle();
             currentPos_3 = gyro1.getThirdAngle();
-            telemetry.addData("First Angle", currentPos_1);
-            telemetry.addData("Second Angle", currentPos_1);
-            telemetry.addData("Third Angle", currentPos_1);
+
+            telemetry.addData("Current First Angle", currentPos_1 );
+            telemetry.addData("Current Second Angle", currentPos_2);
+            telemetry.addData("Current Third Angle", currentPos_3);
             telemetry.update();
         }
         changeX = gamepad1.x;
@@ -65,26 +66,19 @@ public class testGyro extends BasicOpMode_Iterative {
         }
         changeA = gamepad1.a;
         changeB = gamepad1.b;
-        telemetry.addData("Original First Angle", currentPos_1);
-        telemetry.addData("Original Second Angle", currentPos_1);
-        telemetry.addData("Original Third Angle", currentPos_1);
-        telemetry.update();
-        telemetry.addData("New First Angle", pastPos_1);
-        telemetry.addData("New Second Angle", pastPos_2);
-        telemetry.addData("New Third Angle", pastPos_3);
-        telemetry.update();
+
         telemetry.addData("Change in First Angle", currentPos_1 - pastPos_1);
         telemetry.addData("Change in Second Angle", currentPos_2 - pastPos_2);
         telemetry.addData("Change in Third Angle", currentPos_3 - pastPos_3);
         telemetry.update();
-
     }
 
 
     @Override
     public void loop() {
-
+        changeGyro();
+        getGyro();
     }
-    }
+}
 
 
