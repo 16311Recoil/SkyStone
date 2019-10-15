@@ -13,8 +13,7 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 
 @TeleOp (name = "Drivetrain Prototype", group = "Controlled")
 public class DrivetrainPrototype extends OpMode {
-    {
-        // Declare OpMode members.
+
         private ElapsedTime runtime = new ElapsedTime();
         private DcMotor fr = null;
         private DcMotor fl = null;
@@ -23,13 +22,10 @@ public class DrivetrainPrototype extends OpMode {
         private boolean changeDpadD;
         private Drivetrain tele;
 
-
-
-        /*
-         * Code to run ONCE when the driver hits INIT
-         */
         @Override
-        public void init(){
+        public void init () {
+
+
         telemetry.addData("Status", "Initialized");
 
         // Initialize the hardware variables. Note that the strings used here as parameters
@@ -50,21 +46,6 @@ public class DrivetrainPrototype extends OpMode {
 
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
-    }
-
-        /*
-         * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
-         */
-        @Override
-        public void init_loop () {
-    }
-
-        /*
-         * Code to run ONCE when the driver hits PLAY
-         */
-        @Override
-        public void start () {
-        runtime.reset();
     }
 
         /*
@@ -101,20 +82,12 @@ public class DrivetrainPrototype extends OpMode {
         }
         changeDpadD = gamepad1.dpad_down;
     }
-
-        /*
-         * Code to run ONCE after the driver hits STOP
-         */
-        @Override
-        public void stop () {
-    }
         public void moveTelop ( double x, double y, double z){
         fr.setPower(Range.clip(y - x + z, -1, 1));
         fl.setPower(Range.clip(y + x - z, -1, 1));
         br.setPower(Range.clip(y + x + z, -1, 1));
         bl.setPower(Range.clip(y - x - z, -1, 1));
     }
-
-    }
 }
+
 

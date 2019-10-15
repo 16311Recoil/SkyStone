@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import org.firstinspires.ftc.robotcontroller.external.samples.BasicOpMode_Iterative;
+import org.firstinspires.ftc.teamcode.Testing.LiftPrototype;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.ExpansionHubMotor;
 import org.openftc.revextensions2.RevBulkData;
@@ -17,10 +19,24 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class Drivetrain {
+    private double multiplier;
+
     // Instance Variables
+    private enum State{
+        HALF_SPEED,
+        FULL_SPEED,
+        L_SCALE_POWER,
+        H_SCALE_POWER;
+    }
+    State currentState;
+
+
 
     private static final int NUM_MOTORS = 4;
     public LinearOpMode opMode;
+    public BasicOpMode_Iterative opMode_iterative;
+
+
 
     private final double WHEEL_DIAMETER_MM = 100.0;
     private final double WHEEL_DIAMETER_FEET = 0.328084;
@@ -30,7 +46,12 @@ public class Drivetrain {
     private final int FRONT_RIGHT = 1;
     private final int BACK_LEFT = 2;
     private final int BACK_RIGHT = 3;
-    double scale[] = {1, 0.5};
+    private double scale[] = {1, 0.5};
+
+    private double max_power;
+    private double min_power;
+
+
     int dpadd_ButtonCount = 0;
 
     // Instance Variables
@@ -46,18 +67,60 @@ public class Drivetrain {
     private ExpansionHubEx expansionHub;
     private RevBulkData bulkdata;
     private boolean reset;
+    private boolean changeDpad;
 
     public Drivetrain(LinearOpMode opMode, ElapsedTime timer, Map<String, Double> sensorVals) throws InterruptedException {
         this.opMode = opMode;
         sensors = new Sensors(opMode);
         encoderVals = new double[4];
+        changeDpad = false;
+        max_power = 1;
+        min_power = 0;
+
+        multiplier = 1;
 
         // Tracks Sensor Vals.
         this.sensorVals = sensorVals;
         drivetrainClock = new ElapsedTime();
 
+        fl = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("fl");
+        fr = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("fr");
+        bl = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("bl");
+        br = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("br");
 
 
+        encoderVals[FRONT_LEFT] = expansionHub.getBulkInputData().getMotorCurrentPosition(fl);
+        encoderVals[FRONT_RIGHT] = expansionHub.getBulkInputData().getMotorCurrentPosition(fr);
+        encoderVals[BACK_LEFT] = expansionHub.getBulkInputData().getMotorCurrentPosition(bl);
+        encoderVals[BACK_RIGHT] = expansionHub.getBulkInputData().getMotorCurrentPosition(br);
+
+
+        sensorVals.put("Current Encoder", getEncoderAverage(encoderVals));
+        sensorVals.put("Timestamp", 0.0);
+
+        fr.setDirection(DcMotor.Direction.FORWARD);
+        br.setDirection(DcMotor.Direction.FORWARD);
+        bl.setDirection(DcMotor.Direction.FORWARD);
+        fl.setDirection(DcMotor.Direction.FORWARD);
+
+        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        pidControlller = new PID();
+        pidControlller.setReset(true);
+    }
+    // iterative opMode();
+    public Drivetrain(BasicOpMode_Iterative opMode, ElapsedTime timer, Map<String, Double> sensorVals) throws InterruptedException {
+        this.opMode_iterative = opMode;
+        sensors = new Sensors(opMode);
+        encoderVals = new double[4];
+        currentState = State.FULL_SPEED;
+
+        // Tracks Sensor Vals.
+        this.sensorVals = sensorVals;
+        drivetrainClock = new ElapsedTime();
 
         fl = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("fl");
         fr = (ExpansionHubMotor)this.opMode.hardwareMap.dcMotor.get("fr");
@@ -373,16 +436,45 @@ public class Drivetrain {
      * @param z - input variable for turning - opMode.gamepad1.right_stick_x - x value of the right joystick
      */
     public void moveTelop(double x, double y, double z) {
-        if (opMode.gamepad1.dpad_down){
-            dpadd_ButtonCount++;                                          //left side -z right side +z
-        }
-        double scaleSpeed = scale[dpadd_ButtonCount % 2];
-        double netTheta = Math.atan2(x,y) - sensors.getFirstAngle();
         double v_d = Math.hypot(x,y);
-        fl.setPower( scaleSpeed * (v_d * (Math.sin( (netTheta) + Math.PI / 4) )) - z );
-        fr.setPower( scaleSpeed * (v_d * (Math.cos( (netTheta) + Math.PI / 4) )) + z );
-        bl.setPower( scaleSpeed * (v_d * (Math.sin( (netTheta) + Math.PI / 4) )) - z );
-        br.setPower( scaleSpeed * (v_d * (Math.cos( (netTheta) + Math.PI / 4) )) + z );
-    }
+        double netTheta = Math.atan2(x,y) - sensors.getFirstAngle();
+        if (v_d < 0.05)
+            v_d = 0;
+        if (v_d > 0.95)
+            v_d = 1;
+        double power;
+        checkState();
 
+        if (currentState.equals(State.FULL_SPEED))
+            multiplier = 1;
+        if (currentState.equals(State.HALF_SPEED))
+            multiplier = 0.5;
+        if (currentState.equals(State.H_SCALE_POWER))
+            v_d = l_scale_speed(v_d);
+        if (currentState.equals(State.H_SCALE_POWER))
+            v_d = h_scale_speed(v_d);
+
+
+        fl.setPower( multiplier * (v_d * (Math.sin( (netTheta) + Math.PI / 4) )) - z );
+        fr.setPower( multiplier * (v_d * (Math.cos( (netTheta) + Math.PI / 4) )) + z );
+        bl.setPower( multiplier * (v_d * (Math.sin( (netTheta) + Math.PI / 4) )) - z );
+        br.setPower( multiplier * (v_d * (Math.cos( (netTheta) + Math.PI / 4) )) + z );
+    }
+    private double h_scale_speed(double v_d) {
+        return Range.clip(0.0308 * Math.exp(4.3891 * v_d), 0.05, 1);
+    }
+    public void checkState(){
+        if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.a)
+            currentState = State.HALF_SPEED;
+        if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.b)
+            currentState = State.H_SCALE_POWER;
+        if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.x)
+            currentState = State.L_SCALE_POWER;
+        if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.y)
+            currentState = State.FULL_SPEED;
+    }
+    public double l_scale_speed(double input){
+        // 0.3253ln(x) + 0.9069
+        return Range.clip(0.3243 * Math.log(input) + 0.9069, 0.05, 1);
+    }
 }
