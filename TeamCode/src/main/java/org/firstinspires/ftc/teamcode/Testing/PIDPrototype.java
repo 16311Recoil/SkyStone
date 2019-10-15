@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.PID;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Sensors;
 import com.qualcomm.robotcore.util.RobotLog;
 
+import java.util.TreeMap;
+
 @Autonomous(name="Basic: PIDPrototype", group="Linear Opmode")
 @Disabled
 public class PIDPrototype extends LinearOpMode {
@@ -30,11 +32,11 @@ public class PIDPrototype extends LinearOpMode {
     private double TURN_DEGREES = 90;
     Sensors gyro;
     Drivetrain drivetrainPID;
+    private TreeMap<String, Double> sensorVals;
 
     @Override
     public void runOpMode() {
-        telemetry.addData("Status", "Initialized");
-        telemetry.update();
+
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
@@ -51,38 +53,37 @@ public class PIDPrototype extends LinearOpMode {
         br.setDirection(DcMotor.Direction.FORWARD);
         bl.setDirection(DcMotor.Direction.FORWARD);
         // Wait for the game to start (driver presses PLAY)
-        waitForStart();
-        runtime.reset();
-
         PID pid = new PID();
         try{
             gyro = new Sensors(this);
-            drivetrainPID = new Drivetrain(this, runtime);
+            drivetrainPID = new Drivetrain(this, runtime, sensorVals);
 
         }
         catch(InterruptedException E) {
+            telemetry.addLine(E.getMessage());
             RobotLog.i(E.getMessage());
+            telemetry.update();
         }
+        telemetry.addData("Status", "Initialized");
+        telemetry.update();
+
+        waitForStart();
+        runtime.reset();
+        // Tune (Ziegler Nichols)
+        // get to oscillate
+        // once oscillations, increment D
+        // add I as needed -- //TODO: Set Max Sum for Integral Windup
+        drivetrainPID.turnPID(0,0,0,0,0,false);
+
 
 
         // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
-            if(gamepad1.a ^ changeA) {
-                double target = gyro.getFirstAngle() + TURN_DEGREES;
-                error = TURN_DEGREES;
-                while (error > 0){
-                    drivetrainPID.turn(pid.iteration(error, runtime.seconds()), true);
-                    error = target - gyro.getFirstAngle();
-                }
-                drivetrainPID.setAllMotors(0);
-            }
-            changeA = gamepad1.a;
+
 
             // Show the elapsed game time and wheel power.
             telemetry.addData("Status", "Run Time: " + runtime.toString());
-            telemetry.addData("Motors", "left (%.2f), right (%.2f)", fl, fr);
+            telemetry.addData("Motors", "left (%.2f), right (%.2f)", fl.getPower(), fr.getPower());
             telemetry.update();
         }
 
-    }
 }

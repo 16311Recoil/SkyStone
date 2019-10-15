@@ -14,6 +14,8 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Sensors;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 
+import java.util.TreeMap;
+
 
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
@@ -44,11 +46,14 @@ public class AutoPrototype extends LinearOpMode {
     private DcMotor ir = null;
     private Drivetrain auto;
     private Stacker intake_outake;
+    private TreeMap<String, Double> sensorVal;
 
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
+        sensorVal = new TreeMap<String, Double>();
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
@@ -68,7 +73,7 @@ public class AutoPrototype extends LinearOpMode {
         waitForStart();
         runtime.reset();
         try{
-             auto = new Drivetrain( this, runtime);
+             auto = new Drivetrain( this, runtime, sensorVal);
              intake_outake = new Stacker(this);
         }
         catch (InterruptedException E){

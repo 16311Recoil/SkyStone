@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 
 @TeleOp (name = "Drivetrain Prototype", group = "Controlled")
 public class DrivetrainPrototype extends OpMode {
-    
+
         // Declare OpMode members.
         private ElapsedTime runtime = new ElapsedTime();
         private DcMotor fr = null;
@@ -115,6 +115,5 @@ public class DrivetrainPrototype extends OpMode {
         bl.setPower(Range.clip(y - x - z, -1, 1));
     }
 
-    }
 }
 
