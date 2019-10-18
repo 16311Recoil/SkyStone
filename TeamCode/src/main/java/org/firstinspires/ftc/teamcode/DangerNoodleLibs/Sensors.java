@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.DangerNoodleLibs;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.robotcontroller.external.samples.BasicOpMode_Iterative;
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
@@ -13,7 +14,7 @@ import org.firstinspires.ftc.teamcode.Testing.LiftPrototype;
 
 public class Sensors {
     private LinearOpMode opMode;
-    private BasicOpMode_Iterative iterative;
+    private OpMode iterative;
 
     //REV2Distance Sensor?
     // Gyro Declaration
@@ -37,7 +38,7 @@ public class Sensors {
         gyro.initialize(parameters);
 
     }
-    public Sensors(BasicOpMode_Iterative opMode) throws InterruptedException{
+    public Sensors(OpMode opMode) throws InterruptedException{
         iterative = opMode;
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
@@ -48,7 +49,7 @@ public class Sensors {
         parameters.loggingTag = "IMU";
         parameters.accelerationIntegrationAlgorithm = new JustLoggingAccelerationIntegrator();
 
-        gyro = this.opMode.hardwareMap.get(BNO055IMU.class, "imu");
+        gyro = this.iterative.hardwareMap.get(BNO055IMU.class, "imu");
         gyro.initialize(parameters);
 
     }

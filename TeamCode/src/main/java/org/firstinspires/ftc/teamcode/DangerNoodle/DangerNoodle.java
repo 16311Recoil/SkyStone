@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.DangerNoodle;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.BitmapVision;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
@@ -39,6 +40,7 @@ public class DangerNoodle implements Robot {
         Constructor includes
      */
     // TODO: Add Exception Handling/Logging using RobotLog.i();
+    // TODO: Determine Hardware Thread Bug
     public DangerNoodle(LinearOpMode opMode){
         try {
             timer = new ElapsedTime();
@@ -57,6 +59,9 @@ public class DangerNoodle implements Robot {
         } catch (InterruptedException e) {
             // Include handling later.
             e.printStackTrace();
+            RobotLog.i(e.getMessage());
+            this.opMode.telemetry.addLine("DRIVETRAIN INIT FAILED");
+            this.opMode.telemetry.update();
         }
         isMoving = false;
     }

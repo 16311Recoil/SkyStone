@@ -41,17 +41,16 @@ public class testGyro extends BasicOpMode_Iterative {
         }
     }
     public void getGyro () {
-        if (gamepad1.x ^ changeX) {
-            currentPos_1 = gyro1.getFirstAngle();
-            currentPos_2 = gyro1.getSecondAngle();
-            currentPos_3 = gyro1.getThirdAngle();
 
-            telemetry.addData("Current First Angle", currentPos_1 );
-            telemetry.addData("Current Second Angle", currentPos_2);
-            telemetry.addData("Current Third Angle", currentPos_3);
-            telemetry.update();
-        }
-        changeX = gamepad1.x;
+        currentPos_1 = gyro1.getFirstAngle();
+        currentPos_2 = gyro1.getSecondAngle();
+        currentPos_3 = gyro1.getThirdAngle();
+
+        telemetry.addData("Current First Angle", currentPos_1 );
+        telemetry.addData("Current Second Angle", currentPos_2);
+        telemetry.addData("Current Third Angle", currentPos_3);
+        telemetry.update();
+
     }
     public void changeGyro() {
         if (gamepad1.a ^ changeA) {
@@ -76,7 +75,7 @@ public class testGyro extends BasicOpMode_Iterative {
 
     @Override
     public void loop() {
-        changeGyro();
+        //changeGyro();
         getGyro();
     }
 }
