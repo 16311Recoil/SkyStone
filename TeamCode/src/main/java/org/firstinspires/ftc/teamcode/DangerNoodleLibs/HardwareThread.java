@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.DangerNoodleLibs;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
 import org.firstinspires.ftc.teamcode.DangerNoodle.DangerNoodle;
 import org.firstinspires.ftc.teamcode.DangerNoodle.Robot;
 import org.openftc.revextensions2.ExpansionHubEx;
@@ -11,6 +13,7 @@ import java.util.Map;
 public class HardwareThread implements Runnable {
 
     private final ExpansionHubEx expansionHubEx2;
+    private LinearOpMode opMode;
     private Drivetrain drivetrain;
     private RevBulkData bulkData;
     private ExpansionHubEx expansionHubEx;
@@ -23,22 +26,47 @@ public class HardwareThread implements Runnable {
     private RevBulkData bulkData2;
 
     public HardwareThread(@NotNull DangerNoodle robot, Map<String, Double> sensorVals){
+
+        this.opMode = robot.getOpMode();
+
+        opMode.telemetry.addLine("Thread Init Started");
+        opMode.telemetry.update();
+
         this.sensorVals = sensorVals;
         this.robot = robot;
         this.drivetrain = robot.getDrivetrain();
         this.sensors = robot.getDrivetrain().getSensors();
         this.manip = robot.getManipulator();
-        expansionHubEx = robot.getOpMode().hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 1");
-        expansionHubEx2 = robot.getOpMode().hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 2");
+
+        opMode.telemetry.addLine("1");
+        opMode.telemetry.update();
+
+        expansionHubEx = opMode.hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 1");
+        expansionHubEx2 = opMode.hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 2");
+
+
+        opMode.telemetry.addLine("2");
+        opMode.telemetry.update();
+
         bulkData = expansionHubEx.getBulkInputData();
+        bulkData2 = expansionHubEx2.getBulkInputData();
+
+        drivetrain.resetEncoders();
+
+
         drivetrainEncoders[0] = bulkData.getMotorCurrentPosition(drivetrain.getFl());
-        drivetrainEncoders[1] = bulkData.getMotorCurrentPosition(drivetrain.getFr());
+        drivetrainEncoders[1] = bulkData2.getMotorCurrentPosition(drivetrain.getFr());
         drivetrainEncoders[2] = bulkData.getMotorCurrentPosition(drivetrain.getBl());
-        drivetrainEncoders[3] = bulkData.getMotorCurrentPosition(drivetrain.getBr());
+        drivetrainEncoders[3] = bulkData2.getMotorCurrentPosition(drivetrain.getBr());
+
+
+        opMode.telemetry.addLine("3");
+        opMode.telemetry.update();
+
 
         // initialize lift encoders
         liftEncoders[0] = bulkData.getMotorCurrentPosition(manip.getIl());
-        liftEncoders[1] = bulkData.getMotorCurrentPosition(manip.getIr());
+        liftEncoders[1] = bulkData2.getMotorCurrentPosition(manip.getIr());
 
         // get sensors
         //      - gyro
@@ -48,6 +76,9 @@ public class HardwareThread implements Runnable {
         sensorVals.put("Previous Time", robot.timer.milliseconds());
         sensorVals.put("Init Gyro Angle", sensors.getFirstAngle());
 
+        opMode.telemetry.addLine("Thread Init Completed");
+        opMode.telemetry.update();
+
     }
 
     @Override
@@ -56,25 +87,26 @@ public class HardwareThread implements Runnable {
             // continuously update sensorVals and
             bulkData = expansionHubEx.getBulkInputData();
             bulkData2 = expansionHubEx2.getBulkInputData();
-            sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage(drivetrainEncoders));
-            sensorVals.put("Previous Lift Encoder Average", robot.getManipulator().getLiftEncoderAverage());
-            sensorVals.put("Previous Time", robot.timer.milliseconds());
-            sensorVals.put("Init Gyro Angle", sensors.getFirstAngle());
-
-            //caching?
-            drivetrainEncoders[0] = bulkData.getMotorCurrentPosition(drivetrain.getFl());
-            drivetrainEncoders[1] = bulkData.getMotorCurrentPosition(drivetrain.getFr());
-            drivetrainEncoders[2] = bulkData.getMotorCurrentPosition(drivetrain.getBl());
-            drivetrainEncoders[3] = bulkData.getMotorCurrentPosition(drivetrain.getBr());
-
-            liftEncoders[0] = bulkData.getMotorCurrentPosition(manip.getIl());
-            liftEncoders[1] = bulkData.getMotorCurrentPosition(manip.getIr());
-            // update rev 2m distance
-
 
             sensorVals.put("Current Drivetrain Encoder Average", drivetrain.getEncoderAverage(drivetrainEncoders));
             sensorVals.put("Current Lift Encoder Average", manip.getLiftEncoderAverage());
             sensorVals.put("Current Time", robot.timer.milliseconds());
+
+            //caching?
+            drivetrainEncoders[0] = bulkData.getMotorCurrentPosition(drivetrain.getFl());
+            drivetrainEncoders[1] = bulkData2.getMotorCurrentPosition(drivetrain.getFr());
+            drivetrainEncoders[2] = bulkData.getMotorCurrentPosition(drivetrain.getBl());
+            drivetrainEncoders[3] = bulkData2.getMotorCurrentPosition(drivetrain.getBr());
+
+            liftEncoders[0] = bulkData.getMotorCurrentPosition(manip.getIl());
+            liftEncoders[1] = bulkData2.getMotorCurrentPosition(manip.getIr());
+            // update rev 2m distance
+
+            opMode.telemetry.addData("DT Encoder Avg: ", sensorVals.get("Previous Drivetrain Encoder Average"));
+
+            sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage(drivetrainEncoders));
+            sensorVals.put("Previous Lift Encoder Average", robot.getManipulator().getLiftEncoderAverage());
+            sensorVals.put("Previous Time", robot.timer.milliseconds());
         }
     }
 

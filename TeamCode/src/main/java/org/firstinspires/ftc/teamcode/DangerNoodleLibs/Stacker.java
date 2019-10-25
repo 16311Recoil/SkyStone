@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.DangerNoodleLibs;
 import android.graphics.Path;
 import android.graphics.Picture;
 
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -10,12 +11,67 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.Testing.LiftPrototype;
+
 
 public class Stacker {
     private LinearOpMode opMode;
+    private OpMode opMode_iterative;
     private DcMotor il; //intake left
     private DcMotor ir; //intake right
     private DcMotor ll; //lift left
+    private DcMotor lr; //lift right
+    private Servo gr; // gantry right
+    private Servo gl; // gantry left
+    private Servo armRotater;
+    private Servo pincher;
+    private boolean changeX;
+    private boolean changeY;
+    private boolean changeX2;
+    private boolean changeY2;
+    private final double TIME_FOR_INTAKE = 3;
+    private final double ENCODER_LIFT_UP = 2;  //TODO: Test times for Lift Times
+    private final double ENCODER_LIFT_DOWN = 1.5;
+    private final double CLOSED_PINCHER_SERVO_POSITION = 0; //TODO: Test for Servo Positions
+    private final double OPEN_PICHER_SERVO_POSITION = 90;
+    private final double ARM_IN = 0;
+    private final double ARM_OUT = 1;
+    private final double INCHES_TO_SERVO = 0;//TODO: Test conversions for inches in gantry movement to servo position
+
+    public Stacker(LinearOpMode opMode) {
+        this.opMode = opMode;
+        opMode.telemetry.addLine("Stacker Init Started");
+        opMode.telemetry.update();
+        //il = this.opMode.hardwareMap.dcMotor.get("il");
+        //ir = this.opMode.hardwareMap.dcMotor.get("ir");
+        ll = this.opMode.hardwareMap.dcMotor.get("ll");
+        lr = this.opMode.hardwareMap.dcMotor.get("lr");
+        //armRotater = this.opMode.hardwareMap.servo.get("armRotater");
+        //pincher = this.opMode.hardwareMap.servo.get("pincher");
+        //gl = this.opMode.hardwareMap.servo.get("gl");
+        //gr = this.opMode.hardwareMap.servo.get("gr");
+
+        opMode.telemetry.addLine("Stacker Init Completed");
+        opMode.telemetry.update();
+
+    }
+    public Stacker(OpMode opMode){
+        this.opMode_iterative = opMode;
+        opMode_iterative.telemetry.addLine("Stacker Init Started");
+        opMode_iterative.telemetry.update();
+        //il = this.opMode.hardwareMap.dcMotor.get("il");
+        //ir = this.opMode.hardwareMap.dcMotor.get("ir");
+        ll = this.opMode_iterative.hardwareMap.dcMotor.get("ll");
+        lr = this.opMode_iterative.hardwareMap.dcMotor.get("lr");
+        //armRotater = this.opMode.hardwareMap.servo.get("armRotater");
+        //pincher = this.opMode.hardwareMap.servo.get("pincher");
+        //gl = this.opMode.hardwareMap.servo.get("gl");
+        //gr = this.opMode.hardwareMap.servo.get("gr");
+
+        opMode.telemetry.addLine("Stacker Init Completed");
+        opMode.telemetry.update();
+
+    }
 
     public DcMotor getIl() {
         return il;
@@ -65,35 +121,7 @@ public class Stacker {
         this.gl = gl;
     }
 
-    private DcMotor lr; //lift right
-    private Servo gr; // gantry right
-    private Servo gl; // gantry left
-    private Servo armRotater;
-    private Servo pincher;
-    private boolean changeX;
-    private boolean changeY;
-    private boolean changeX2;
-    private boolean changeY2;
-    private final double TIME_FOR_INTAKE = 3;
-    private final double ENCODER_LIFT_UP = 2;  //TODO: Test times for Lift Times
-    private final double ENCODER_LIFT_DOWN = 1.5;
-    private final double CLOSED_PINCHER_SERVO_POSITION = 0; //TODO: Test for Servo Positions
-    private final double OPEN_PICHER_SERVO_POSITION = 90;
-    private final double ARM_IN = 0;
-    private final double ARM_OUT = 1;
-    private final double INCHES_TO_SERVO = 0;//TODO: Test conversions for inches in gantry movement to servo position
 
-    public Stacker(LinearOpMode opMode) {
-        il = this.opMode.hardwareMap.dcMotor.get("il");
-        ir = this.opMode.hardwareMap.dcMotor.get("ir");
-        ll = this.opMode.hardwareMap.dcMotor.get("ll");
-        lr = this.opMode.hardwareMap.dcMotor.get("lr");
-        armRotater = this.opMode.hardwareMap.servo.get("armRotater");
-        pincher = this.opMode.hardwareMap.servo.get("pincher");
-        gl = this.opMode.hardwareMap.servo.get("gl");
-        gr = this.opMode.hardwareMap.servo.get("gr");
-
-    }
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     public void setIntakePower(double power) {
@@ -234,6 +262,26 @@ public class Stacker {
         changeY = opMode.gamepad1.y;
         changeY2 = opMode.gamepad2.y;
     }
+    /*
+    private void liftControlD2() {
+
+        if (gamepad2.a ^ changeA2){
+            currentState = LiftPrototype.State.L_SPEED;
+        }
+        else if (gamepad2.b ^ changeB2) {
+            currentState = LiftPrototype.State.H_SPEED;
+        }
+        else if (gamepad2.dpad_left ^ changeDpadLeft2)
+            currentState = LiftPrototype.State.DIRECT;
+
+        changeA = gamepad2.a;
+        changeB = gamepad2.b;
+        changeDpadLeft2 = gamepad2.dpad_left;
+
+        ll.setPower(gamepad2.left_stick_y);
+        lr.setPower(gamepad2.left_stick_y);
+    }
+    */
 
 }
 

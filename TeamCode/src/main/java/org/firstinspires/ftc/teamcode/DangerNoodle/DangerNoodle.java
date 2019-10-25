@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.DangerNoodle;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -15,14 +16,16 @@ import org.openftc.revextensions2.ExpansionHubMotor;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 // edit
 public class DangerNoodle implements Robot {
     // Instance Variables
     private Drivetrain drivetrain;
     private Stacker manipulator;
-    private BitmapVision bmv;
+    //private BitmapVision bmv;
     private LinearOpMode opMode;
+    private OpMode opMode_iterative;
 
     private boolean isMoving;
     public ElapsedTime timer;
@@ -32,8 +35,8 @@ public class DangerNoodle implements Robot {
 
 
 
-    private Servo lFang;
-    private Servo rFang;
+    //private Servo lFang;
+    //private Servo rFang;
     private static final double SERVO_LOCK = 0.0; // Needs to be tested;
     private static final double SERVO_UNLOCK = 0.0; // Needs to be tested;
     /*
@@ -43,18 +46,20 @@ public class DangerNoodle implements Robot {
     // TODO: Determine Hardware Thread Bug
     public DangerNoodle(LinearOpMode opMode){
         try {
+
+
             timer = new ElapsedTime();
             this.opMode = opMode;
-            this.sensorVals = new TreeMap<String, Double>();
+            this.sensorVals = new ConcurrentHashMap<String, Double>();
             drivetrain = new Drivetrain(opMode, timer, sensorVals);
             manipulator = new Stacker(opMode);
-            bmv = new BitmapVision(opMode);
+            //bmv = new BitmapVision(opMode);
 
             hardwareThread = new HardwareThread(this, sensorVals);
             hardwareThread.run();
 
-            lFang = this.opMode.hardwareMap.servo.get("lFang");
-            rFang = this.opMode.hardwareMap.servo.get("rFang");
+            //lFang = this.opMode.hardwareMap.servo.get("lFang");
+            //rFang = this.opMode.hardwareMap.servo.get("rFang");
 
         } catch (InterruptedException e) {
             // Include handling later.
@@ -64,6 +69,32 @@ public class DangerNoodle implements Robot {
             this.opMode.telemetry.update();
         }
         isMoving = false;
+        opMode.telemetry.addLine("DangerNoodle Init Completed");
+        opMode.telemetry.update();
+    }
+    public DangerNoodle(OpMode opMode){
+        try {
+
+
+            timer = new ElapsedTime();
+            this.opMode_iterative = opMode;
+            this.sensorVals = new ConcurrentHashMap<String, Double>();
+            drivetrain = new Drivetrain(opMode_iterative, timer, sensorVals);
+            manipulator = new Stacker(opMode_iterative);
+            //bmv = new BitmapVision(opMode);
+            //lFang = this.opMode.hardwareMap.servo.get("lFang");
+            //rFang = this.opMode.hardwareMap.servo.get("rFang");
+
+        } catch (InterruptedException e) {
+            // Include handling later.
+            e.printStackTrace();
+            RobotLog.i(e.getMessage());
+            this.opMode.telemetry.addLine("DRIVETRAIN INIT FAILED");
+            this.opMode.telemetry.update();
+        }
+        isMoving = false;
+        opMode.telemetry.addLine("DangerNoodle Init Completed");
+        opMode.telemetry.update();
     }
     // Wait for robot
     @Override
@@ -86,6 +117,7 @@ public class DangerNoodle implements Robot {
     @Override
     public void moveFoundation(boolean direction) {
         if (direction) {
+            /*
             // Latches onto foundation
             lFang.setPosition(SERVO_LOCK);
             rFang.setPosition(SERVO_LOCK);
@@ -103,7 +135,9 @@ public class DangerNoodle implements Robot {
             drivetrain.moveForward(1.5, 1, 5);
             lFang.setPosition(SERVO_UNLOCK);
             rFang.setPosition(SERVO_UNLOCK);
+            */
         }
+
 
     }
 
@@ -155,14 +189,16 @@ public class DangerNoodle implements Robot {
     public void setManipulator(Stacker manipulator) {
         this.manipulator = manipulator;
     }
-
+/*
     public BitmapVision getBmv() {
         return bmv;
     }
-
+    */
+/*
     public void setBmv(BitmapVision bmv) {
         this.bmv = bmv;
     }
+    */
 
     public LinearOpMode getOpMode() {
         return opMode;
@@ -177,5 +213,9 @@ public class DangerNoodle implements Robot {
 
     public void setSensorVals(Map<String, Double> sensorVals) {
         this.sensorVals = sensorVals;
+    }
+    public void teleOp(){
+        drivetrain.moveTelop();
+
     }
 }

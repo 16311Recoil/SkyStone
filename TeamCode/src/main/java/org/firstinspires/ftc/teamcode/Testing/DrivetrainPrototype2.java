@@ -1,36 +1,30 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Acceleration;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
-import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 
 import java.util.TreeMap;
 
-@TeleOp (name = "Drivetrain Prototype", group = "Controlled")
-public class DrivetrainPrototype extends OpMode {
+@TeleOp (name = "Drivetrain Prototype2", group = "Controlled")
+public class DrivetrainPrototype2 extends OpMode {
 
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private Drivetrain tele;
-
 
     /*
      * Code to run ONCE when the driver hits INIT
      */
     @Override
     public void init() {
-
         // Tell the driver that initialization is complete.
         telemetry.addData("Status", "Initialized");
 
@@ -61,10 +55,10 @@ public class DrivetrainPrototype extends OpMode {
      */
     @Override
     public void loop() {
-        tele.moveTelop2(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x);
+        tele.moveTelop(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x);
         tele.checkState();
         telemetry.update();
     }
- }
+}
 
 
