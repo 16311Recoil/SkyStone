@@ -12,7 +12,7 @@ import java.util.TreeMap;
 
 @TeleOp(name = "TeleOp", group = "controlled")
 public class TeleOP extends OpMode {
-    Robot r;
+    DangerNoodle r;
     ElapsedTime teleOpTime = new ElapsedTime();
 
     @Override
@@ -24,6 +24,6 @@ public class TeleOP extends OpMode {
 
     @Override
     public void loop() {
-
+        r.teleOpControl();
     }
 }

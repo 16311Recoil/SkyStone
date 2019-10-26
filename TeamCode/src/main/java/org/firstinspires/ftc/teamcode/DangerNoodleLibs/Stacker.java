@@ -10,11 +10,25 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Testing.LiftPrototype;
 
 
 public class Stacker {
+
+
+    private boolean changeLtrigger;
+    private double intakePower;
+    private boolean changeLBumper;
+    private boolean changeRBumper;
+
+    private enum State{
+        DIRECT,
+        L_SPEED,
+        H_SPEED
+    }
+    private State currentState;
     private LinearOpMode opMode;
     private OpMode opMode_iterative;
     private DcMotor il; //intake left
@@ -37,39 +51,50 @@ public class Stacker {
     private final double ARM_IN = 0;
     private final double ARM_OUT = 1;
     private final double INCHES_TO_SERVO = 0;//TODO: Test conversions for inches in gantry movement to servo position
+    private boolean changeA2;
+    private boolean changeB2;
+    private boolean changeDpadLeft2;
 
     public Stacker(LinearOpMode opMode) {
         this.opMode = opMode;
         opMode.telemetry.addLine("Stacker Init Started");
         opMode.telemetry.update();
-        //il = this.opMode.hardwareMap.dcMotor.get("il");
-        //ir = this.opMode.hardwareMap.dcMotor.get("ir");
+        il = this.opMode.hardwareMap.dcMotor.get("il");
+        ir = this.opMode.hardwareMap.dcMotor.get("ir");
         ll = this.opMode.hardwareMap.dcMotor.get("ll");
         lr = this.opMode.hardwareMap.dcMotor.get("lr");
-        //armRotater = this.opMode.hardwareMap.servo.get("armRotater");
-        //pincher = this.opMode.hardwareMap.servo.get("pincher");
+        armRotater = this.opMode.hardwareMap.servo.get("armRotater");
+        pincher = this.opMode.hardwareMap.servo.get("pincher");
         //gl = this.opMode.hardwareMap.servo.get("gl");
         //gr = this.opMode.hardwareMap.servo.get("gr");
 
+        ll.setDirection(DcMotor.Direction.FORWARD);
+        lr.setDirection(DcMotor.Direction.REVERSE);
+
         opMode.telemetry.addLine("Stacker Init Completed");
         opMode.telemetry.update();
+        currentState = State.DIRECT;
 
     }
     public Stacker(OpMode opMode){
         this.opMode_iterative = opMode;
         opMode_iterative.telemetry.addLine("Stacker Init Started");
         opMode_iterative.telemetry.update();
-        //il = this.opMode.hardwareMap.dcMotor.get("il");
-        //ir = this.opMode.hardwareMap.dcMotor.get("ir");
+        il = this.opMode_iterative.hardwareMap.dcMotor.get("il");
+        ir = this.opMode_iterative.hardwareMap.dcMotor.get("ir");
         ll = this.opMode_iterative.hardwareMap.dcMotor.get("ll");
         lr = this.opMode_iterative.hardwareMap.dcMotor.get("lr");
-        //armRotater = this.opMode.hardwareMap.servo.get("armRotater");
-        //pincher = this.opMode.hardwareMap.servo.get("pincher");
+        armRotater = this.opMode_iterative.hardwareMap.servo.get("armRotater");
+        pincher = this.opMode_iterative.hardwareMap.servo.get("pincher");
         //gl = this.opMode.hardwareMap.servo.get("gl");
         //gr = this.opMode.hardwareMap.servo.get("gr");
 
-        opMode.telemetry.addLine("Stacker Init Completed");
-        opMode.telemetry.update();
+        ll.setDirection(DcMotor.Direction.FORWARD);
+        lr.setDirection(DcMotor.Direction.REVERSE);
+        intakePower = 0;
+
+        opMode_iterative.telemetry.addLine("Stacker Init Completed");
+        opMode_iterative.telemetry.update();
 
     }
 
@@ -198,42 +223,10 @@ public class Stacker {
     }
     ////////////////////////////////////////////////////////////////////////////////////
     //          Tele-Op
-    public void teleLiftTrigger(){
-        if ((opMode.gamepad1.right_trigger == 0) && (opMode.gamepad1.left_trigger == 0))
-            setLiftPower(0);
-        if (opMode.gamepad1.right_trigger != 0) {
-            setLiftPower(opMode.gamepad1.right_trigger);
-        }
-        else if (opMode.gamepad1.left_trigger != 0);{
-            setLiftPower(opMode.gamepad1.left_trigger);
-        }
-    }
-    public void teleLiftBumpers(double power){
-        if (opMode.gamepad1.right_bumper || opMode.gamepad2.right_bumper){
-            setLiftPower(power);
-        }
-        else if (opMode.gamepad1.left_bumper || opMode.gamepad2.left_bumper){
-            setLiftPower(-power);
-        }
-        else {
-            setLiftPower(0);
-        }
-    }
-    public void teleIntake(double power){
-        if (opMode.gamepad1.a || opMode.gamepad2.a){
-            setIntakePower(power);
-        }
-        else if (opMode.gamepad1.b || opMode.gamepad2.b){
-            setIntakePower(-power);
-        }
-        else {
-            setIntakePower(0);
-        }
-    }
     public void telePincher(){
         double counter = 0;
         boolean close;
-        if ((opMode.gamepad1.x ^ changeX) || (opMode.gamepad2.x ^ changeX2)){
+        if ((opMode_iterative.gamepad1.x ^ changeX) || (opMode_iterative.gamepad2.x ^ changeX2)){
             counter ++;
         }
         if ((counter % 2) == 0){
@@ -243,13 +236,13 @@ public class Stacker {
             close = false;
         }
         setPincherPosition(close);
-        changeX = opMode.gamepad1.x;
-        changeX2 = opMode.gamepad2.x;
+        changeX = opMode_iterative.gamepad1.x;
+        changeX2 = opMode_iterative.gamepad2.x;
     }
     public void teleArm(){
         double counter = 0;
         boolean in;
-        if ((opMode.gamepad1.y ^ changeY) || (opMode.gamepad2.y ^ changeY2)){
+        if ((opMode_iterative.gamepad2.y ^ changeY2)){
             counter ++;
         }
         if ((counter % 2) == 0){
@@ -259,29 +252,61 @@ public class Stacker {
             in = false;
         }
         setArmPosition(in);
-        changeY = opMode.gamepad1.y;
-        changeY2 = opMode.gamepad2.y;
+        changeY2 = opMode_iterative.gamepad2.y;
     }
-    /*
     private void liftControlD2() {
 
-        if (gamepad2.a ^ changeA2){
-            currentState = LiftPrototype.State.L_SPEED;
+        if (opMode_iterative.gamepad2.a ^ changeA2){
+            currentState = State.L_SPEED;
         }
-        else if (gamepad2.b ^ changeB2) {
-            currentState = LiftPrototype.State.H_SPEED;
+        else if (opMode_iterative.gamepad2.b ^ changeB2) {
+            currentState = State.H_SPEED;
         }
-        else if (gamepad2.dpad_left ^ changeDpadLeft2)
-            currentState = LiftPrototype.State.DIRECT;
+        else if (opMode_iterative.gamepad2.dpad_left ^ changeDpadLeft2)
+            currentState = State.DIRECT;
 
-        changeA = gamepad2.a;
-        changeB = gamepad2.b;
-        changeDpadLeft2 = gamepad2.dpad_left;
+        changeA2 = opMode_iterative.gamepad2.a;
+        changeB2 = opMode_iterative.gamepad2.b;
+        changeDpadLeft2 = opMode_iterative.gamepad2.dpad_left;
 
-        ll.setPower(gamepad2.left_stick_y);
-        lr.setPower(gamepad2.left_stick_y);
+        ll.setPower(opMode_iterative.gamepad2.left_stick_y);
+        lr.setPower(opMode_iterative.gamepad2.left_stick_y);
     }
-    */
+    private void intakeControlD2(){
+        if(opMode_iterative.gamepad2.left_bumper ^ changeLBumper && intakePower <= 1) {
+            intakePower += 0.1;
+        }
+        else if(opMode_iterative.gamepad2.right_bumper ^ changeRBumper && intakePower >= -1){
+            if(intakePower == 0.1)
+                intakePower = 0;
+            else
+                intakePower -= 0.1;
+
+        }
+        opMode_iterative.telemetry.addData("Intake Power: ",intakePower);
+        opMode_iterative.telemetry.update();
+        double multiplier = calculatePower();
+        il.setPower(multiplier * Range.clip(intakePower, -1,1));
+        ir.setPower(-multiplier * Range.clip(intakePower, -1,1));
+
+        changeLBumper = opMode_iterative.gamepad2.x;
+        changeRBumper = opMode_iterative.gamepad2.y;
+    }
+    public void stackerTeleControl(){
+        teleArm();
+        telePincher();
+        intakeControlD2();
+        liftControlD2();
+    }
+    private double calculatePower(){
+        if (currentState == State.DIRECT)
+            return 1;
+        else if (currentState == State.H_SPEED)
+            return 0.5;
+        else if (currentState == State.L_SPEED)
+            return 0.25;
+        return 0;
+    }
 
 }
 

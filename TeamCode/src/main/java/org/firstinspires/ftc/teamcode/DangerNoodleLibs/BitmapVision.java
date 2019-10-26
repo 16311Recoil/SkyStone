@@ -31,16 +31,16 @@ public class BitmapVision {
 
     // Threshold Values for cutting the pic into only three stones in order to loop through less
     // pixels.
-    private final int X_MIN_THRESHOLD = 0;
-    private final int X_MAX_THRESHOLD = 0;
-    private final int Y_MIN_THRESHOLD = 0;
-    private final int Y_MAX_THRESHOLD = 0;
+    private final int X_MIN_THRESHOLD = 90;
+    private final int X_MAX_THRESHOLD = 1200;
+    private final int Y_MIN_THRESHOLD = 300;
+    private final int Y_MAX_THRESHOLD = 573;
 
     // Threshold value for the X position of each stone (depends on orientation of webcam/scanning
     // position
-    private final int LEFT_THRESHOLD = 0;
-    private final int MIDDLE_THRESHOLD = 0;
-    private final int RIGHT_THRESHOLD = 0;
+    private final int LEFT_THRESHOLD = 508;
+    private final int MIDDLE_THRESHOLD = 935;
+    private final int RIGHT_THRESHOLD = 1275;
 
     private final int RED_THRESHOLD = 0;
     private final int BLUE_THRESHOLD = 0;
@@ -124,15 +124,15 @@ public class BitmapVision {
         } catch(ArithmeticException E) {
             averageX = 0;
         }
-        if (averageX > LEFT_THRESHOLD && averageX < MIDDLE_THRESHOLD) {
+        if (averageX < LEFT_THRESHOLD) {
             skyPos[0] = 0;
             skyPos[1] = 3;
-        } else if (averageX > MIDDLE_THRESHOLD && averageX < RIGHT_THRESHOLD){
-            skyPos[0] = 1;
-            skyPos[1] = 4;
-        } else {
+        } else if (averageX > MIDDLE_THRESHOLD){
             skyPos[0] = 2;
             skyPos[1] = 5;
+        } else {
+            skyPos[0] = 1;
+            skyPos[1] = 2;
         }
     }
     public int[] getSkyPos(){

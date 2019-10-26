@@ -23,9 +23,12 @@ public class DangerNoodle implements Robot {
     // Instance Variables
     private Drivetrain drivetrain;
     private Stacker manipulator;
-    //private BitmapVision bmv;
+    private BitmapVision bmv;
     private LinearOpMode opMode;
     private OpMode opMode_iterative;
+    private Servo lFang;
+    private Servo rFang;
+    private int[] skyPos;
 
     private boolean isMoving;
     public ElapsedTime timer;
@@ -34,11 +37,11 @@ public class DangerNoodle implements Robot {
     private HardwareThread hardwareThread;
 
 
-
-    //private Servo lFang;
-    //private Servo rFang;
     private static final double SERVO_LOCK = 0.0; // Needs to be tested;
     private static final double SERVO_UNLOCK = 0.0; // Needs to be tested;
+    private boolean rBumper1;
+    private boolean lBumper1;
+
     /*
         Constructor includes
      */
@@ -46,20 +49,19 @@ public class DangerNoodle implements Robot {
     // TODO: Determine Hardware Thread Bug
     public DangerNoodle(LinearOpMode opMode){
         try {
-
-
+            skyPos = new int[2];
             timer = new ElapsedTime();
             this.opMode = opMode;
             this.sensorVals = new ConcurrentHashMap<String, Double>();
             drivetrain = new Drivetrain(opMode, timer, sensorVals);
             manipulator = new Stacker(opMode);
-            //bmv = new BitmapVision(opMode);
+            bmv = new BitmapVision(opMode);
 
-            hardwareThread = new HardwareThread(this, sensorVals);
-            hardwareThread.run();
+            //hardwareThread = new HardwareThread(this, sensorVals);
+            //hardwareThread.run();
 
-            //lFang = this.opMode.hardwareMap.servo.get("lFang");
-            //rFang = this.opMode.hardwareMap.servo.get("rFang");
+            lFang = this.opMode.hardwareMap.servo.get("lFang");
+            rFang = this.opMode.hardwareMap.servo.get("rFang");
 
         } catch (InterruptedException e) {
             // Include handling later.
@@ -68,40 +70,46 @@ public class DangerNoodle implements Robot {
             this.opMode.telemetry.addLine("DRIVETRAIN INIT FAILED");
             this.opMode.telemetry.update();
         }
+        rBumper1 = false;
+        lBumper1 = false;
         isMoving = false;
         opMode.telemetry.addLine("DangerNoodle Init Completed");
         opMode.telemetry.update();
     }
     public DangerNoodle(OpMode opMode){
         try {
-
-
             timer = new ElapsedTime();
             this.opMode_iterative = opMode;
             this.sensorVals = new ConcurrentHashMap<String, Double>();
             drivetrain = new Drivetrain(opMode_iterative, timer, sensorVals);
             manipulator = new Stacker(opMode_iterative);
             //bmv = new BitmapVision(opMode);
-            //lFang = this.opMode.hardwareMap.servo.get("lFang");
-            //rFang = this.opMode.hardwareMap.servo.get("rFang");
+            lFang = this.opMode_iterative.hardwareMap.servo.get("lFang");
+            rFang = this.opMode_iterative.hardwareMap.servo.get("rFang");
 
         } catch (InterruptedException e) {
             // Include handling later.
             e.printStackTrace();
             RobotLog.i(e.getMessage());
-            this.opMode.telemetry.addLine("DRIVETRAIN INIT FAILED");
-            this.opMode.telemetry.update();
+            this.opMode_iterative.telemetry.addLine("DRIVETRAIN INIT FAILED");
+            this.opMode_iterative.telemetry.update();
         }
         isMoving = false;
-        opMode.telemetry.addLine("DangerNoodle Init Completed");
-        opMode.telemetry.update();
+        opMode_iterative.telemetry.addLine("DangerNoodle Init Completed");
+        opMode_iterative.telemetry.update();
     }
     // Wait for robot
     @Override
     public void scan() {
-        while(!opMode.opModeIsActive()){
-
+        while(!opMode.isStarted() && skyPos[1] == 0){
+            skyPos = bmv.getSkyPos();
         }
+        if (skyPos[0] == 0)
+            opMode.telemetry.addLine("LEFT");
+        else if (skyPos[1] == 1)
+            opMode.telemetry.addLine("MIDDLE");
+        else
+            opMode.telemetry.addLine("RIGHT");
 
     }
 
@@ -215,7 +223,16 @@ public class DangerNoodle implements Robot {
         this.sensorVals = sensorVals;
     }
     public void teleOp(){
-        drivetrain.moveTelop();
-
+        drivetrain.moveTelop(opMode_iterative.gamepad1.left_stick_x, opMode_iterative.gamepad1.left_stick_y, opMode_iterative.gamepad1.right_stick_x);
+        manipulator.stackerTeleControl();
+        if(opMode_iterative.gamepad2.left_bumper ^ lBumper1){
+            lFang.setPosition(SERVO_LOCK);
+            rFang.setPosition(SERVO_LOCK);
+        }
+        else if (opMode_iterative.gamepad2.right_bumper ^ rBumper1){
+            lFang.setPosition(SERVO_UNLOCK);
+            rFang.setPosition(SERVO_UNLOCK);
+        }
     }
+
 }
