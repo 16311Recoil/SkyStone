@@ -327,6 +327,12 @@ public class Drivetrain {
 
         // Note that the plane formed by the force vectors of the mecanum wheels rotates the cartesian
         // plane by pi/4, thus creating the shift in the trig function.
+        /*
+           fr.setPower(multiplier * Range.clip(y - x - z, -1, 1));
+        fl.setPower(multiplier * Range.clip(y + x + z, -1, 1));
+        br.setPower(multiplier * Range.clip(y + x - z, -1, 1));
+        bl.setPower(multiplier * Range.clip(y - x + z, -1, 1));
+         */
         double[] powers = new double[NUM_MOTORS];
         powers[FRONT_LEFT] = (v_d * Math.sin(angle)  - v_d * Math.cos(angle) - v_theta);
         powers[FRONT_RIGHT] = (v_d * Math.sin(angle)  + v_d * Math.cos(angle) + v_theta);
@@ -544,6 +550,7 @@ public class Drivetrain {
         }
     }
     public void moveTelop2 ( double x, double y, double z){
+
 
         fr.setPower(multiplier * Range.clip(y - x - z, -1, 1));
         fl.setPower(multiplier * Range.clip(y + x + z, -1, 1));
