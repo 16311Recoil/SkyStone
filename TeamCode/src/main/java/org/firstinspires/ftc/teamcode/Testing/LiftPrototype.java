@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.DangerNoodle.Robot;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 
 import java.util.TreeMap;
 
@@ -84,6 +85,7 @@ public class LiftPrototype extends OpMode {
             runtime = new ElapsedTime();
             intakePower = 0;
 
+
             // Initialize the hardware variables. Note that the strings used here as parameters
             // to 'get' must correspond to the names assigned during the robot configuration
             // step (using the FTC Robot Controller app on the phone).
@@ -106,7 +108,10 @@ public class LiftPrototype extends OpMode {
             // Tell the driver that initialization is complete.
             telemetry.addData("Status", "Initialized");
             currentState = State.DIRECT;
+
+
         }
+    LiftPrototype LiftP = new LiftPrototype();
 
         /*
          * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
@@ -156,8 +161,22 @@ public class LiftPrototype extends OpMode {
             ll.setPower(power);
             lr.setPower(power);
         }
+        if ((gamepad1.x && !changeX)){
+            telemetry.addData("Encoder:", LiftP.getLiftEncoderAverage());
+        }
+        telemetry.update();
         ll.setPower(0);
         lr.setPower(0);
+    }
+    public  double getLiftEncoderAverage() {
+        double counter = 0;
+        if (ll.getCurrentPosition() == 0) {
+            counter += 1;
+        }
+        if (lr.getCurrentPosition() == 0) {
+            counter += 1;
+        }
+        return (ll.getCurrentPosition() + lr.getCurrentPosition() / (2 - counter));
     }
 }
 
