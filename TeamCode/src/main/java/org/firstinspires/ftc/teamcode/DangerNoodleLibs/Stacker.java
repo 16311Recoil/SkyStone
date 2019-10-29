@@ -19,7 +19,6 @@ public class Stacker {
 
 
     private boolean changeLtrigger;
-    private double intakePower;
     private boolean changeLBumper;
     private boolean changeRBumper;
 
@@ -35,14 +34,10 @@ public class Stacker {
     private DcMotor ir; //intake right
     private DcMotor ll; //lift left
     private DcMotor lr; //lift right
-    private Servo gr; // gantry right
-    private Servo gl; // gantry left
+    private CRServo gr; // gantry right
+    private CRServo gl; // gantry left
     private Servo armRotater;
     private Servo pincher;
-    private boolean changeX;
-    private boolean changeY;
-    private boolean changeX2;
-    private boolean changeY2;
     private final double TIME_FOR_INTAKE = 3;
     private final double ENCODER_LIFT_UP = 2;  //TODO: Test times for Lift Times
     private final double ENCODER_LIFT_DOWN = 1.5;
@@ -51,9 +46,19 @@ public class Stacker {
     private final double ARM_IN = 0;
     private final double ARM_OUT = 1;
     private final double INCHES_TO_SERVO = 0;//TODO: Test conversions for inches in gantry movement to servo position
-    private boolean changeA2;
-    private boolean changeB2;
-    private boolean changeDpadLeft2;
+    private final double LIFT_MAX = 0; //TODO: Test for Max Encoder Limit on Lift
+    private final double LIFT_MIN = 0; //TODO: Test for Min Encoder Limit on Lift
+    private boolean changeX = false;
+    private boolean changeY = false;
+    private boolean changeX2 = false;
+    private boolean changeY2 = false;
+    private boolean changeA = false;
+    private boolean changeB = false;
+    private boolean changeA2 = false;
+    private boolean changeB2 = false;
+    private boolean changeDpadLeft2 = false;
+    private boolean teleArmToggle = false;
+    private boolean telePincherToggle = false;
 
     public Stacker(LinearOpMode opMode) {
         this.opMode = opMode;
@@ -70,6 +75,8 @@ public class Stacker {
 
         ll.setDirection(DcMotor.Direction.FORWARD);
         lr.setDirection(DcMotor.Direction.REVERSE);
+        gl.setDirection(DcMotorSimple.Direction.FORWARD);
+        gr.setDirection(DcMotorSimple.Direction.REVERSE);
 
         opMode.telemetry.addLine("Stacker Init Completed");
         opMode.telemetry.update();
@@ -91,7 +98,6 @@ public class Stacker {
 
         ll.setDirection(DcMotor.Direction.FORWARD);
         lr.setDirection(DcMotor.Direction.REVERSE);
-        intakePower = 0;
 
         opMode_iterative.telemetry.addLine("Stacker Init Completed");
         opMode_iterative.telemetry.update();
@@ -130,19 +136,19 @@ public class Stacker {
         this.lr = lr;
     }
 
-    public Servo getGr() {
+    public CRServo getGr() {
         return gr;
     }
 
-    public void setGr(Servo gr) {
+    public void setGr(CRServo gr) {
         this.gr = gr;
     }
 
-    public Servo getGl() {
+    public CRServo getGl() {
         return gl;
     }
 
-    public void setGl(Servo gl) {
+    public void setGl(CRServo gl) {
         this.gl = gl;
     }
 
@@ -157,6 +163,10 @@ public class Stacker {
     public void setLiftPower(double power) {
         ll.setPower(power);
         lr.setPower(power);
+    }
+    public void setGantryPower(double power){
+        gl.setPower(power);
+        gr.setPower(power);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -200,11 +210,6 @@ public class Stacker {
             setLiftPower(0);
         }
     }
-
-    public void setGantryPosition(double inches) {
-        gl.setPosition(inchToServo(inches));
-        gr.setPosition(inchToServo(inches));
-    }
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -224,79 +229,79 @@ public class Stacker {
     ////////////////////////////////////////////////////////////////////////////////////
     //          Tele-Op
     public void telePincher(){
-        double counter = 0;
         boolean close;
-        if ((opMode_iterative.gamepad1.x ^ changeX) || (opMode_iterative.gamepad2.x ^ changeX2)){
-            counter ++;
-        }
-        if ((counter % 2) == 0){
+        if ((opMode_iterative.gamepad1.x && !changeX) || (opMode_iterative.gamepad2.a && !changeA2) && !telePincherToggle){
             close = true;
         }
         else{
             close = false;
         }
         setPincherPosition(close);
+        telePincherToggle = !telePincherToggle;
         changeX = opMode_iterative.gamepad1.x;
-        changeX2 = opMode_iterative.gamepad2.x;
+        changeA2 = opMode_iterative.gamepad2.a;
     }
     public void teleArm(){
-        double counter = 0;
         boolean in;
-        if ((opMode_iterative.gamepad2.y ^ changeY2)){
-            counter ++;
-        }
-        if ((counter % 2) == 0){
+        if ((opMode_iterative.gamepad1.b && !changeB ) || (opMode_iterative.gamepad2.b && !changeB2) &&  !teleArmToggle){
             in = true;
         }
         else{
             in = false;
         }
         setArmPosition(in);
-        changeY2 = opMode_iterative.gamepad2.y;
-    }
-    private void liftControlD2() {
-
-        if (opMode_iterative.gamepad2.a ^ changeA2){
-            currentState = State.L_SPEED;
-        }
-        else if (opMode_iterative.gamepad2.b ^ changeB2) {
-            currentState = State.H_SPEED;
-        }
-        else if (opMode_iterative.gamepad2.dpad_left ^ changeDpadLeft2)
-            currentState = State.DIRECT;
-
-        changeA2 = opMode_iterative.gamepad2.a;
+        teleArmToggle = !teleArmToggle;
+        changeB = opMode_iterative.gamepad1.b;
         changeB2 = opMode_iterative.gamepad2.b;
-        changeDpadLeft2 = opMode_iterative.gamepad2.dpad_left;
-
-        ll.setPower(opMode_iterative.gamepad2.left_stick_y);
-        lr.setPower(opMode_iterative.gamepad2.left_stick_y);
     }
-    private void intakeControlD2(){
-        if(opMode_iterative.gamepad2.left_bumper ^ changeLBumper && intakePower <= 1) {
-            intakePower += 0.1;
+    public void GantryControler(double power) {
+        if (opMode_iterative.gamepad2.right_bumper){
+            setGantryPower(power);
         }
-        else if(opMode_iterative.gamepad2.right_bumper ^ changeRBumper && intakePower >= -1){
-            if(intakePower == 0.1)
-                intakePower = 0;
-            else
-                intakePower -= 0.1;
-
+        else if (opMode_iterative.gamepad2.left_bumper){
+            setGantryPower(-power);
         }
-        opMode_iterative.telemetry.addData("Intake Power: ",intakePower);
-        opMode_iterative.telemetry.update();
-        double multiplier = calculatePower();
-        il.setPower(multiplier * Range.clip(intakePower, -1,1));
-        ir.setPower(-multiplier * Range.clip(intakePower, -1,1));
-
-        changeLBumper = opMode_iterative.gamepad2.x;
-        changeRBumper = opMode_iterative.gamepad2.y;
+        else if (opMode_iterative.gamepad1.y){
+            setGantryPower(power);
+        }
+        else if (opMode_iterative.gamepad1.x){
+            setGantryPower(-power);
+        }
     }
-    public void stackerTeleControl(){
+    private void liftControl(double power) {
+        if (opMode_iterative.gamepad2.right_trigger != 0){
+            setLiftPower(opMode_iterative.gamepad2.right_trigger);
+        }
+        else if (opMode_iterative.gamepad2.left_trigger != 0){
+            setLiftPower(-opMode_iterative.gamepad2.left_trigger);
+        }
+        else if (opMode_iterative.gamepad1.left_bumper){
+            setLiftPower(-power);
+        }
+        else if (opMode_iterative.gamepad1.right_bumper) {
+            setLiftPower(power);
+        }
+        setLiftPower(0);
+    }
+    private void intakeControl(double power){
+        if (opMode_iterative.gamepad2.left_stick_y > 0) {
+            setIntakePower(-power);
+        }
+        else if (opMode_iterative.gamepad2.left_stick_y < 0){
+            setIntakePower(power);
+        }
+        else if(opMode_iterative.gamepad1.left_trigger > 0){
+            setIntakePower(-power);
+        }
+        else if (opMode_iterative.gamepad1.right_trigger > 0){
+            setIntakePower(power);
+        }
+    }
+    public void stackerTeleControl(double intakePower, double liftPower){
         teleArm();
         telePincher();
-        intakeControlD2();
-        liftControlD2();
+        intakeControl(intakePower);
+        liftControl(liftPower);
     }
     private double calculatePower(){
         if (currentState == State.DIRECT)

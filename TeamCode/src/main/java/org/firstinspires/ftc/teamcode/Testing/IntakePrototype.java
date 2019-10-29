@@ -60,16 +60,19 @@ public class IntakePrototype extends OpMode  {
      */
     @Override
     public void loop() {
-       if(gamepad1.x ^ changeX && power < 1) {
+       if(gamepad1.x && !changeX && power < 1) {
            power += .1;
+           telemetry.addData("Intake Power Up", power);
        }
-       else if(gamepad1.y ^ changeY && power > -1){
+       else if(gamepad1.y && !changeY && power > -1){
            power -= .1;
+           telemetry.addData("Intake Power Down", power);
        }
        intakeMotor.setPower(power);
        intakeMotor2.setPower(power);
        changeX = gamepad1.x;
        changeY = gamepad1.y;
+       telemetry.update();
     }
 
     /*

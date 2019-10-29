@@ -12,18 +12,17 @@ import java.util.TreeMap;
 
 @TeleOp(name = "TeleOp", group = "controlled")
 public class TeleOP extends OpMode {
-    DangerNoodle r;
+    DangerNoodle teleOp;
     ElapsedTime teleOpTime = new ElapsedTime();
 
     @Override
     public void init() {
-        r = new DangerNoodle(this);
-
+        teleOp = new DangerNoodle(this);
 
     }
 
     @Override
     public void loop() {
-        r.teleOpControl();
+        teleOp.teleOp();
     }
 }
