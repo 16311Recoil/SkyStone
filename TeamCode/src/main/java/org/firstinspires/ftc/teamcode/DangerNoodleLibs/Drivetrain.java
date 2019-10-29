@@ -334,10 +334,10 @@ public class Drivetrain {
         bl.setPower(multiplier * Range.clip(y - x + z, -1, 1));
          */
         double[] powers = new double[NUM_MOTORS];
-        powers[FRONT_LEFT] = (v_d * Math.sin(angle)  - v_d * Math.cos(angle) - v_theta);
-        powers[FRONT_RIGHT] = (v_d * Math.sin(angle)  + v_d * Math.cos(angle) + v_theta);
-        powers[BACK_LEFT] = (v_d * Math.sin(angle)  + v_d * Math.cos(angle) - v_theta);
-        powers[BACK_RIGHT] = (v_d * Math.sin(angle)  - v_d * Math.cos(angle) + v_theta);
+        powers[FRONT_LEFT] = (v_d * Math.sin(angle)  + v_d * Math.cos(angle) - v_theta);
+        powers[FRONT_RIGHT] = (v_d * Math.sin(angle)  - v_d * Math.cos(angle) + v_theta);
+        powers[BACK_LEFT] = (v_d * Math.sin(angle)  - v_d * Math.cos(angle) - v_theta);
+        powers[BACK_RIGHT] = (v_d * Math.sin(angle)  + v_d * Math.cos(angle) + v_theta);
 
         // Range of above methods is [-2, 2]; in order to scale to [-1, 1], the maximum is found, and
         // it is used to divide each motor power, conserving the ratio between motor powers, but bringing
