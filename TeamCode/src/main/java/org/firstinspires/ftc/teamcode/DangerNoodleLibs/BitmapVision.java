@@ -27,24 +27,25 @@ public class BitmapVision {
     private VuforiaLocalizer vuforia;
     private LinearOpMode opMode;
     private int[] skyPos;
-    private final String vuforiaKey = "";
+    private final String vuforiaKey = "ASez2+z/////AAABmQHP1mc3SEEZvo408HeZ5nInV5/WlugcsO3dwjW7cpOZW08ftxSCA6uY5Dw9qW7HiB0IXTavwA4X1V+6tvt0q329qSBz/kGL+Q5xcb35DcDAYVlN6FbMhw55coMad/ajtuygpZofxagcq0/4RSbJgD3BlSaVDI/7f3MXodipi6SZo0Xxh3gF52rVZvHyYbgeTcb3P2YkjvEhhTtks6M6RkUDnY4ILRLhSVquiVg+FjtZ5XYXx3tLPYLrqXjge+zDpQftDtEJWXdrnF1TJwoTxkOVe+67Gu8gBSteQsd3HKZLlTMF0LXY3jVKctXCAVof6ep9blubWDaj0IgtbpTqfOBNKIzfFZpJbgIm861H3a7X";
 
+    private final int aspectRatio = 2;
     // Threshold Values for cutting the pic into only three stones in order to loop through less
     // pixels.
-    private final int X_MIN_THRESHOLD = 90;
-    private final int X_MAX_THRESHOLD = 1200;
-    private final int Y_MIN_THRESHOLD = 300;
-    private final int Y_MAX_THRESHOLD = 573;
+    private final int X_MIN_THRESHOLD = 90 / aspectRatio;
+    private final int X_MAX_THRESHOLD = 1200 / aspectRatio;
+    //private final int Y_MIN_THRESHOLD = 300;
+    //private final int Y_MAX_THRESHOLD = 573;
 
     // Threshold value for the X position of each stone (depends on orientation of webcam/scanning
     // position
-    private final int LEFT_THRESHOLD = 508;
-    private final int MIDDLE_THRESHOLD = 935;
-    private final int RIGHT_THRESHOLD = 1275;
+    private final int LEFT_THRESHOLD = 508 / aspectRatio;
+    private final int MIDDLE_THRESHOLD = 935 / aspectRatio;
+    private final int RIGHT_THRESHOLD = 1275 / aspectRatio;
 
-    private final int RED_THRESHOLD = 0;
-    private final int BLUE_THRESHOLD = 0;
-    private final int GREEN_THRESHOLD = 0;
+    private final int RED_THRESHOLD = 144;
+    private final int BLUE_THRESHOLD = 99;
+    private final int GREEN_THRESHOLD = 164;
 
 
     public BitmapVision(LinearOpMode opMode){
@@ -56,7 +57,7 @@ public class BitmapVision {
 
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters(cameraMonitorViewId);
 
-        parameters.cameraName = opMode.hardwareMap.get(WebcamName.class, "Webcam 1");
+        parameters.cameraName = opMode.hardwareMap.get(WebcamName.class, "WC");
         parameters.vuforiaLicenseKey = vuforiaKey;
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
@@ -93,8 +94,8 @@ public class BitmapVision {
         {
             image = Bitmap.createBitmap(pic.getWidth(), pic.getHeight(), Bitmap.Config.RGB_565);
             image.copyPixelsFromBuffer(pic.getPixels());
-            opMode.telemetry.addLine("Sucessful Bitmap Creation");
-            opMode.telemetry.update();
+            //opMode.telemetry.addLine("Sucessful Bitmap Creation");
+            //opMode.telemetry.update();
         }
         frame.close();
 
@@ -104,18 +105,20 @@ public class BitmapVision {
     {
         Bitmap image = getBitmap();
         ArrayList<Integer> xVals = new ArrayList<Integer>();
-        for (int x = X_MIN_THRESHOLD; x < X_MAX_THRESHOLD; x+=2) {
-            for (int y = Y_MIN_THRESHOLD; y < Y_MAX_THRESHOLD; x+=2) {
+
+        for (int x = X_MIN_THRESHOLD; x < X_MAX_THRESHOLD; x += 3) {
+            for (int y = 0; y < image.getHeight(); y += 3) {
                 int pixel = image.getPixel(x,y);
 
                 int red = red(pixel);
                 int blue = blue(pixel);
                 int green = green(pixel);
 
-                if (red > RED_THRESHOLD && blue > BLUE_THRESHOLD && green > GREEN_THRESHOLD)
+                if (red < RED_THRESHOLD && blue < BLUE_THRESHOLD && green < GREEN_THRESHOLD)
                     xVals.add(x);
             }
         }
+
         int averageX = 0;
         for (int n: xVals)
             averageX += n;
@@ -136,7 +139,11 @@ public class BitmapVision {
         }
     }
     public int[] getSkyPos(){
-        getSkyPos();
+        try {
+            findSkyPos();
+        } catch (InterruptedException e) {
+            opMode.telemetry.addLine("Error in findSkyStone()");
+        }
         return skyPos;
     }
 
