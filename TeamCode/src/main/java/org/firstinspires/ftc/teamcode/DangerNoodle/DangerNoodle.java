@@ -37,7 +37,7 @@ public class DangerNoodle implements Robot {
     private HardwareThread hardwareThread;
 
 
-    private static final double SERVO_LOCK = 0.0; // Needs to be tested;
+    private static final double SERVO_LOCK = 0.3; // Needs to be tested;
     private static final double SERVO_UNLOCK = 0.0; // Needs to be tested;
     private boolean rBumper1;
     private boolean lBumper1;

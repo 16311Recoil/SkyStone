@@ -195,7 +195,16 @@ public class Stacker {
             armRotater.setPosition(ARM_OUT);
         }
     }
-
+    public void setFangs (boolean lock) {
+        if(lock){
+            lFang.setPosition(SERVO_LOCK);
+            rFang.setPosition(SERVO_LOCK);
+        }
+        else {
+            lFang.setPosition(SERVO_UNLOCK);
+            rFang.setPosition(SERVO_UNLOCK);
+        }
+    }
     public void setLiftPosition(double power, boolean up) {
         double currentPos = getLiftEncoderAverage();
         if (up) {

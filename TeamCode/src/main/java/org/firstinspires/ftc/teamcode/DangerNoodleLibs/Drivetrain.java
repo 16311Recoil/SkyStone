@@ -21,10 +21,10 @@ import java.util.TreeMap;
 
 public class Drivetrain {
     private enum State{
-        FULL_SPEED,
-        REGULAR_SPEED,
-        LOW_SPEED,
-        H_SCALE_POWER
+       FULL_SPEED,
+        HALF_SPEED,
+        H_SCALE_POWER,
+        L_SCALE_POWER;
     }
     // Instance Variables
     private State currentState;
@@ -41,8 +41,7 @@ public class Drivetrain {
     private final int BACK_LEFT = 2;
     private final int BACK_RIGHT = 3;
     double scale[] = {1, 0.5};
-    boolean changeDpadDown = false;
-    boolean changeDpadUp = false;
+    int dpadd_ButtonCount = 0;
 
     // Instance Variables
 
@@ -60,7 +59,6 @@ public class Drivetrain {
     ///private RevBulkData bulkdata;
     private boolean reset;
     private double multiplier;
-    private int stateCounter = 2;
 
 
     public Drivetrain(LinearOpMode opMode, ElapsedTime timer, Map<String, Double> sensorVals) throws InterruptedException {
@@ -288,6 +286,7 @@ public class Drivetrain {
             reset = true;
             RobotLog.i("All Encoders equal Zero");
             return encoderAverage;
+
         }
     }
 
@@ -515,10 +514,10 @@ public class Drivetrain {
 
         if (currentState.equals(State.FULL_SPEED))
             multiplier = 1;
-        if (currentState.equals(State.REGULAR_SPEED))
+        if (currentState.equals(State.HALF_SPEED))
             multiplier = 0.5;
-        if (currentState.equals(State.LOW_SPEED))
-            multiplier = .25;
+        if (currentState.equals(State.H_SCALE_POWER))
+            multiplier = l_scale_speed(v_d);
         if (currentState.equals(State.H_SCALE_POWER))
             multiplier = h_scale_speed(v_d);
 
@@ -531,34 +530,24 @@ public class Drivetrain {
         return Range.clip(0.0308 * Math.exp(4.3891 * v_d), 0.05, 1);
     }
     public void checkState(){
-
-        if ((opMode_iterative.gamepad1.dpad_down && !changeDpadDown) && stateCounter > 0){
-            stateCounter --;
-        }
-        if ((opMode_iterative.gamepad1.dpad_up && !changeDpadUp) && stateCounter < 3){
-            stateCounter ++;
-        }
-        if (stateCounter == 1) {
-            opMode_iterative.telemetry.addLine("LOW_SPEED");
-            currentState = State.LOW_SPEED;
-            multiplier = 0.25;
-        }
-        if (stateCounter == 2) {
-            opMode_iterative.telemetry.addLine("REGULAR SPEED MODE");
-            currentState = State.REGULAR_SPEED;
-            multiplier = 0.65;
-        }
-        if (stateCounter == 3) {
-            opMode_iterative.telemetry.addLine("FULL SPEED");
-            currentState = State.FULL_SPEED;
-            multiplier = 1;
+        if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.a) {
+            opMode_iterative.telemetry.addLine("HALF SPEED MODE");
+            currentState = State.HALF_SPEED;
+            multiplier = 0.5;
         }
         if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.b) {
             opMode_iterative.telemetry.addLine("H_SCALE");
             currentState = State.H_SCALE_POWER;
         }
-
-
+        if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.x) {
+            opMode_iterative.telemetry.addLine("L_SCALE");
+            currentState = State.L_SCALE_POWER;
+        }
+        if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.y) {
+            opMode_iterative.telemetry.addLine("FULL SPEED");
+            currentState = State.FULL_SPEED;
+            multiplier = 1;
+        }
     }
     public void moveTelop2 ( double x, double y, double z){
 
@@ -568,6 +557,10 @@ public class Drivetrain {
         br.setPower(multiplier * Range.clip(y + x - z, -1, 1));
         bl.setPower(multiplier * Range.clip(y - x + z, -1, 1));
 
+    }
+    public double l_scale_speed(double input){
+        // 0.3253ln(x) + 0.9069
+        return Range.clip(0.3243 * Math.log(input) + 0.9069, minPower, maxPower);
     }
 
 }
