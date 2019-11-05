@@ -96,8 +96,8 @@ public class LiftPrototype extends OpMode {
             // Reverse the motor that runs backwards when connected directly to the battery
             ll.setDirection(DcMotor.Direction.FORWARD);
             lr.setDirection(DcMotor.Direction.REVERSE);
-            ll.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+            ll.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+            lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
             intakeMotor  = hardwareMap.get(DcMotor.class, "intakeMotor");
             intakeMotor2 = hardwareMap.get(DcMotor.class, "intakeMotor2");
@@ -111,7 +111,6 @@ public class LiftPrototype extends OpMode {
 
 
         }
-    LiftPrototype LiftP = new LiftPrototype();
 
         /*
          * Code to run REPEATEDLY after the driver hits INIT, but before they hit PLAY
@@ -162,7 +161,7 @@ public class LiftPrototype extends OpMode {
             lr.setPower(power);
         }
         if ((gamepad1.x && !changeX)){
-            telemetry.addData("Encoder:", LiftP.getLiftEncoderAverage());
+            telemetry.addData("Encoder:", getLiftEncoderAverage());
         }
         telemetry.update();
         ll.setPower(0);

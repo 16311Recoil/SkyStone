@@ -26,8 +26,6 @@ public class DangerNoodle implements Robot {
     private BitmapVision bmv;
     private LinearOpMode opMode;
     private OpMode opMode_iterative;
-    private Servo lFang;
-    private Servo rFang;
     private int[] skyPos;
 
     private boolean isMoving;
@@ -37,10 +35,6 @@ public class DangerNoodle implements Robot {
     private HardwareThread hardwareThread;
 
 
-    private static final double SERVO_LOCK = 0.3; // Needs to be tested;
-    private static final double SERVO_UNLOCK = 0.0; // Needs to be tested;
-    private boolean rBumper1;
-    private boolean lBumper1;
 
     /*
         Constructor includes
@@ -60,9 +54,6 @@ public class DangerNoodle implements Robot {
             //hardwareThread = new HardwareThread(this, sensorVals);
             //hardwareThread.run();
 
-            lFang = this.opMode.hardwareMap.servo.get("lFang");
-            rFang = this.opMode.hardwareMap.servo.get("rFang");
-
         } catch (InterruptedException e) {
             // Include handling later.
             e.printStackTrace();
@@ -70,8 +61,6 @@ public class DangerNoodle implements Robot {
             this.opMode.telemetry.addLine("DRIVETRAIN INIT FAILED");
             this.opMode.telemetry.update();
         }
-        rBumper1 = false;
-        lBumper1 = false;
         isMoving = false;
         opMode.telemetry.addLine("DangerNoodle Init Completed");
         opMode.telemetry.update();
@@ -84,8 +73,7 @@ public class DangerNoodle implements Robot {
             drivetrain = new Drivetrain(opMode_iterative, timer, sensorVals);
             manipulator = new Stacker(opMode_iterative);
             //bmv = new BitmapVision(opMode);
-            lFang = this.opMode_iterative.hardwareMap.servo.get("lFang");
-            rFang = this.opMode_iterative.hardwareMap.servo.get("rFang");
+
 
         } catch (InterruptedException e) {
             // Include handling later.
@@ -224,15 +212,7 @@ public class DangerNoodle implements Robot {
     }
     public void teleOp(){
         drivetrain.moveTelop(opMode_iterative.gamepad1.left_stick_x, opMode_iterative.gamepad1.left_stick_y, opMode_iterative.gamepad1.right_stick_x);
-        manipulator.stackerTeleControl();
-        if(opMode_iterative.gamepad2.left_bumper ^ lBumper1){
-            lFang.setPosition(SERVO_LOCK);
-            rFang.setPosition(SERVO_LOCK);
-        }
-        else if (opMode_iterative.gamepad2.right_bumper ^ rBumper1){
-            lFang.setPosition(SERVO_UNLOCK);
-            rFang.setPosition(SERVO_UNLOCK);
-        }
+        manipulator.stackerTeleControl(0.75,1,.75);
     }
 
 }

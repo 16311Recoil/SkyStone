@@ -22,9 +22,9 @@ import java.util.TreeMap;
 public class Drivetrain {
     private enum State{
        FULL_SPEED,
-        HALF_SPEED,
-        H_SCALE_POWER,
-        L_SCALE_POWER;
+        REGULAR_SPEED,
+        LOW_SPEED,
+        H_SCALE_POWER;
     }
     // Instance Variables
     private State currentState;
@@ -36,12 +36,14 @@ public class Drivetrain {
     private double INCH_PER_ENCODER = 40;
 
 
+
     private final int FRONT_LEFT = 0;
     private final int FRONT_RIGHT = 1;
     private final int BACK_LEFT = 2;
     private final int BACK_RIGHT = 3;
     double scale[] = {1, 0.5};
-    int dpadd_ButtonCount = 0;
+    boolean changeDpadDown= false;
+    boolean changeDpadUp = false;
 
     // Instance Variables
 
@@ -53,6 +55,7 @@ public class Drivetrain {
     private Sensors sensors;
     private double maxPower = 1;
     private double minPower = 0.05;
+    private int stateCounter = 2;
     private double prevEncoder;
     private boolean isMoving;
     //private ExpansionHubEx expansionHub;
@@ -136,10 +139,10 @@ public class Drivetrain {
         br.setDirection(DcMotor.Direction.REVERSE);
         bl.setDirection(DcMotor.Direction.FORWARD);
 
-        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        fl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        fr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         pidControlller = new PID();
         pidControlller.setReset(true);
@@ -283,10 +286,7 @@ public class Drivetrain {
         try{
             return (encoderAverage / (4 - counter));
         } catch(ArithmeticException E){
-            reset = true;
-            RobotLog.i("All Encoders equal Zero");
-            return encoderAverage;
-
+           return 0;
         }
     }
 
@@ -322,6 +322,7 @@ public class Drivetrain {
     public void move(double v_d, double v_theta, double angle, double distance, double timeout) {
         resetEncoders();
 
+
         // Calculates required motor powers based on direction of the rollers on the Mecanum wheel,
         // Desired Velocity, Desired Rotational Velocity, and Desired Angle
 
@@ -342,19 +343,17 @@ public class Drivetrain {
         // Range of above methods is [-2, 2]; in order to scale to [-1, 1], the maximum is found, and
         // it is used to divide each motor power, conserving the ratio between motor powers, but bringing
         // motor power within desired range.
-        double maxPower = powers[0];
 
         for (int i = 1; i < powers.length; i++)
             maxPower = Math.max(Math.abs(maxPower), Math.abs(powers[i]));
 
 
-        powers[FRONT_LEFT] /= maxPower;
-        powers[FRONT_RIGHT] /= maxPower;
-        powers[BACK_LEFT] /= maxPower;
-        powers[BACK_RIGHT] /= maxPower;
-
-        opMode.telemetry.addData("Powers", Arrays.toString(powers));
-        opMode.telemetry.update();
+        if (maxPower > 1){
+            powers[FRONT_LEFT] /= maxPower;
+            powers[FRONT_RIGHT] /= maxPower;
+            powers[BACK_LEFT] /= maxPower;
+            powers[BACK_RIGHT] /= maxPower;
+        }
 
 
         // Set Motor Powers for set time
@@ -362,22 +361,19 @@ public class Drivetrain {
         getEncoders();
         opMode.telemetry.addData("Encoder", Arrays.toString(encoderVals));
         opMode.telemetry.update();
-        double currentPos = getEncoderAverage(encoderVals);
-
-        while (currentPos < distance && timer.seconds() < timeout & opMode.opModeIsActive()) {
+        double currentPos = 0;
+        timer.reset();
+        while ((currentPos < distance) && (timer.seconds() < timeout) && opMode.opModeIsActive()) {
 
             opMode.telemetry.addData("Inside Loop", Arrays.toString(encoderVals));
             opMode.telemetry.update();
-            getEncoders();
-
-
 
             fl.setPower(powers[FRONT_LEFT]);
             fr.setPower(powers[FRONT_RIGHT]);
             bl.setPower(powers[BACK_LEFT]);
             br.setPower(powers[BACK_RIGHT]);
-            LynxModule k;
 
+            getEncoders();
             currentPos = getEncoderAverage(encoderVals);
         }
         setAllMotors(0);
@@ -514,10 +510,10 @@ public class Drivetrain {
 
         if (currentState.equals(State.FULL_SPEED))
             multiplier = 1;
-        if (currentState.equals(State.HALF_SPEED))
+        if (currentState.equals(State.REGULAR_SPEED))
             multiplier = 0.5;
-        if (currentState.equals(State.H_SCALE_POWER))
-            multiplier = l_scale_speed(v_d);
+        if (currentState.equals(State.LOW_SPEED))
+            multiplier = .25;
         if (currentState.equals(State.H_SCALE_POWER))
             multiplier = h_scale_speed(v_d);
 
@@ -529,38 +525,41 @@ public class Drivetrain {
     private double h_scale_speed(double v_d) {
         return Range.clip(0.0308 * Math.exp(4.3891 * v_d), 0.05, 1);
     }
-    public void checkState(){
-        if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.a) {
-            opMode_iterative.telemetry.addLine("HALF SPEED MODE");
-            currentState = State.HALF_SPEED;
-            multiplier = 0.5;
+    public void checkState() {
+
+        if ((opMode_iterative.gamepad1.dpad_down && !changeDpadDown) && stateCounter > 0) {
+            stateCounter--;
+        }
+        if ((opMode_iterative.gamepad1.dpad_up && !changeDpadUp) && stateCounter < 3) {
+            stateCounter++;
+        }
+        if (stateCounter == 1) {
+            opMode_iterative.telemetry.addLine("LOW_SPEED");
+            currentState = State.LOW_SPEED;
+            multiplier = 0.25;
+        }
+        if (stateCounter == 2) {
+            opMode_iterative.telemetry.addLine("REGULAR SPEED MODE");
+            currentState = State.REGULAR_SPEED;
+            multiplier = 0.65;
+        }
+        if (stateCounter == 3) {
+            opMode_iterative.telemetry.addLine("FULL SPEED");
+            currentState = State.FULL_SPEED;
+            multiplier = 1;
         }
         if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.b) {
             opMode_iterative.telemetry.addLine("H_SCALE");
             currentState = State.H_SCALE_POWER;
         }
-        if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.x) {
-            opMode_iterative.telemetry.addLine("L_SCALE");
-            currentState = State.L_SCALE_POWER;
-        }
-        if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.y) {
-            opMode_iterative.telemetry.addLine("FULL SPEED");
-            currentState = State.FULL_SPEED;
-            multiplier = 1;
-        }
+        changeDpadDown = !changeDpadDown;
+        changeDpadUp = !changeDpadUp;
     }
-    public void moveTelop2 ( double x, double y, double z){
 
-
+    public void moveTelop2( double x, double y, double z){
         fr.setPower(multiplier * Range.clip(y - x - z, -1, 1));
         fl.setPower(multiplier * Range.clip(y + x + z, -1, 1));
         br.setPower(multiplier * Range.clip(y + x - z, -1, 1));
         bl.setPower(multiplier * Range.clip(y - x + z, -1, 1));
-
     }
-    public double l_scale_speed(double input){
-        // 0.3253ln(x) + 0.9069
-        return Range.clip(0.3243 * Math.log(input) + 0.9069, minPower, maxPower);
-    }
-
 }
