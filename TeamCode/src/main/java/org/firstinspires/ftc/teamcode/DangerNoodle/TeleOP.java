@@ -7,22 +7,35 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 
 import java.util.TreeMap;
 
-@TeleOp(name = "TeleOp", group = "controlled")
+@TeleOp
+        (name = "TeleOp", group = "controlled")
 public class TeleOP extends OpMode {
-    DangerNoodle teleOp;
+    //DangerNoodle teleOp;
+    Drivetrain drivetrain;
+    Stacker stacker;
     ElapsedTime teleOpTime = new ElapsedTime();
 
     @Override
     public void init() {
-        teleOp = new DangerNoodle(this);
+        try {
+            drivetrain = new Drivetrain(this, new ElapsedTime(), new TreeMap<String, Double>());
+            stacker = new Stacker(this);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
     }
 
     @Override
     public void loop() {
-        teleOp.teleOp();
+        drivetrain.moveTelop2(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x);
+        drivetrain.checkState();
+        stacker.stackerTeleControl(0.75,1,.75);
+        telemetry.update();
+
     }
 }

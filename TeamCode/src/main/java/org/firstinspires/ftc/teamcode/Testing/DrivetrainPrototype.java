@@ -23,6 +23,7 @@ public class DrivetrainPrototype extends OpMode {
     // Declare OpMode members.
     private ElapsedTime runtime = new ElapsedTime();
     private Drivetrain tele;
+    private Stacker s;
 
 
     /*
@@ -36,6 +37,7 @@ public class DrivetrainPrototype extends OpMode {
 
         try {
             tele = new Drivetrain(this, new ElapsedTime(), new TreeMap<String, Double>());
+            s = new Stacker(this);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -63,6 +65,7 @@ public class DrivetrainPrototype extends OpMode {
     public void loop() {
         tele.moveTelop2(gamepad1.left_stick_x, -gamepad1.left_stick_y, gamepad1.right_stick_x);
         tele.checkState();
+        s.stackerTeleControl(0.75,0.75,0);
         telemetry.update();
     }
  }

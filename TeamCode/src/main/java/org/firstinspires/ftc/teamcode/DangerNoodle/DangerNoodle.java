@@ -211,7 +211,7 @@ public class DangerNoodle implements Robot {
         this.sensorVals = sensorVals;
     }
     public void teleOp(){
-        drivetrain.moveTelop(opMode_iterative.gamepad1.left_stick_x, opMode_iterative.gamepad1.left_stick_y, opMode_iterative.gamepad1.right_stick_x);
+        drivetrain.moveTelop2(opMode_iterative.gamepad1.left_stick_x, opMode_iterative.gamepad1.left_stick_y, opMode_iterative.gamepad1.right_stick_x);
         manipulator.stackerTeleControl(0.75,1,.75);
     }
 

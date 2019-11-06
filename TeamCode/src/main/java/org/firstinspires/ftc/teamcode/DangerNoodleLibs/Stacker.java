@@ -34,8 +34,8 @@ public class Stacker {
     private DcMotor ir; //intake right
     private DcMotor ll; //lift left
     private DcMotor lr; //lift right
-    private CRServo gr; // gantry right
-    private CRServo gl; // gantry left
+    //private CRServo gr; // gantry right
+    //private CRServo gl; // gantry left
     private Servo armRotater;
     private Servo pincher;
     private Servo lFang;
@@ -50,10 +50,9 @@ public class Stacker {
     private final double INCHES_TO_SERVO = 0;//TODO: Test conversions for inches in gantry movement to servo position
     private final double LIFT_MAX = 0; //TODO: Test for Max Encoder Limit on Lift
     private final double LIFT_MIN = 0; //TODO: Test for Min Encoder Limit on Lift
-    private static final double SERVO_LOCK_ONE = 0.0; // Needs to be tested;
-    private static final double SERVO_UNLOCK_ONE = 0.3; // Needs to be tested;
-    private static final double SERVO_LOCK_TWO = 0.3;
-    private static final double SERVO_UNLOCK_TWO = 0.0;
+    private static final double SERVO_LOCK = 0.3; // Needs to be tested;
+    private static final double SERVO_UNLOCK = 0; // Needs to be tested;
+
     private boolean changeX = false;
     private boolean changeY = false;
     private boolean changeX2 = false;
@@ -83,8 +82,14 @@ public class Stacker {
         //gl = this.opMode.hardwareMap.servo.get("gl");
         //gr = this.opMode.hardwareMap.servo.get("gr");
 
+        lFang.setDirection(Servo.Direction.FORWARD);
+        rFang.setDirection(Servo.Direction.REVERSE);
+
         ll.setDirection(DcMotor.Direction.FORWARD);
         lr.setDirection(DcMotor.Direction.REVERSE);
+
+        il.setDirection(DcMotor.Direction.REVERSE);
+        ir.setDirection(DcMotor.Direction.FORWARD);
         //gl.setDirection(DcMotorSimple.Direction.FORWARD);
         //gr.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -149,7 +154,7 @@ public class Stacker {
         this.lr = lr;
     }
 
-    public CRServo getGr() {
+   /* public CRServo getGr() {
         return gr;
     }
 
@@ -164,23 +169,23 @@ public class Stacker {
     public void setGl(CRServo gl) {
         this.gl = gl;
     }
-
+*/
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////
     public void setIntakePower(double power) {
         il.setPower(power);
-        ir.setPower(power);
+        ir.setPower(-power);
     }
 
     public void setLiftPower(double power) {
         ll.setPower(power);
         lr.setPower(power);
     }
-    public void setGantryPower(double power){
+   /* public void setGantryPower(double power){
         gl.setPower(power);
         gr.setPower(power);
-    }
+    } */
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void intakeTime(double power) {
@@ -210,12 +215,12 @@ public class Stacker {
     }
     public void setFangs (boolean lock) {
         if(lock){
-            lFang.setPosition(SERVO_LOCK_TWO);
-            rFang.setPosition(SERVO_LOCK_ONE);
+            lFang.setPosition(SERVO_LOCK);
+            rFang.setPosition(SERVO_LOCK);
         }
         else {
-            lFang.setPosition(SERVO_UNLOCK_TWO);
-            rFang.setPosition(SERVO_UNLOCK_ONE);
+            lFang.setPosition(SERVO_UNLOCK);
+            rFang.setPosition(SERVO_UNLOCK);
         }
     }
     public void setLiftPosition(double power, boolean up) {
@@ -288,7 +293,7 @@ public class Stacker {
         changeX2 = opMode_iterative.gamepad2.x;
 
     }
-    public void gantryControler(double power) {
+    /*public void gantryControler(double power) {
         if (opMode_iterative.gamepad2.right_bumper){
             setGantryPower(power);
         }
@@ -301,7 +306,7 @@ public class Stacker {
         else if (opMode_iterative.gamepad1.a){
             setGantryPower(-power);
         }
-    }
+    } */
     private void liftControl(double power) {
         if (opMode_iterative.gamepad2.right_trigger != 0){
             setLiftPower(opMode_iterative.gamepad2.right_trigger);
@@ -319,17 +324,18 @@ public class Stacker {
     }
     private void intakeControl(double power){
         if (opMode_iterative.gamepad2.left_stick_y > 0) {
-            setIntakePower(-power);
+            setIntakePower(power * 0.65);
         }
         else if (opMode_iterative.gamepad2.left_stick_y < 0){
-            setIntakePower(power);
+            setIntakePower(power * 0.65);
         }
         else if(opMode_iterative.gamepad1.left_trigger > 0){
-            setIntakePower(-power);
+            setIntakePower(power * 0.65);
         }
         else if (opMode_iterative.gamepad1.right_trigger > 0){
-            setIntakePower(power);
+            setIntakePower(power * 0.65);
         }
+        setIntakePower(0);
     }
     public void stackerTeleControl(double intakePower, double liftPower, double gantryPower){
         teleArm();
@@ -337,7 +343,7 @@ public class Stacker {
         fangControl();
         intakeControl(intakePower);
         liftControl(liftPower);
-        gantryControler(gantryPower);
+        //gantryControler(gantryPower);
 
     }
     private double calculatePower(){

@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.DangerNoodle;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
@@ -11,8 +10,8 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Autonomous
-        (name = "AutoTester", group = "ControlledGroup")
-public class AutoTester extends LinearOpMode {
+        (name = "ParkAuto", group = "ControlledGroup")
+public class ParkAuto extends LinearOpMode {
     Drivetrain drivetrain;
     Stacker manipulator;
 
@@ -23,28 +22,29 @@ public class AutoTester extends LinearOpMode {
 
         waitForStart();
 
-        manipulator.setFangs(false);
+        drivetrain.move(0.4, 0, Math.PI/2, 1200, 5);
+        Thread.sleep(400);
+        drivetrain.move(0.4, 0, 0, 150, 3);
+        /*manipulator.setFangs(false);
         Thread.sleep(300);
-        drivetrain.move(0.4, 0, Math.PI, 5, 3);
+        drivetrain.move(-0.2, 0, Math.PI/2, 1300, 5);
         Thread.sleep(300);
-        drivetrain.move(-0.25, 0, Math.PI/2, 1400, 5);
-        Thread.sleep(1000);
         //drivetrain.move(-0.5, 0, Math.PI, 25, 4);
         //Thread.sleep(300);
         manipulator.setFangs(true);
         Thread.sleep(300);
-        drivetrain.move(0.43, 0, Math.PI/2, 2500, 4);
-        Thread.sleep(300);
-        drivetrain.move(0.25, 0, Math.PI, 1200, 5);
+        drivetrain.move(0.3, 0, Math.PI/2, 1200, 4);
         Thread.sleep(300);
         manipulator.setFangs(false);
-        Thread.sleep(300);
-        drivetrain.move(0.6, 0, 0, 5000, 5);
+        */
+
 
         //drivetrain.move(0.5, 0, Math.toRadians(251.565), 18.97, 4);
         //drivetrain.move(1,0,0,30,6);
 
         Thread.sleep(300);
+
+
     }
 
 }

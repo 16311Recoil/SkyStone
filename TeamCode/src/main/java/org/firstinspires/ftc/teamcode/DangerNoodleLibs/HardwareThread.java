@@ -38,31 +38,22 @@ public class HardwareThread implements Runnable {
         this.sensors = robot.getDrivetrain().getSensors();
         this.manip = robot.getManipulator();
 
-        opMode.telemetry.addLine("1");
-        opMode.telemetry.update();
 
         expansionHubEx = opMode.hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 1");
         expansionHubEx2 = opMode.hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 2");
-
-
-        opMode.telemetry.addLine("2");
-        opMode.telemetry.update();
 
         bulkData = expansionHubEx.getBulkInputData();
         bulkData2 = expansionHubEx2.getBulkInputData();
 
         drivetrain.resetEncoders();
 
-
         drivetrainEncoders[0] = bulkData.getMotorCurrentPosition(drivetrain.getFl());
         drivetrainEncoders[1] = bulkData2.getMotorCurrentPosition(drivetrain.getFr());
         drivetrainEncoders[2] = bulkData.getMotorCurrentPosition(drivetrain.getBl());
         drivetrainEncoders[3] = bulkData2.getMotorCurrentPosition(drivetrain.getBr());
 
-
         opMode.telemetry.addLine("3");
         opMode.telemetry.update();
-
 
         // initialize lift encoders
         liftEncoders[0] = bulkData.getMotorCurrentPosition(manip.getIl());
@@ -71,14 +62,13 @@ public class HardwareThread implements Runnable {
         // get sensors
         //      - gyro
         //      - REV 2m Distance Sensor
-        sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage(drivetrainEncoders));
+        sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage());
         sensorVals.put("Previous Lift Encoder Average", robot.getManipulator().getLiftEncoderAverage());
         sensorVals.put("Previous Time", robot.timer.milliseconds());
         sensorVals.put("Init Gyro Angle", sensors.getFirstAngle());
 
         opMode.telemetry.addLine("Thread Init Completed");
         opMode.telemetry.update();
-
     }
 
     @Override
@@ -88,7 +78,7 @@ public class HardwareThread implements Runnable {
             bulkData = expansionHubEx.getBulkInputData();
             bulkData2 = expansionHubEx2.getBulkInputData();
 
-            sensorVals.put("Current Drivetrain Encoder Average", drivetrain.getEncoderAverage(drivetrainEncoders));
+            sensorVals.put("Current Drivetrain Encoder Average", drivetrain.getEncoderAverage());
             sensorVals.put("Current Lift Encoder Average", manip.getLiftEncoderAverage());
             sensorVals.put("Current Time", robot.timer.milliseconds());
 
@@ -104,7 +94,7 @@ public class HardwareThread implements Runnable {
 
             opMode.telemetry.addData("DT Encoder Avg: ", sensorVals.get("Previous Drivetrain Encoder Average"));
 
-            sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage(drivetrainEncoders));
+            sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage());
             sensorVals.put("Previous Lift Encoder Average", robot.getManipulator().getLiftEncoderAverage());
             sensorVals.put("Previous Time", robot.timer.milliseconds());
         }

@@ -87,7 +87,7 @@ public class Drivetrain {
        // encoderVals[BACK_RIGHT] = expansionHub.getBulkInputData().getMotorCurrentPosition(br);
 
 
-        sensorVals.put("Current Encoder", getEncoderAverage(encoderVals));
+        sensorVals.put("Current Encoder", getEncoderAverage());
         sensorVals.put("Timestamp", 0.0);
 
         fr.setDirection(DcMotor.Direction.REVERSE);
@@ -113,8 +113,11 @@ public class Drivetrain {
         sensors = new Sensors(this.opMode_iterative);
         encoderVals = new double[4];
 
+        opMode_iterative.telemetry.addLine("Drivetrain update");
+        opMode_iterative.telemetry.update();
+
         // Tracks Sensor Vals.
-        this.sensorVals = sensorVals;
+        //this.sensorVals = sensorVals;
         drivetrainClock = new ElapsedTime();
 
         currentState = State.FULL_SPEED;
@@ -131,8 +134,8 @@ public class Drivetrain {
         //encoderVals[BACK_RIGHT] = expansionHub.getBulkInputData().getMotorCurrentPosition(br);
 
 
-        sensorVals.put("Current Encoder", getEncoderAverage(encoderVals));
-        sensorVals.put("Timestamp", 0.0);
+        //sensorVals.put("Current Encoder", getEncoderAverage());
+        //sensorVals.put("Timestamp", 0.0);
 
         fr.setDirection(DcMotor.Direction.REVERSE);
         fl.setDirection(DcMotor.Direction.FORWARD);
@@ -144,9 +147,13 @@ public class Drivetrain {
         bl.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         br.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        opMode_iterative.telemetry.addLine("Drivetrain Complete");
+        opMode_iterative.telemetry.update();
+/*
         pidControlller = new PID();
         pidControlller.setReset(true);
         multiplier = 1;
+        */
     }
 
     /* ============================ UTILITY METHODS ==============================================*/
@@ -274,20 +281,24 @@ public class Drivetrain {
     // consistently reporting a motion-dependent value rather than a static value or 0 due to wire
     // entanglement, broken encoder, etc,
 
-    public double getEncoderAverage(double[] encoderValues) {
+    public double getEncoderAverage() {
         double encoderAverage = 0;
         int counter = 0;
-        for(double encoder: encoderValues) {
-            if (encoder == 0){
-                counter ++;
+        for(int i = 0; i < encoderVals.length; i++) {
+            opMode.telemetry.addData("Data", encoderVals[i]);
+            if (encoderVals[i] == 0){
+                counter++;
             }
-            encoderAverage += encoder;
+            encoderAverage += encoderVals[i];
+            opMode.telemetry.update();
         }
         try{
             return (encoderAverage / (4 - counter));
         } catch(ArithmeticException E){
            return 0;
         }
+
+
     }
 
 
@@ -301,11 +312,11 @@ public class Drivetrain {
      */
     public void moveForward(double distance, double power, double timeout) {
         resetEncoders();
-        double currentPos = getEncoderAverage(encoderVals);
+        double currentPos = getEncoderAverage();
         ElapsedTime timer = new ElapsedTime();
         while (timer.seconds() < timeout && currentPos < inchesToEncoder(distance)) { //timer loop to stop motors after time reaches timeout or if destination is reached
             getEncoders();
-            currentPos = getEncoderAverage(encoderVals);
+            currentPos = getEncoderAverage();
             setAllMotors(power);
         }
         setAllMotors(0);
@@ -320,8 +331,6 @@ public class Drivetrain {
      * @param angle   - Desired Angle
      */
     public void move(double v_d, double v_theta, double angle, double distance, double timeout) {
-        resetEncoders();
-
 
         // Calculates required motor powers based on direction of the rollers on the Mecanum wheel,
         // Desired Velocity, Desired Rotational Velocity, and Desired Angle
@@ -360,10 +369,12 @@ public class Drivetrain {
         ElapsedTime timer = new ElapsedTime();
         getEncoders();
         opMode.telemetry.addData("Encoder", Arrays.toString(encoderVals));
+
+        double initPos = getEncoderAverage();
+        opMode.telemetry.addData("Enccoder Average", initPos);
         opMode.telemetry.update();
-        double currentPos = 0;
         timer.reset();
-        while ((currentPos < distance) && (timer.seconds() < timeout) && opMode.opModeIsActive()) {
+        while ((Math.abs(initPos - getEncoderAverage()) + 10 < distance) || (timer.seconds() < timeout) && opMode.opModeIsActive()) {
 
             opMode.telemetry.addData("Inside Loop", Arrays.toString(encoderVals));
             opMode.telemetry.update();
@@ -374,7 +385,6 @@ public class Drivetrain {
             br.setPower(powers[BACK_RIGHT]);
 
             getEncoders();
-            currentPos = getEncoderAverage(encoderVals);
         }
         setAllMotors(0);
 
@@ -557,9 +567,25 @@ public class Drivetrain {
     }
 
     public void moveTelop2( double x, double y, double z){
-        fr.setPower(multiplier * Range.clip(y - x - z, -1, 1));
-        fl.setPower(multiplier * Range.clip(y + x + z, -1, 1));
-        br.setPower(multiplier * Range.clip(y + x - z, -1, 1));
-        bl.setPower(multiplier * Range.clip(y - x + z, -1, 1));
+        double[] powers = new double[NUM_MOTORS];
+        powers[FRONT_RIGHT] = y - x - z;
+        powers[FRONT_LEFT] = y + x + z;
+        powers[BACK_RIGHT] = y + x - z;
+        powers[BACK_LEFT] = y - x + z;
+
+        double maxPower = powers[0];
+        for (int i = 1; i < NUM_MOTORS; i++){
+            maxPower = Math.max(maxPower, powers[i]);
+        }
+        if (maxPower > 1){
+            powers[FRONT_RIGHT] /= maxPower;
+            powers[FRONT_LEFT] /= maxPower;
+            powers[BACK_LEFT] /= maxPower;
+            powers[BACK_RIGHT] /= maxPower;
+        }
+        fl.setPower(multiplier * powers[FRONT_LEFT]);
+        fr.setPower(multiplier * powers[FRONT_RIGHT]);
+        br.setPower(multiplier * powers[BACK_RIGHT]);
+        bl.setPower(multiplier * powers[BACK_LEFT]);
     }
 }
