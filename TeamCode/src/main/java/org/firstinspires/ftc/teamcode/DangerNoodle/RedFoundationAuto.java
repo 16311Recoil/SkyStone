@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.DangerNoodle;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
@@ -11,8 +10,8 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Autonomous
-        (name = "AutoTester", group = "ControlledGroup")
-public class AutoTester extends LinearOpMode {
+        (name = "RedFoundationAuto", group = "ControlledGroup")
+public class RedFoundationAuto extends LinearOpMode {
     Drivetrain drivetrain;
     Stacker manipulator;
 

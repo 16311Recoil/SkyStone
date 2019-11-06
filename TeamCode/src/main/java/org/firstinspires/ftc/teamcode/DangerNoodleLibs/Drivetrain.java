@@ -282,6 +282,7 @@ public class Drivetrain {
     // entanglement, broken encoder, etc,
 
     public double getEncoderAverage() {
+        getEncoders();
         double encoderAverage = 0;
         int counter = 0;
         for(int i = 0; i < encoderVals.length; i++) {
@@ -367,14 +368,13 @@ public class Drivetrain {
 
         // Set Motor Powers for set time
         ElapsedTime timer = new ElapsedTime();
-        getEncoders();
         opMode.telemetry.addData("Encoder", Arrays.toString(encoderVals));
 
         double initPos = getEncoderAverage();
         opMode.telemetry.addData("Enccoder Average", initPos);
         opMode.telemetry.update();
         timer.reset();
-        while ((Math.abs(initPos - getEncoderAverage()) + 10 < distance) || (timer.seconds() < timeout) && opMode.opModeIsActive()) {
+        while ((Math.abs(initPos - getEncoderAverage()) + 5 < distance) && (timer.seconds() < timeout) && opMode.opModeIsActive()) {
 
             opMode.telemetry.addData("Inside Loop", Arrays.toString(encoderVals));
             opMode.telemetry.update();
@@ -383,8 +383,6 @@ public class Drivetrain {
             fr.setPower(powers[FRONT_RIGHT]);
             bl.setPower(powers[BACK_LEFT]);
             br.setPower(powers[BACK_RIGHT]);
-
-            getEncoders();
         }
         setAllMotors(0);
 
