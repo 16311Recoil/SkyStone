@@ -1,11 +1,12 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp
         (name = "ServoTest", group = "Controlled")
-
+//@Disabled
 public class ServoTest extends LinearOpMode {
 
     private Servo lFang;
@@ -19,8 +20,8 @@ public class ServoTest extends LinearOpMode {
         lFang = hardwareMap.servo.get("lFang");
         rFang = hardwareMap.servo.get("rFang");
 
-        lFang.setDirection(Servo.Direction.FORWARD);
-        rFang.setDirection(Servo.Direction.REVERSE);
+        lFang.setDirection(Servo.Direction.REVERSE);
+        rFang.setDirection(Servo.Direction.FORWARD);
 
 
 

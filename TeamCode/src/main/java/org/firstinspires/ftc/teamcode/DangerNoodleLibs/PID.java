@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.DangerNoodleLibs;
 
+import com.qualcomm.robotcore.util.Range;
+
 public class PID {
     private double k_i;
     private double k_p;
@@ -46,22 +48,23 @@ public class PID {
 
         if(reset){
             t_sum = 0.0;
-            d = 0.0;
+            d = error / currentTime;
             i = 0.0;
-            p = 0.0;
+            p = k_p * error;
             reset = false;
             previousError = Math.abs(target - error);
+            return Range.clip(p + i + d, -1,1);
         } else {
             double deltaTime = currentTime - t_i;
-             p = k_p * error;
-             t_sum = 0.5 * (error +  previousError) * deltaTime;
-             if (t_sum > MAX_SUM)
-                 t_sum = MAX_SUM;// test for maxSum
-             i = k_i * t_sum;
-             d = k_d * (error - previousError) / deltaTime;
-
+            p = k_p * error;
+            t_sum = 0.5 * (error + previousError) * deltaTime;
+            if (t_sum > MAX_SUM)
+                t_sum = MAX_SUM;// test for maxSum
+            i = k_i * t_sum;
+            d = k_d * (error - previousError) / deltaTime;
+            previousError = error;
+            return Range.clip((p + i + d), -1, 1);
         }
-        return(p + i + d);
     }
 
     public double getK_i() {

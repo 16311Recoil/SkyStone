@@ -1,13 +1,14 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.RevBulkData;
 
 import java.util.TreeMap;
-
+@Disabled
 public class CoreRangeSensorTest extends LinearOpMode {
     ModernRoboticsI2cRangeSensor rangeSensor;
     TreeMap<String, Double> sensorVal;

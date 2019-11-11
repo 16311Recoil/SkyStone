@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Sensors;
 
 @TeleOp(name="Basic: testGyro", group="Iterative Opmode")
-//@Disabled
+@Disabled
 public class testGyro extends BasicOpMode_Iterative {
 
     private double currentPos_1;

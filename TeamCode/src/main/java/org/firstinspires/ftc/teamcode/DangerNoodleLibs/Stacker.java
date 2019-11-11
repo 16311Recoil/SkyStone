@@ -50,7 +50,7 @@ public class Stacker {
     private final double INCHES_TO_SERVO = 0;//TODO: Test conversions for inches in gantry movement to servo position
     private final double LIFT_MAX = 0; //TODO: Test for Max Encoder Limit on Lift
     private final double LIFT_MIN = 0; //TODO: Test for Min Encoder Limit on Lift
-    private static final double SERVO_LOCK = 0.3; // Needs to be tested;
+    private static final double SERVO_LOCK = 1; // Needs to be tested;
     private static final double SERVO_UNLOCK = 0; // Needs to be tested;
 
     private boolean changeX = false;
@@ -79,22 +79,29 @@ public class Stacker {
         rFang = this.opMode.hardwareMap.servo.get("rFang");
         armRotater = this.opMode.hardwareMap.servo.get("armRotater");
         pincher = this.opMode.hardwareMap.servo.get("pincher");
+
         //gl = this.opMode.hardwareMap.servo.get("gl");
         //gr = this.opMode.hardwareMap.servo.get("gr");
 
-        lFang.setDirection(Servo.Direction.FORWARD);
-        rFang.setDirection(Servo.Direction.REVERSE);
+        lFang.setDirection(Servo.Direction.REVERSE);
+        rFang.setDirection(Servo.Direction.FORWARD);
 
         ll.setDirection(DcMotor.Direction.FORWARD);
         lr.setDirection(DcMotor.Direction.REVERSE);
 
-        il.setDirection(DcMotor.Direction.REVERSE);
-        ir.setDirection(DcMotor.Direction.FORWARD);
+        il.setDirection(DcMotor.Direction.FORWARD);
+        ir.setDirection(DcMotor.Direction.REVERSE);
+
+        il.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        ir.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         //gl.setDirection(DcMotorSimple.Direction.FORWARD);
         //gr.setDirection(DcMotorSimple.Direction.REVERSE);
 
         ll.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        ir.setPower(0);
+        il.setPower(0);
 
         opMode.telemetry.addLine("Stacker Init Completed");
         opMode.telemetry.update();
@@ -111,11 +118,26 @@ public class Stacker {
         lr = this.opMode_iterative.hardwareMap.dcMotor.get("lr");
         armRotater = this.opMode_iterative.hardwareMap.servo.get("armRotater");
         pincher = this.opMode_iterative.hardwareMap.servo.get("pincher");
+        lFang = this.opMode_iterative.hardwareMap.servo.get("lFang");
+        rFang = this.opMode_iterative.hardwareMap.servo.get("rFang");
         //gl = this.opMode.hardwareMap.servo.get("gl");
         //gr = this.opMode.hardwareMap.servo.get("gr");
+        il.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        ir.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
-        ll.setDirection(DcMotor.Direction.FORWARD);
-        lr.setDirection(DcMotor.Direction.REVERSE);
+        ir.setPower(0);
+        il.setPower(0);
+
+        il.setDirection(DcMotor.Direction.FORWARD);
+        ir.setDirection(DcMotor.Direction.REVERSE);
+
+
+
+        lFang.setDirection(Servo.Direction.FORWARD);
+        rFang.setDirection(Servo.Direction.REVERSE);
+
+        ll.setDirection(DcMotor.Direction.REVERSE);
+        lr.setDirection(DcMotor.Direction.FORWARD);
 
         opMode_iterative.telemetry.addLine("Stacker Init Completed");
         opMode_iterative.telemetry.update();
@@ -175,7 +197,7 @@ public class Stacker {
     //////////////////////////////////////////////////////////////////////////////////////////////
     public void setIntakePower(double power) {
         il.setPower(power);
-        ir.setPower(-power);
+        ir.setPower(power);
     }
 
     public void setLiftPower(double power) {
@@ -281,11 +303,11 @@ public class Stacker {
         changeB2 = opMode_iterative.gamepad2.b;
     }
     public void fangControl(){
-        if((opMode_iterative.gamepad1.x && !changeX) || (opMode_iterative.gamepad2.x && !changeX2) &&  !teleFangToggle){
+        if(((opMode_iterative.gamepad1.x && !changeX) || (opMode_iterative.gamepad2.x && !changeX2)) &&  !teleFangToggle){
             setFangs(true);
             teleFangToggle = !teleFangToggle;
         }
-        else if ((opMode_iterative.gamepad1.x && !changeX) || (opMode_iterative.gamepad2.x && !changeX2) &&  teleFangToggle){
+        else if (((opMode_iterative.gamepad1.x && !changeX) || (opMode_iterative.gamepad2.x && !changeX2)) &&  teleFangToggle){
             setFangs(false);
             teleFangToggle = !teleFangToggle;
         }
@@ -327,13 +349,13 @@ public class Stacker {
             setIntakePower(power * 0.65);
         }
         else if (opMode_iterative.gamepad2.left_stick_y < 0){
-            setIntakePower(power * 0.65);
+            setIntakePower(-power * 0.65);
         }
         else if(opMode_iterative.gamepad1.left_trigger > 0){
             setIntakePower(power * 0.65);
         }
         else if (opMode_iterative.gamepad1.right_trigger > 0){
-            setIntakePower(power * 0.65);
+            setIntakePower(-power * 0.65);
         }
         setIntakePower(0);
     }

@@ -62,7 +62,7 @@ public class HardwareThread implements Runnable {
         // get sensors
         //      - gyro
         //      - REV 2m Distance Sensor
-        sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage());
+        sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage(Math.PI/2));
         sensorVals.put("Previous Lift Encoder Average", robot.getManipulator().getLiftEncoderAverage());
         sensorVals.put("Previous Time", robot.timer.milliseconds());
         sensorVals.put("Init Gyro Angle", sensors.getFirstAngle());
@@ -78,7 +78,7 @@ public class HardwareThread implements Runnable {
             bulkData = expansionHubEx.getBulkInputData();
             bulkData2 = expansionHubEx2.getBulkInputData();
 
-            sensorVals.put("Current Drivetrain Encoder Average", drivetrain.getEncoderAverage());
+            sensorVals.put("Current Drivetrain Encoder Average", drivetrain.getEncoderAverage(Math.PI/2));
             sensorVals.put("Current Lift Encoder Average", manip.getLiftEncoderAverage());
             sensorVals.put("Current Time", robot.timer.milliseconds());
 
@@ -94,7 +94,7 @@ public class HardwareThread implements Runnable {
 
             opMode.telemetry.addData("DT Encoder Avg: ", sensorVals.get("Previous Drivetrain Encoder Average"));
 
-            sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage());
+            sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage(Math.PI/2));
             sensorVals.put("Previous Lift Encoder Average", robot.getManipulator().getLiftEncoderAverage());
             sensorVals.put("Previous Time", robot.timer.milliseconds());
         }

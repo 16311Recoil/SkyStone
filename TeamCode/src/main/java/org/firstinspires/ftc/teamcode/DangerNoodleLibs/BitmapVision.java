@@ -3,12 +3,15 @@ package org.firstinspires.ftc.teamcode.DangerNoodleLibs;
 import android.graphics.Bitmap;
 import java.util.ArrayList;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.RobotLog;
 import com.vuforia.Image;
 import com.vuforia.PIXEL_FORMAT;
 import com.vuforia.Vuforia;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
+
+import static android.graphics.Color.RED;
 import static android.graphics.Color.blue;
 import static android.graphics.Color.green;
 import static android.graphics.Color.red;
@@ -24,18 +27,20 @@ import static android.graphics.Color.red;
 
  */
 public class BitmapVision {
+    private static final double LEFT_THRESHOLD_RATIO = 0.278;
+    private static final double RIGHT_THRESHOLD_RATIO = 0.670;
     private VuforiaLocalizer vuforia;
     private LinearOpMode opMode;
     private int[] skyPos;
-    private final String vuforiaKey = "ASez2+z/////AAABmQHP1mc3SEEZvo408HeZ5nInV5/WlugcsO3dwjW7cpOZW08ftxSCA6uY5Dw9qW7HiB0IXTavwA4X1V+6tvt0q329qSBz/kGL+Q5xcb35DcDAYVlN6FbMhw55coMad/ajtuygpZofxagcq0/4RSbJgD3BlSaVDI/7f3MXodipi6SZo0Xxh3gF52rVZvHyYbgeTcb3P2YkjvEhhTtks6M6RkUDnY4ILRLhSVquiVg+FjtZ5XYXx3tLPYLrqXjge+zDpQftDtEJWXdrnF1TJwoTxkOVe+67Gu8gBSteQsd3HKZLlTMF0LXY3jVKctXCAVof6ep9blubWDaj0IgtbpTqfOBNKIzfFZpJbgIm861H3a7X";
+    private final String vuforiaKey = "AU5V2Zr/////AAABmTyLGvLADkQMj7KO5SybwIBFMDGOh6UbhHbOcPIzf2AUeG8hSvpZ5sin2YHPK6iJHHKAs4lTpdmIdZs4VIjEDLjrz3QPFJxSitRYPZlcWZT8MfAyjfz70VVCEUk+mDCiKjZu4JcwI8EO2kcpNnnNfJAkCleZG4/Oa78vCvp11A5D+NT0dQ0fUn23VqzCRnV4lyjGT4wJWZDkmNUac4eW/oDDaEwH02UGQr98rxR1ASe3GAYDubIHMQWwbwleRGj7GhvGCCDwrOznwTLPc/0AjpDckArTEAZtRQUDDp4oTOXiQjXkDJuqXxigfnAu6hghc2/rxkAhr+oATZRZ633m77d1oRGeDuNGy8yFEvhvLY4B";
 
     private final int aspectRatio = 2;
     // Threshold Values for cutting the pic into only three stones in order to loop through less
     // pixels.
     private final int X_MIN_THRESHOLD = 90 / aspectRatio;
     private final int X_MAX_THRESHOLD = 1200 / aspectRatio;
-    //private final int Y_MIN_THRESHOLD = 300;
-    //private final int Y_MAX_THRESHOLD = 573;
+    private final int Y_MIN_THRESHOLD = 165 / aspectRatio;
+    private final int Y_MAX_THRESHOLD = 410 / aspectRatio;
 
     // Threshold value for the X position of each stone (depends on orientation of webcam/scanning
     // position
@@ -43,9 +48,9 @@ public class BitmapVision {
     private final int MIDDLE_THRESHOLD = 935 / aspectRatio;
     private final int RIGHT_THRESHOLD = 1275 / aspectRatio;
 
-    private final int RED_THRESHOLD = 144;
-    private final int BLUE_THRESHOLD = 99;
-    private final int GREEN_THRESHOLD = 164;
+    private final int RED_THRESHOLD = 121;
+    private final int BLUE_THRESHOLD = 121;
+    private final int GREEN_THRESHOLD = 121;
 
 
     public BitmapVision(LinearOpMode opMode){
@@ -62,6 +67,9 @@ public class BitmapVision {
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
         Vuforia.setFrameFormat(PIXEL_FORMAT.RGB565, true);
         vuforia.setFrameQueueCapacity(4);
+
+        opMode.telemetry.addLine("Vuforia Init Compete");
+        opMode.telemetry.update();
     }
     // used last year; need to test this versus getBitmapVuf();
     private Bitmap getBitmap() throws InterruptedException {
@@ -106,31 +114,39 @@ public class BitmapVision {
         Bitmap image = getBitmap();
         ArrayList<Integer> xVals = new ArrayList<Integer>();
 
-        for (int x = X_MIN_THRESHOLD; x < X_MAX_THRESHOLD; x += 3) {
-            for (int y = 0; y < image.getHeight(); y += 3) {
-                int pixel = image.getPixel(x,y);
+
+        for (int colNum = 0; colNum < image.getWidth(); colNum++){
+            for (int rowNum = Y_MIN_THRESHOLD; rowNum < Y_MAX_THRESHOLD; rowNum++){
+                int pixel = image.getPixel(colNum,rowNum);
 
                 int red = red(pixel);
                 int blue = blue(pixel);
                 int green = green(pixel);
 
-                if (red < RED_THRESHOLD && blue < BLUE_THRESHOLD && green < GREEN_THRESHOLD)
-                    xVals.add(x);
+                if (red <= 30 && green <= 30 && blue <= 30) {
+                    xVals.add(colNum);
+                }
             }
         }
 
-        int averageX = 0;
+        double averageX = 0;
         for (int n: xVals)
             averageX += n;
+
+
+
         try {
             averageX /= xVals.size();
         } catch(ArithmeticException E) {
             averageX = 0;
         }
-        if (averageX < LEFT_THRESHOLD) {
+        opMode.telemetry.addData("AVG X", averageX);
+        opMode.telemetry.update();
+
+        if (averageX / image.getWidth() < LEFT_THRESHOLD_RATIO) {
             skyPos[0] = 0;
             skyPos[1] = 3;
-        } else if (averageX > MIDDLE_THRESHOLD){
+        } else if (averageX / image.getWidth()> RIGHT_THRESHOLD_RATIO){
             skyPos[0] = 2;
             skyPos[1] = 5;
         } else {
@@ -150,6 +166,11 @@ public class BitmapVision {
     // Never used- needs to be tested.
     private Bitmap getBitmapVuf() throws InterruptedException {
         return vuforia.convertFrameToBitmap(vuforia.getFrameQueue().take());
+    }
+    private boolean isInRange(int r, int b, int g){
+        if (r < 100 && b < 100 && g < 100)
+            return true;
+        return false;
     }
 
 

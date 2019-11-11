@@ -13,7 +13,7 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 import java.util.TreeMap;
 
 @Autonomous(name="Basic: AutoPrototype", group="Linear Opmode")
-//@Disabled
+@Disabled
 public class testEncoders extends LinearOpMode{
 
 

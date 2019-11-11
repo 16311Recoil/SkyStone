@@ -10,7 +10,7 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Autonomous
-        (name = "ParkAuto", group = "ControlledGroup")
+        (name = "RedParkAuto", group = "ControlledGroup")
 public class ParkAuto extends LinearOpMode {
     Drivetrain drivetrain;
     Stacker manipulator;
@@ -24,7 +24,7 @@ public class ParkAuto extends LinearOpMode {
 
         drivetrain.move(0.4, 0, Math.PI/2, 1200, 5);
         Thread.sleep(400);
-        drivetrain.move(0.4, 0, 0, 150, 3);
+        drivetrain.move(0.4, 0, 0, 600, 10);
         /*manipulator.setFangs(false);
         Thread.sleep(300);
         drivetrain.move(-0.2, 0, Math.PI/2, 1300, 5);
@@ -39,7 +39,7 @@ public class ParkAuto extends LinearOpMode {
         */
 
 
-        //drivetrain.move(0.5, 0, Math.toRadians(251.565), 18.97, 4);
+        //drivetrain.move(0.5, 0, Math.toRadians(251.565), 18.97, 4)
         //drivetrain.move(1,0,0,30,6);
 
         Thread.sleep(300);

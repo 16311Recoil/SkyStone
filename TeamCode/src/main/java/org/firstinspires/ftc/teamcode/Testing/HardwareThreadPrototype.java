@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.TreeMap;
 @TeleOp
         (name = "Hardware Thread Prototype", group = "Controlled")
+@Disabled
 public class HardwareThreadPrototype extends LinearOpMode {
 
     private Map<String, Double> dummy = new TreeMap<String, Double>();

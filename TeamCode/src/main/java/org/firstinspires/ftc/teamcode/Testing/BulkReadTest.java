@@ -1,9 +1,10 @@
 package org.firstinspires.ftc.teamcode.Testing;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.DangerNoodle.DangerNoodle;
-
+@Disabled
 public class BulkReadTest extends LinearOpMode {
     private DangerNoodle robot;
 

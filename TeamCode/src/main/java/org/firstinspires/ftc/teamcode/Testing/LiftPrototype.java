@@ -17,6 +17,7 @@ import java.util.TreeMap;
 
 @TeleOp
         (name="Basic: LiftPrototype", group="Iterative Opmode")
+@Disabled
 public class LiftPrototype extends OpMode {
 
 

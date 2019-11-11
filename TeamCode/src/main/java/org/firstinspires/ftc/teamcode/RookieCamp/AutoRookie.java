@@ -1,10 +1,12 @@
 package org.firstinspires.ftc.teamcode.RookieCamp;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 @Autonomous(name = "Rookiecamp Auto", group = "LinearOpMode")
+@Disabled
 public class AutoRookie extends LinearOpMode {
 
 
