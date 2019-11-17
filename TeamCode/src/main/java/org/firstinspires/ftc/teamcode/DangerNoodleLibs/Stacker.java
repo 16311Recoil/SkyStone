@@ -34,8 +34,8 @@ public class Stacker {
     private DcMotor ir; //intake right
     private DcMotor ll; //lift left
     private DcMotor lr; //lift right
-    //private CRServo gr; // gantry right
-    //private CRServo gl; // gantry left
+    private CRServo gr; // gantry right
+    private CRServo gl; // gantry left
     private Servo armRotater;
     private Servo pincher;
     private Servo lFang;
@@ -65,6 +65,10 @@ public class Stacker {
     private boolean teleArmToggle = false;
     private boolean telePincherToggle = false;
     private boolean teleFangToggle = false;
+    private boolean buttonA;
+    private boolean buttonB;
+    private boolean buttonX;
+    private boolean buttonY;
 
 
     public Stacker(LinearOpMode opMode) {
@@ -80,8 +84,8 @@ public class Stacker {
         armRotater = this.opMode.hardwareMap.servo.get("armRotater");
         pincher = this.opMode.hardwareMap.servo.get("pincher");
 
-        //gl = this.opMode.hardwareMap.servo.get("gl");
-        //gr = this.opMode.hardwareMap.servo.get("gr");
+        gl = this.opMode.hardwareMap.crservo.get("gl");
+        gr = this.opMode.hardwareMap.crservo.get("gr");
 
         lFang.setDirection(Servo.Direction.REVERSE);
         rFang.setDirection(Servo.Direction.FORWARD);
@@ -94,8 +98,8 @@ public class Stacker {
 
         il.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ir.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        //gl.setDirection(DcMotorSimple.Direction.FORWARD);
-        //gr.setDirection(DcMotorSimple.Direction.REVERSE);
+        gl.setDirection(DcMotorSimple.Direction.FORWARD);
+        gr.setDirection(DcMotorSimple.Direction.REVERSE);
 
         ll.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -120,8 +124,8 @@ public class Stacker {
         pincher = this.opMode_iterative.hardwareMap.servo.get("pincher");
         lFang = this.opMode_iterative.hardwareMap.servo.get("lFang");
         rFang = this.opMode_iterative.hardwareMap.servo.get("rFang");
-        //gl = this.opMode.hardwareMap.servo.get("gl");
-        //gr = this.opMode.hardwareMap.servo.get("gr");
+        gl = this.opMode.hardwareMap.crservo.get("gl");
+        gr = this.opMode.hardwareMap.crservo.get("gr");
         il.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         ir.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
@@ -176,7 +180,7 @@ public class Stacker {
         this.lr = lr;
     }
 
-   /* public CRServo getGr() {
+    public CRServo getGr() {
         return gr;
     }
 
@@ -191,7 +195,7 @@ public class Stacker {
     public void setGl(CRServo gl) {
         this.gl = gl;
     }
-*/
+
 
 
     //////////////////////////////////////////////////////////////////////////////////////////////
@@ -204,10 +208,10 @@ public class Stacker {
         ll.setPower(power);
         lr.setPower(power);
     }
-   /* public void setGantryPower(double power){
+    public void setGantryPower(double power){
         gl.setPower(power);
         gr.setPower(power);
-    } */
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     public void intakeTime(double power) {
@@ -315,7 +319,7 @@ public class Stacker {
         changeX2 = opMode_iterative.gamepad2.x;
 
     }
-    /*public void gantryControler(double power) {
+    public void gantryControler(double power) {
         if (opMode_iterative.gamepad2.right_bumper){
             setGantryPower(power);
         }
@@ -328,7 +332,7 @@ public class Stacker {
         else if (opMode_iterative.gamepad1.a){
             setGantryPower(-power);
         }
-    } */
+    }
     private void liftControl(double power) {
         if (opMode_iterative.gamepad2.right_trigger != 0){
             setLiftPower(opMode_iterative.gamepad2.right_trigger);
@@ -365,7 +369,9 @@ public class Stacker {
         fangControl();
         intakeControl(intakePower);
         liftControl(liftPower);
-        //gantryControler(gantryPower);
+        gantryControler(gantryPower);
+    }
+    public void buttonMapping(){
 
     }
     private double calculatePower(){
