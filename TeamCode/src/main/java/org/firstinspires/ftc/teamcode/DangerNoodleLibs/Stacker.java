@@ -99,7 +99,7 @@ public class Stacker {
         il.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         ir.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         gl.setDirection(DcMotorSimple.Direction.FORWARD);
-        gr.setDirection(DcMotorSimple.Direction.REVERSE);
+        gr.setDirection(DcMotorSimple.Direction.FORWARD);
 
         ll.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -124,8 +124,8 @@ public class Stacker {
         pincher = this.opMode_iterative.hardwareMap.servo.get("pincher");
         lFang = this.opMode_iterative.hardwareMap.servo.get("lFang");
         rFang = this.opMode_iterative.hardwareMap.servo.get("rFang");
-        gl = this.opMode.hardwareMap.crservo.get("gl");
-        gr = this.opMode.hardwareMap.crservo.get("gr");
+        gl = this.opMode_iterative.hardwareMap.crservo.get("gl");
+        gr = this.opMode_iterative.hardwareMap.crservo.get("gr");
         il.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         ir.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
@@ -142,6 +142,9 @@ public class Stacker {
 
         ll.setDirection(DcMotor.Direction.REVERSE);
         lr.setDirection(DcMotor.Direction.FORWARD);
+
+        ll.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         opMode_iterative.telemetry.addLine("Stacker Init Completed");
         opMode_iterative.telemetry.update();
@@ -210,7 +213,7 @@ public class Stacker {
     }
     public void setGantryPower(double power){
         gl.setPower(power);
-        gr.setPower(power);
+        gr.setPower(-power);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -332,6 +335,9 @@ public class Stacker {
         else if (opMode_iterative.gamepad1.a){
             setGantryPower(-power);
         }
+        else {
+            setGantryPower(0);
+        }
     }
     private void liftControl(double power) {
         if (opMode_iterative.gamepad2.right_trigger != 0){
@@ -346,7 +352,9 @@ public class Stacker {
         else if (opMode_iterative.gamepad1.right_bumper) {
             setLiftPower(power);
         }
-        setLiftPower(0);
+        else{
+            setLiftPower(0);
+        }
     }
     private void intakeControl(double power){
         if (opMode_iterative.gamepad2.left_stick_y > 0) {
@@ -361,7 +369,10 @@ public class Stacker {
         else if (opMode_iterative.gamepad1.right_trigger > 0){
             setIntakePower(-power * 0.65);
         }
-        setIntakePower(0);
+        else{
+            setIntakePower(0);
+        }
+
     }
     public void stackerTeleControl(double intakePower, double liftPower, double gantryPower){
         teleArm();
@@ -372,7 +383,6 @@ public class Stacker {
         gantryControler(gantryPower);
     }
     public void buttonMapping(){
-
     }
     private double calculatePower(){
         if (currentState == State.DIRECT)
