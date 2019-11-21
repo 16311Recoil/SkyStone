@@ -54,6 +54,7 @@ public class Drivetrain {
     private ElapsedTime drivetrainClock;
     public Map<String, Double> sensorVals;
     public double[] encoderVals;
+    private double[] powers;
     private PID pidControlller;
     private Sensors sensors;
     private double maxPower = 1;
@@ -72,7 +73,8 @@ public class Drivetrain {
 
         this.opMode = opMode;
         sensors = new Sensors(this.opMode);
-        encoderVals = new double[4];
+        powers = new double[NUM_MOTORS];
+        encoderVals = new double[NUM_MOTORS];
 
         // Tracks Sensor Vals.
         this.sensorVals = sensorVals;
@@ -91,6 +93,7 @@ public class Drivetrain {
 
 
         sensorVals.put("Current Encoder", getEncoderAverage(Math.PI / 2));
+        sensorVals.put("Current Angle", sensors.getFirstAngle());
         sensorVals.put("Timestamp", 0.0);
         encoderStrafe = false;
 
@@ -118,6 +121,7 @@ public class Drivetrain {
     public Drivetrain(OpMode opMode, ElapsedTime timer, Map<String, Double> sensorVals) throws InterruptedException {
         this.opMode_iterative = opMode;
         sensors = new Sensors(this.opMode_iterative);
+        double[] powers = new double[NUM_MOTORS];
         encoderVals = new double[4];
 
         opMode_iterative.telemetry.addLine("Drivetrain update");
@@ -367,9 +371,10 @@ public class Drivetrain {
         ElapsedTime t_i = new ElapsedTime();
         double currAngle = sensors.getFirstAngle();
         double target = 0;
-        while (!inBounds(currAngle) && Math.abs(currAngle) > 0.3 && t_i.seconds() < timeout && opMode.opModeIsActive()) {
+        while (!inBounds(currAngle, -1,1) && Math.abs(currAngle) > 0.3 && t_i.seconds() < timeout && opMode.opModeIsActive()) {
             turn(pidControlller.iteration(currAngle, t_i.seconds()), !((Math.signum(currAngle)) > 0));
             currAngle = sensors.getFirstAngle();
+            sensorVals.put("Current Angle", currAngle);
 
             opMode.telemetry.addData("INSIDE LOOP: t_i", t_i);
             opMode.telemetry.addData("INSIDE LOOP: error", currAngle);
@@ -382,56 +387,33 @@ public class Drivetrain {
         }
         setAllMotors(0);
     }
-    public double correctHeading2(double p, double d, double timeout, ElapsedTime t_i, double target, double currAngle) {
+    public double correctHeading2(double p, double d, ElapsedTime t_i, double target, double currAngle) {
 
         pidControlller.setReset(true);
         pidControlller.setCoeffs(p, 0, d);
         double currAngleError = Math.toDegrees(target) - currAngle;
-        if (!inBounds(currAngleError)) {
+        if (!inBounds(currAngleError, -1,1)) {
             currAngleError = Math.toDegrees(target) - currAngle;
             return pidControlller.iteration(currAngleError, t_i.seconds()) * Math.signum(currAngle) * -1;
         }
         return 0;
     }
 
-    private boolean inBounds(double num) {
-        if (num >= -1 && num <= 1)
+    private boolean inBounds(double num, double lowBound, double highBound) {
+        if (num >= lowBound && num <= highBound)
             return true;
         return false;
     }
 
+    private void setPowers(double v_d, double v_theta, double angle){
 
-    /**
-     * Move or strafe in the cardinal directions with the option to turn while doing so
-     *
-     * @param v_d     - Desired Velocity
-     * @param v_theta - Desired Rotational Velocity
-     * @param angle   - Desired Angle
-     */
-    public void move(double v_d, double v_theta, double angle, double distance, double timeout) {
-        resetEncoders();
-        // Calculates required motor powers based on direction of the rollers on the Mecanum wheel,
-        // Desired Velocity, Desired Rotational Velocity, and Desired Angle
-
-        // Note that the plane formed by the force vectors of the mecanum wheels rotates the cartesian
-        // plane by pi/4, thus creating the shift in the trig function.
-        /*
-           fr.setPower(multiplier * Range.clip(y - x - z, -1, 1));
-        fl.setPower(multiplier * Range.clip(y + x + z, -1, 1));
-        br.setPower(multiplier * Range.clip(y + x - z, -1, 1));
-        bl.setPower(multiplier * Range.clip(y - x + z, -1, 1));
-         */
-        double[] powers = new double[NUM_MOTORS];
         powers[FRONT_LEFT] = (v_d * Math.sin(angle) + v_d * Math.cos(angle) - v_theta);
         powers[FRONT_RIGHT] = (v_d * Math.sin(angle) - v_d * Math.cos(angle) + v_theta);
         powers[BACK_LEFT] = (v_d * Math.sin(angle) - v_d * Math.cos(angle) - v_theta);
         powers[BACK_RIGHT] = (v_d * Math.sin(angle) + v_d * Math.cos(angle) + v_theta);
-
-        // Range of above methods is [-2, 2]; in order to scale to [-1, 1], the maximum is found, and
-        // it is used to divide each motor power, conserving the ratio between motor powers, but bringing
-        // motor power within desired range.
-
-        maxPower = powers[0];
+    }
+    private void scaleMotors(){
+        double maxPower = powers[0];
 
         for (int i = 1; i < powers.length; i++)
             maxPower = Math.max(Math.abs(maxPower), Math.abs(powers[i]));
@@ -443,76 +425,93 @@ public class Drivetrain {
             powers[BACK_RIGHT] /= maxPower;
         }
 
-        // Set Motor Powers for set time
-        ElapsedTime timer = new ElapsedTime();
+    }
 
+
+    /**
+     * Move or strafe in the cardinal directions with the option to turn while doing so
+     *
+     * @param v_d     - Desired Velocity
+     * @param v_theta - Desired Rotational Velocity
+     * @param angle   - Desired Angle
+     * @param distance - Desired distance in encoder ticks
+     * @param timeout - maximum time for the movement
+     * @param percentTolerance  - acceptable percentage of error.
+     */
+    public void move(double v_d, double v_theta, double angle, double distance, double timeout, double percentTolerance) {
+        resetEncoders();
+        ElapsedTime timer = new ElapsedTime();
         double initPos = getEncoderAverageES(Math.toRadians(sensors.getFirstAngle()));
 
-        timer.reset();
-        while ((Math.abs(initPos - getEncoderAverageES(angle)) + 5 < distance) && (timer.seconds() < timeout) && opMode.opModeIsActive()) {
+        // Bounds calculated by the percentTolerance
+        double low_bound = distance * (1 - percentTolerance);
+        double high_bound = distance * (1 + percentTolerance);
 
+        // Loop Condition
+        boolean loopCondition = !inBounds(Math.abs(initPos - getEncoderAverageES(angle)), low_bound, high_bound )
+                && (timer.seconds() < timeout) && opMode.opModeIsActive();
+
+        // Calculate motor powers
+        setPowers(v_d, v_theta, angle);
+
+        // Scale Motors while conserving ratios between them
+        scaleMotors();
+        timer.reset();
+        while (loopCondition) {
             fl.setPower(powers[FRONT_LEFT]);
             fr.setPower(powers[FRONT_RIGHT]);
             bl.setPower(powers[BACK_LEFT]);
             br.setPower(powers[BACK_RIGHT]);
+
+            loopCondition = !inBounds(Math.abs(initPos - getEncoderAverageES(angle)), low_bound, high_bound )
+                    && (timer.seconds() < timeout) && opMode.opModeIsActive();
         }
         setAllMotors(0);
-
     }
-    public void moveStraight(double v_d, double distance, double timeout, double angle) {
+    public void moveToHeading(double v_d, double distance, double timeout, double angle, double percentTolerance) {
         resetEncoders();
-        // Calculates required motor powers based on direction of the rollers on the Mecanum wheel,
-        // Desired Velocity, Desired Rotational Velocity, and Desired Angle
+        double d_low_bound = distance * (1 - percentTolerance);
+        double d_high_bound = distance * (1 + percentTolerance);
+        double a_low_bound = angle * (1 - percentTolerance);
+        double a_high_bound = angle * (1 + percentTolerance);
 
-        // Note that the plane formed by the force vectors of the mecanum wheels rotates the cartesian
-        // plane by pi/4, thus creating the shift in the trig function.
-        /*
-           fr.setPower(multiplier * Range.clip(y - x - z, -1, 1));
-        fl.setPower(multiplier * Range.clip(y + x + z, -1, 1));
-        br.setPower(multiplier * Range.clip(y + x - z, -1, 1));
-        bl.setPower(multiplier * Range.clip(y - x + z, -1, 1));
-         */
-        double[] powers = new double[NUM_MOTORS];
-        double v_theta = 0;
+
 
         // Set Motor Powers for set time
         ElapsedTime timer = new ElapsedTime();
 
         double currAngle = sensors.getFirstAngle();
+        double v_theta;
         double initPos = getEncoderAverageES(Math.toRadians(currAngle));
 
+
         timer.reset();
-        while ((Math.abs(initPos - getEncoderAverageES(angle)) + 5 < distance) && (timer.seconds() < timeout) && opMode.opModeIsActive()) {
-            v_theta = correctHeading2((0.5 / currAngle), (0.2/currAngle),timeout, timer, angle, currAngle);
+        boolean loopCondition = !inBounds(Math.abs(initPos - getEncoderAverageES(angle)), d_low_bound, d_high_bound)
+                && !inBounds(Math.abs(currAngle - angle), a_low_bound, a_high_bound)&&(timer.seconds() < timeout) && opMode.opModeIsActive();
+
+        while (loopCondition) {
+            v_theta = correctHeading2((0.5 / currAngle), (0.2 / currAngle), timer, angle, currAngle);
             powers[FRONT_LEFT] = (v_d * Math.sin(angle) + v_d * Math.cos(angle) - v_theta);
             powers[FRONT_RIGHT] = (v_d * Math.sin(angle) - v_d * Math.cos(angle) + v_theta);
             powers[BACK_LEFT] = (v_d * Math.sin(angle) - v_d * Math.cos(angle) - v_theta);
             powers[BACK_RIGHT] = (v_d * Math.sin(angle) + v_d * Math.cos(angle) + v_theta);
 
-            // Range of above methods is [-2, 2]; in order to scale to [-1, 1], the maximum is found, and
-            // it is used to divide each motor power, conserving the ratio between motor powers, but bringing
-            // motor power within desired range.
-
-            maxPower = powers[0];
-
-            for (int i = 1; i < powers.length; i++)
-                maxPower = Math.max(Math.abs(maxPower), Math.abs(powers[i]));
-
-            if (maxPower > 1) {
-                powers[FRONT_LEFT] /= maxPower;
-                powers[FRONT_RIGHT] /= maxPower;
-                powers[BACK_LEFT] /= maxPower;
-                powers[BACK_RIGHT] /= maxPower;
-            }
-
+            scaleMotors();
 
             fl.setPower(powers[FRONT_LEFT]);
             fr.setPower(powers[FRONT_RIGHT]);
             bl.setPower(powers[BACK_LEFT]);
             br.setPower(powers[BACK_RIGHT]);
+
+            currAngle = sensors.getFirstAngle();
+            sensorVals.put("Current Angle", currAngle);
+
+            loopCondition = !inBounds(Math.abs(initPos - getEncoderAverageES(angle)), d_low_bound, d_high_bound)
+                    && !inBounds(Math.abs(currAngle - angle), a_low_bound, a_high_bound)&&(timer.seconds() < timeout) && opMode.opModeIsActive();
+
+
         }
         setAllMotors(0);
-
     }
     //TODO
     // Experimentally determine constant multiplier to multiply by; the multiplier will change

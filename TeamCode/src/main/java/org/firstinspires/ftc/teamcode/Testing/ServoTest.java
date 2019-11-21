@@ -23,9 +23,6 @@ public class ServoTest extends LinearOpMode {
         lFang.setDirection(Servo.Direction.REVERSE);
         rFang.setDirection(Servo.Direction.FORWARD);
 
-
-
-
         lFang.setPosition(0);
         rFang.setPosition(0);
 
@@ -39,9 +36,5 @@ public class ServoTest extends LinearOpMode {
             telemetry.update();
 
         }
-
-
-
-
     }
 }

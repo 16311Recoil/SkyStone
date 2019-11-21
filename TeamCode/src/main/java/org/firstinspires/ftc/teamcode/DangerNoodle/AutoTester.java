@@ -14,13 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
         (name = "AutoTester", group = "ControlledGroup")
 public class AutoTester extends LinearOpMode {
     Drivetrain drivetrain;
-    Stacker manipulator;
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        drivetrain = new Drivetrain(this, new ElapsedTime(), new ConcurrentHashMap<String, Double>());
-        manipulator = new Stacker(this);
+
 
         waitForStart();
         /*
@@ -68,10 +66,10 @@ public class AutoTester extends LinearOpMode {
 
         Thread.sleep(300);
 
-       drivetrain.move(0.5,0,Math.PI/4,300, 5);
+       //drivetrain.move(0.5,0,Math.PI/4,300, 5);
 
         Thread.sleep(100);
 
-        drivetrain.move(0.5,0,Math.PI,2500,6);
+        //drivetrain.move(0.5,0,Math.PI,2500,6);
     }
 }

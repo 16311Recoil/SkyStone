@@ -26,18 +26,18 @@ public class RedFoundationAuto extends LinearOpMode {
         manipulator.setFangs(false);
         Thread.sleep(300);
 
-        drivetrain.move(0.4, 0, (3*Math.PI/2), 200, 3);
+        drivetrain.move(0.4, 0, (3*Math.PI/2), 200, 3,0.1);
         Thread.sleep(300);
 
         // Strafe Right slightly
-        drivetrain.move(0.4, 0, Math.PI, 1400, 3);
+        drivetrain.move(0.4, 0, Math.PI, 1400, 3,0.1);
         Thread.sleep(300);
 
        // double angle = drivetrain.getSensors().getFirstAngle();
         //drivetrain.correctHeading((0.5 / angle), (0.2/angle),2);
 
         // Move Forward
-        drivetrain.move(0.4, 0, (3 * Math.PI/2), 1150, 4);
+        drivetrain.move(0.4, 0, (3 * Math.PI/2), 1150, 4,0.1);
 
         Thread.sleep(300);
         //drivetrain.move(-0.5, 0, Math.PI, 25, 4);
@@ -46,7 +46,7 @@ public class RedFoundationAuto extends LinearOpMode {
         manipulator.setFangs(true);
         Thread.sleep(1100);
 
-        drivetrain.move(0.65,0, Math.PI/2, 1100, 4);
+        drivetrain.move(0.65,0, Math.PI/2, 1100, 4,0.1);
         Thread.sleep(300);
 /*
         drivetrain.turnPID(90,(0.93 / 90),0,0.6 / 90,3,true);
