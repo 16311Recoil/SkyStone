@@ -14,6 +14,8 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.Testing.LiftPrototype;
 
+import static android.os.SystemClock.sleep;
+
 
 public class Stacker {
 
@@ -41,14 +43,17 @@ public class Stacker {
     private Servo lFang;
     private Servo rFang;
     private final double TIME_FOR_INTAKE = 3;
-    private final double ENCODER_LIFT_UP = 2;  //TODO: Test times for Lift Times
-    private final double ENCODER_LIFT_DOWN = 1.5;
-    private final double CLOSED_PINCHER_SERVO_POSITION = 0; //TODO: Test for Servo Positions
-    private final double OPEN_PICHER_SERVO_POSITION = 90;
-    private final double ARM_IN = 0;
-    private final double ARM_OUT = 1;
+    private final double TIME_FOR_GANTRY_IN = 0; //TODO: Test for Times
+    private final double TIME_FOR_GANTRY_OUT = 0;
+    private final double CLOSED_PINCHER_SERVO_POSITION = 0.9;
+    private final double OPEN_PICHER_SERVO_POSITION = 0;
+    private final double[] ARM_POSITIONS = new double[]{0, 0.55, 0.9};
+    private int armSpot = 1;
+    private int armRotation = -1;
+    private int liftMaxSpot = 0;
     private final double INCHES_TO_SERVO = 0;//TODO: Test conversions for inches in gantry movement to servo position
     private final double LIFT_MAX = 0; //TODO: Test for Max Encoder Limit on Lift
+    private final double[] LIFT_BLOCK = new double[]{0, 0, 0}; //TODO: Test for encoder readings at each block height
     private final double LIFT_MIN = 0; //TODO: Test for Min Encoder Limit on Lift
     private static final double SERVO_LOCK = 1; // Needs to be tested;
     private static final double SERVO_UNLOCK = 0; // Needs to be tested;
@@ -61,10 +66,13 @@ public class Stacker {
     private boolean changeB = false;
     private boolean changeA2 = false;
     private boolean changeB2 = false;
+    private boolean changeDpadUp2 = false;
+    private boolean changeDpadDown2 = false;
     private boolean changeDpadLeft2 = false;
-    private boolean teleArmToggle = false;
+    private boolean cnangeDpadRight2 = false;
     private boolean telePincherToggle = false;
     private boolean teleFangToggle = false;
+    private boolean teleLiftMax = false;
     private boolean buttonA;
     private boolean buttonB;
     private boolean buttonX;
@@ -216,13 +224,8 @@ public class Stacker {
         gr.setPower(-power);
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    public void intakeTime(double power) {
-        ElapsedTime timer = new ElapsedTime();
-        while (timer.seconds() < TIME_FOR_INTAKE) {
-            setIntakePower(power);
-        }
-        setIntakePower(0);
+    public void setArmPosition(int position){
+        armRotater.setPosition(ARM_POSITIONS[position]);
     }
 
     public void setPincherPosition(boolean close) {
@@ -233,15 +236,6 @@ public class Stacker {
         }
     }
 
-
-    public void setArmPosition(boolean in) {
-        if (in){
-            armRotater.setPosition(ARM_IN);
-        }
-        else{
-            armRotater.setPosition(ARM_OUT);
-        }
-    }
     public void setFangs (boolean lock) {
         if(lock){
             lFang.setPosition(SERVO_LOCK);
@@ -252,20 +246,53 @@ public class Stacker {
             rFang.setPosition(SERVO_UNLOCK);
         }
     }
-    public void setLiftPosition(double power, boolean up) {
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    public void intakeTime(double power) {
+        ElapsedTime timer = new ElapsedTime();
+        while (timer.seconds() < TIME_FOR_INTAKE) {
+            setIntakePower(power);
+        }
+        setIntakePower(0);
+    }
+
+    public void setArmPositionToggle() {
+        if (armSpot == 0 || armSpot == 2){
+            armRotation *= -1;
+        }
+        armSpot += 1 * armRotation;
+        setArmPosition(armSpot);
+    }
+
+    public void setLiftPosition(double power, double position) {
         double currentPos = getLiftEncoderAverage();
-        if (up) {
-            while (currentPos < ENCODER_LIFT_UP) {
+        if (currentPos < position) {
+            while (currentPos < position) {
                 setLiftPower(power);
             }
-            setLiftPower(0);
-        } else {
-            while (currentPos < ENCODER_LIFT_DOWN) {
+        }
+        else {
+            while (currentPos > position) {
                 setLiftPower(-power);
             }
-            setLiftPower(0);
+        }
+        setLiftPower(0);
+    }
+
+    public void setGantryPosition(double power, boolean in){
+        ElapsedTime timer = new ElapsedTime();
+        if (in) {
+            while (timer.milliseconds() < TIME_FOR_GANTRY_IN) {
+                setGantryPower(power);
+            }
+        }
+        else {
+            while (timer.milliseconds() < TIME_FOR_GANTRY_OUT) {
+                setGantryPower(-power);
+            }
         }
     }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -282,6 +309,7 @@ public class Stacker {
     public double inchToServo(double inches){
         return (inches * INCHES_TO_SERVO);
     }
+
     ////////////////////////////////////////////////////////////////////////////////////
     //          Tele-Op
 
@@ -298,13 +326,8 @@ public class Stacker {
         changeA2 = opMode_iterative.gamepad2.a;
     }
     public void teleArm(){
-        if (((opMode_iterative.gamepad1.b && !changeB ) || (opMode_iterative.gamepad2.b && !changeB2)) &&  !teleArmToggle){
-            setArmPosition(true);
-            teleArmToggle = !teleArmToggle;
-        }
-        else if ((opMode_iterative.gamepad1.b && !changeB ) || (opMode_iterative.gamepad2.b && !changeB2) && teleArmToggle){
-            setArmPosition(false);
-            teleArmToggle = !teleArmToggle;
+        if (((opMode_iterative.gamepad1.b && !changeB ) || (opMode_iterative.gamepad2.b && !changeB2))){
+            setArmPositionToggle();
         }
         changeB = opMode_iterative.gamepad1.b;
         changeB2 = opMode_iterative.gamepad2.b;
@@ -322,7 +345,7 @@ public class Stacker {
         changeX2 = opMode_iterative.gamepad2.x;
 
     }
-    public void gantryControler(double power) {
+    public void gantryController(double power) {
         if (opMode_iterative.gamepad2.right_bumper){
             setGantryPower(power);
         }
@@ -339,7 +362,7 @@ public class Stacker {
             setGantryPower(0);
         }
     }
-    private void liftControl(double power) {
+    private void liftControl(double power) {  //TODO: Update with encoder stops, use LIFT_BLOCK[liftMaxSpot] when doing so
         if (opMode_iterative.gamepad2.right_trigger != 0){
             setLiftPower(opMode_iterative.gamepad2.right_trigger);
         }
@@ -356,18 +379,30 @@ public class Stacker {
             setLiftPower(0);
         }
     }
+    private void liftMaxControl(){
+        if (opMode_iterative.gamepad2.dpad_up && !changeDpadUp2 && (liftMaxSpot < 2)){ //TODO Update this number for the max size of LIFT_BLOCK
+            liftMaxSpot++;
+        }
+        if (opMode_iterative.gamepad2.dpad_down && !changeDpadDown2 && liftMaxSpot > 0){
+            liftMaxSpot--;
+        }
+
+        changeDpadUp2 = opMode_iterative.gamepad2.dpad_up;
+        changeDpadDown2 = opMode_iterative.gamepad2.dpad_down;
+    }
+
     private void intakeControl(double power){
         if (opMode_iterative.gamepad2.left_stick_y > 0) {
-            setIntakePower(power * 0.65);
+            setIntakePower(power);
         }
         else if (opMode_iterative.gamepad2.left_stick_y < 0){
-            setIntakePower(-power * 0.65);
+            setIntakePower(-power);
         }
         else if(opMode_iterative.gamepad1.left_trigger > 0){
-            setIntakePower(power * 0.65);
+            setIntakePower(power);
         }
         else if (opMode_iterative.gamepad1.right_trigger > 0){
-            setIntakePower(-power * 0.65);
+            setIntakePower(-power);
         }
         else{
             setIntakePower(0);
@@ -380,7 +415,7 @@ public class Stacker {
         fangControl();
         intakeControl(intakePower);
         liftControl(liftPower);
-        gantryControler(gantryPower);
+        gantryController(gantryPower);
     }
     public void buttonMapping(){
     }
@@ -393,6 +428,23 @@ public class Stacker {
             return 0.25;
         return 0;
     }
-
+////////////////////////////////////// Auto Macros //////////////////////////////////////////////////////////////////////////
+    public void macOut(){
+        setPincherPosition(true);
+        sleep(500);
+        setLiftPosition(1, LIFT_BLOCK[0]);
+        sleep(500);
+        setGantryPosition(1, false);
+        sleep(500);
+        setArmPosition(0);
+    }
+    public void macIn(){
+        setPincherPosition(true);
+        setArmPosition(2);
+        sleep(500);
+        setGantryPosition(1,true);
+        sleep(500);
+        setLiftPosition(1, LIFT_MIN);
+    }
 }
 

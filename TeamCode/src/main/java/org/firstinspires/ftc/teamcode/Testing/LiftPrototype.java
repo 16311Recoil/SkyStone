@@ -3,8 +3,10 @@ package org.firstinspires.ftc.teamcode.Testing;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 import com.qualcomm.robotcore.util.RobotLog;
@@ -17,7 +19,7 @@ import java.util.TreeMap;
 
 @TeleOp
         (name="Basic: LiftPrototype", group="Iterative Opmode")
-@Disabled
+
 public class LiftPrototype extends OpMode {
 
 
@@ -33,6 +35,8 @@ public class LiftPrototype extends OpMode {
         private ElapsedTime runtime;
         private DcMotor ll; //lift left
         private DcMotor lr; //lift right
+        private Servo gl;
+        private Servo gr;
         private boolean changeA;
         private boolean changeB;
         private double power;
@@ -92,6 +96,8 @@ public class LiftPrototype extends OpMode {
             // step (using the FTC Robot Controller app on the phone).
             ll  = hardwareMap.get(DcMotor.class, "ll");
             lr  = hardwareMap.get(DcMotor.class, "lr");
+            gl  = hardwareMap.get(Servo.class, "gl");
+            gr = hardwareMap.get(Servo.class, "gr");
 
             // Most robots need the motor on one side to be reversed to drive forward
             // Reverse the motor that runs backwards when connected directly to the battery
@@ -100,11 +106,12 @@ public class LiftPrototype extends OpMode {
             ll.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            intakeMotor  = hardwareMap.get(DcMotor.class, "intakeMotor");
-            intakeMotor2 = hardwareMap.get(DcMotor.class, "intakeMotor2");
 
-            intakeMotor.setDirection(DcMotor.Direction.FORWARD);
-            intakeMotor2.setDirection(DcMotor.Direction.FORWARD);
+            //intakeMotor  = hardwareMap.get(DcMotor.class, "intakeMotor");
+            //intakeMotor2 = hardwareMap.get(DcMotor.class, "intakeMotor2");
+
+            //intakeMotor.setDirection(DcMotor.Direction.FORWARD);
+            //intakeMotor2.setDirection(DcMotor.Direction.FORWARD);
 
             // Tell the driver that initialization is complete.
             telemetry.addData("Status", "Initialized");
@@ -136,6 +143,7 @@ public class LiftPrototype extends OpMode {
             //drivetrain.moveTelop(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
             //liftControlD1();
             liftControlD2(1);
+            gantry();
         }
 
         /*
@@ -177,6 +185,13 @@ public class LiftPrototype extends OpMode {
             counter += 1;
         }
         return (ll.getCurrentPosition() + lr.getCurrentPosition() / (2 - counter));
+    }
+    public void gantry(){
+        if (gamepad1.a){
+            gl.setPosition(1);
+            gr.setPosition(1);
+        }
+
     }
 }
 
