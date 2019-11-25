@@ -36,17 +36,17 @@ public class RedSkystone extends LinearOpMode {
         switch (skyPos){
             case 2:
 
-               dt.move(0.4,0,Math.PI, 700,3);
+               dt.move(0.4,0,Math.PI, 700,3,0.1);
 
                Thread.sleep(300);
 
-               dt.move(0.6,0,Math.PI/2, 1100,5);
+               dt.move(0.6,0,Math.PI/2, 1100,5,0.1);
 
                Thread.sleep(200);
 
                manip.setIntakePower(0.5);
 
-               dt.move(0.3,0,Math.PI/2, 100,2);
+               dt.move(0.3,0,Math.PI/2, 100,2,0.1);
 
                Thread.sleep(300);
 
@@ -59,47 +59,47 @@ public class RedSkystone extends LinearOpMode {
 
                Thread.sleep(300);
 
-               dt.move(0.2,0,3* Math.PI/2, 200,5);
+               dt.move(0.2,0,3* Math.PI/2, 200,5,0.1);
 
                Thread.sleep(300);
 
-               dt.move(0.3,0,0, 1800,5);
+               dt.move(0.3,0,0, 1800,5,0.1);
                break;
 
             case 1:
                 angle = dt.getSensors().getFirstAngle();
                 dt.correctHeading((0.5 / angle), (0.2/angle),7);
 
-                dt.move(0.2,0, Math.PI/2, 1100,5);
+                dt.move(0.2,0, Math.PI/2, 1100,5,0.1);
 
                 Thread.sleep(300);
 
                 manip.setIntakePower(0.6);
 
-                dt.move(0.14,0,Math.PI/2, 300,3);
+                dt.move(0.14,0,Math.PI/2, 300,3,0.1);
 
                 manip.setIntakePower(0.8);
 
                 Thread.sleep(5000);
 
-                dt.move(0.3,0,3* Math.PI/2, 200,3);
+                dt.move(0.3,0,3* Math.PI/2, 200,3,0.1);
 
                 Thread.sleep(300);
 
-                dt.move(0.3,0,Math.PI, 1200,5);
+                dt.move(0.3,0,Math.PI, 1200,5,0.1);
 
 
                break;
             case 0:
-                dt.move(0.4,0,0,500,3);
+                dt.move(0.4,0,0,500,3,0.1);
 
                 Thread.sleep(300);
 
-                dt.move(0.3,0,Math.PI/2, 1100,5);
+                dt.move(0.3,0,Math.PI/2, 1100,5,0.1);
 
                 Thread.sleep(200);
 
-                dt.move(0.1,0,Math.PI/2, 100,5);
+                dt.move(0.1,0,Math.PI/2, 100,5,0.1);
 
                 Thread.sleep(500);
 
@@ -114,11 +114,11 @@ public class RedSkystone extends LinearOpMode {
 
                 Thread.sleep(300);
 
-                dt.move(0.2,0,3* Math.PI/2, 300,5);
+                dt.move(0.2,0,3* Math.PI/2, 300,5,0.1);
 
                 Thread.sleep(300);
 
-                dt.move(0.3,0,0, 315,5);
+                dt.move(0.3,0,0, 315,5,0.1);
 
                 break;
         }

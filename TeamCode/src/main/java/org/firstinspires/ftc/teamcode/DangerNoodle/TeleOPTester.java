@@ -43,13 +43,13 @@ public class TeleOPTester extends OpMode {
     }
     public void controlDrivetrain(){
         if (gamepad1.dpad_up && changeDpadUp){
-            drivetrain.move(0.5, 0,Math.PI/2,100,5);
+            drivetrain.move(0.5, 0,Math.PI/2,100,5,0.1);
         } else if (gamepad1.dpad_down && changeDpadDown){
-            drivetrain.move(0.5, 0 ,3 * Math.PI / 2, 100,5);
+            drivetrain.move(0.5, 0 ,3 * Math.PI / 2, 100,5,0.1);
         } else if(gamepad1.dpad_left && changeDpadLeft) {
-            drivetrain.move(0.5, 0, Math.PI, 100, 5);
+            drivetrain.move(0.5, 0, Math.PI, 100, 5,0.1);
         } else if(gamepad1.dpad_right && changeDpadRight){
-            drivetrain.move(0.5, 0,0,100,5);
+            drivetrain.move(0.5, 0,0,100,5,0.1);
         }
         changeDpadUp = gamepad1.dpad_up;
         changeDpadRight = gamepad1.dpad_right;

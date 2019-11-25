@@ -103,6 +103,8 @@ public class LiftPrototype extends OpMode {
             // Reverse the motor that runs backwards when connected directly to the battery
             ll.setDirection(DcMotor.Direction.FORWARD);
             lr.setDirection(DcMotor.Direction.REVERSE);
+
+
             ll.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 

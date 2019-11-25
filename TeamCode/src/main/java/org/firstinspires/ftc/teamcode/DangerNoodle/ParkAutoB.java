@@ -22,9 +22,9 @@ public class ParkAutoB extends LinearOpMode {
 
         waitForStart();
 
-        drivetrain.move(0.4, 0, Math.PI/2, 1200, 5);
+        drivetrain.move(0.4, 0, Math.PI/2, 1200, 5,0.1);
         Thread.sleep(400);
-        drivetrain.move(0.4, 0, 0, 600, 10);
+        drivetrain.move(0.4, 0, 0, 600, 10,0.1);
         /*manipulator.setFangs(false);
         Thread.sleep(300);
         drivetrain.move(-0.2, 0, Math.PI/2, 1300, 5);

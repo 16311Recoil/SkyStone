@@ -11,12 +11,10 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.HardwareThread;
 
 import java.util.Map;
 import java.util.TreeMap;
-@TeleOp
-        (name = "Hardware Thread Prototype", group = "Controlled")
 @Disabled
+@TeleOp
+        (name = "HTP", group = "Controlled")
 public class HardwareThreadPrototype extends LinearOpMode {
-
-    private Map<String, Double> dummy = new TreeMap<String, Double>();
     DangerNoodle dangerNoodle;
     @Override
     public void runOpMode() throws InterruptedException {
@@ -24,6 +22,7 @@ public class HardwareThreadPrototype extends LinearOpMode {
         //hThread = new HardwareThread(dangerNoodle, dummy);
         waitForStart();
         while (!isStopRequested()) {
+            telemetry.addData("FL", dangerNoodle.getSensorVals().get(""));
             telemetry.update();
         }
     }

@@ -62,6 +62,7 @@ public class DangerNoodle implements Robot {
             this.opMode.telemetry.update();
         }
         isMoving = false;
+        hardwareThread = new HardwareThread(this, sensorVals);
         opMode.telemetry.addLine("DangerNoodle Init Completed");
         opMode.telemetry.update();
     }
@@ -147,13 +148,11 @@ public class DangerNoodle implements Robot {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        drivetrain.move(1, 0,0,0,0);
+        drivetrain.move(1, 0,0,0,0,0.1);
         if (inside)
-            drivetrain.move(0.85, 0, Math.PI/4,0,0);
+            drivetrain.move(0.85, 0, Math.PI/4,0,0,0.1);
          else
-             drivetrain.move(1, 0, 0 ,0,0);
-
-
+             drivetrain.move(1, 0, 0 ,0,0,0.1);
     }
 
     @Override
