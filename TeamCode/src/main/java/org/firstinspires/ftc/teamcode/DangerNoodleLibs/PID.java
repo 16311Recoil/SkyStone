@@ -120,4 +120,18 @@ public class PID {
     public void setMAX_SUM(double maxSum){
         MAX_SUM = maxSum;
     }
+    private boolean inBounds(double num, double lowBound, double highBound) {
+        return num >= lowBound && num <= highBound;
+    }
+    public boolean checkState(double low, double high){
+        return !inBounds(previousError, low, high);
+    }
+
+    public double getPreviousError() {
+        return previousError;
+    }
+
+    public void setPreviousError(double previousError) {
+        this.previousError = previousError;
+    }
 }

@@ -456,8 +456,10 @@ public class Drivetrain {
 
         // Scale Motors while conserving ratios between them
         scaleMotors();
+
         timer.reset();
         while (loopCondition) {
+
             fl.setPower(powers[FRONT_LEFT]);
             fr.setPower(powers[FRONT_RIGHT]);
             bl.setPower(powers[BACK_LEFT]);
@@ -469,13 +471,22 @@ public class Drivetrain {
         setAllMotors(0);
     }
     public void moveToHeading(double v_d, double distance, double timeout, double angle, double percentTolerance) {
+        PID rotational = new PID();
+        PID linear = new PID();
+
         resetEncoders();
+        double prevErrorCheck_d;
+        double prevErrorCheck_a;
         double d_low_bound = distance * (1 - percentTolerance);
         double d_high_bound = distance * (1 + percentTolerance);
         double a_low_bound = angle * (1 - percentTolerance);
         double a_high_bound = angle * (1 + percentTolerance);
 
+        int countA = 0;
+        int countD = 0;
 
+        rotational.setTarget(angle);
+        linear.setTarget(distance);
 
         // Set Motor Powers for set time
         ElapsedTime timer = new ElapsedTime();
@@ -486,29 +497,49 @@ public class Drivetrain {
 
 
         timer.reset();
-        boolean loopCondition = !inBounds(Math.abs(initPos - getEncoderAverageES(angle)), d_low_bound, d_high_bound)
-                && !inBounds(Math.abs(currAngle - angle), a_low_bound, a_high_bound)&&(timer.seconds() < timeout) && opMode.opModeIsActive();
+        boolean loopCondition = rotational.checkState(a_low_bound, a_high_bound)
+                && linear.checkState(d_low_bound, d_high_bound)
+                && (timer.seconds() < timeout)
+                && opMode.opModeIsActive();
 
         while (loopCondition) {
-            v_theta = correctHeading2((0.5 / currAngle), (0.2 / currAngle), timer, angle, currAngle);
-            powers[FRONT_LEFT] = (v_d * Math.sin(angle) + v_d * Math.cos(angle) - v_theta);
-            powers[FRONT_RIGHT] = (v_d * Math.sin(angle) - v_d * Math.cos(angle) + v_theta);
-            powers[BACK_LEFT] = (v_d * Math.sin(angle) - v_d * Math.cos(angle) - v_theta);
-            powers[BACK_RIGHT] = (v_d * Math.sin(angle) + v_d * Math.cos(angle) + v_theta);
+            currAngle = sensors.getFirstAngle();
+            sensorVals.put("Current Angle", currAngle);
 
+            // correctHeading2((0.5 / currAngle), (0.2 / currAngle), timer, angle, currAngle);
+            v_theta = rotational.iteration(angle - currAngle, timer.seconds() );
+            if (sensorVals.get("Current Drivetrain Encoder Average") != null) {
+                v_d = linear.iteration(sensorVals.get("Current Drivetrain Encoder Average"), timer.seconds());
+            } else{
+                getEncoders();
+                v_d = linear.iteration(getEncoderAverage(currAngle), timer.seconds());
+            }
+
+            setPowers(v_d, v_theta, angle);
             scaleMotors();
+
 
             fl.setPower(powers[FRONT_LEFT]);
             fr.setPower(powers[FRONT_RIGHT]);
             bl.setPower(powers[BACK_LEFT]);
             br.setPower(powers[BACK_RIGHT]);
 
-            currAngle = sensors.getFirstAngle();
-            sensorVals.put("Current Angle", currAngle);
+            prevErrorCheck_a = rotational.getPreviousError();
+            prevErrorCheck_d = linear.getPreviousError();
 
-            loopCondition = !inBounds(Math.abs(initPos - getEncoderAverageES(angle)), d_low_bound, d_high_bound)
-                    && !inBounds(Math.abs(currAngle - angle), a_low_bound, a_high_bound)&&(timer.seconds() < timeout) && opMode.opModeIsActive();
 
+            loopCondition = rotational.checkState(a_low_bound, a_high_bound)
+                    && linear.checkState(d_low_bound, d_high_bound)
+                    && (timer.seconds() < timeout)
+                    && opMode.opModeIsActive()
+                    && countD < 6
+                    && countA < 6;
+
+
+             if (prevErrorCheck_a == rotational.getPreviousError())
+                 countA++;
+             if (prevErrorCheck_d == linear.getPreviousError())
+                 countD++;
 
         }
         setAllMotors(0);

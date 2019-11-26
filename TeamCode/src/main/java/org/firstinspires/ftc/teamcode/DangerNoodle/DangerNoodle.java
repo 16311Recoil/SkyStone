@@ -33,6 +33,7 @@ public class DangerNoodle implements Robot {
     private Map<String, Double> sensorVals;
 
     private HardwareThread hardwareThread;
+    private ElapsedTime masterTime;
 
 
 
@@ -50,6 +51,7 @@ public class DangerNoodle implements Robot {
             drivetrain = new Drivetrain(opMode, timer, sensorVals);
             manipulator = new Stacker(opMode);
             bmv = new BitmapVision(opMode);
+            masterTime = new ElapsedTime();
 
             //hardwareThread = new HardwareThread(this, sensorVals);
             //hardwareThread.run();
@@ -74,6 +76,7 @@ public class DangerNoodle implements Robot {
             drivetrain = new Drivetrain(opMode_iterative, timer, sensorVals);
             manipulator = new Stacker(opMode_iterative);
             //bmv = new BitmapVision(opMode);
+            masterTime = new ElapsedTime();
 
 
         } catch (InterruptedException e) {
@@ -213,5 +216,14 @@ public class DangerNoodle implements Robot {
         drivetrain.moveTelop2(opMode_iterative.gamepad1.left_stick_x, opMode_iterative.gamepad1.left_stick_y, opMode_iterative.gamepad1.right_stick_x);
         manipulator.stackerTeleControl(0.75,1,.75);
     }
+    public String toString(){
+        String output = "DANGERNOODLE OUTPUT\n";
+        output += "\tTIMER (ms): " + masterTime.milliseconds();
+        output += "\tSENSOR VALS:";
+        output += "\n\t\tDT Encoder Average" + sensorVals.get("Current Drivetrain Encoder Average");
+        output += "\n\t\tX: " + sensorVals.get("X") + "\tY:" + sensorVals.get("Y");
+        return output;
+    }
+
 
 }
