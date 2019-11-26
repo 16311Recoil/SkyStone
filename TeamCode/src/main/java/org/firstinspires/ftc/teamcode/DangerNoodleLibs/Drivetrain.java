@@ -638,9 +638,13 @@ public class Drivetrain {
         while (Math.abs(error) > 0.3 && t_i.seconds() < timeout && opMode.opModeIsActive()) {
             if (error > 0)
                 turn(pidControlller.iteration(error, t_i.seconds()), !right);
+            else
+                turn(pidControlller.iteration(error, t_i.seconds()), right);
+
             error = target - sensors.getFirstAngle();
 
             opMode.telemetry.addData("INSIDE LOOP: t_i", t_i);
+            opMode.telemetry.addData("TIME PER LOOP: loops/ns" , loopCount++/t_i.nanoseconds());
             opMode.telemetry.addData("INSIDE LOOP: error", error);
             opMode.telemetry.update();
         }
