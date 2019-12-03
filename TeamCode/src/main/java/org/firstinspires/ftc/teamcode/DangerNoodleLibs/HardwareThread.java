@@ -60,21 +60,19 @@ public class HardwareThread implements Runnable {
         drivetrainEncoders[2] = bulkData.getMotorCurrentPosition(drivetrain.getBl());
         drivetrainEncoders[3] = bulkData2.getMotorCurrentPosition(drivetrain.getBr());
 
-        opMode.telemetry.addLine("3");
-        opMode.telemetry.update();
 
         // initialize lift encoders
-        liftEncoders[0] = bulkData.getMotorCurrentPosition(manip.getIl());
-        liftEncoders[1] = bulkData2.getMotorCurrentPosition(manip.getIr());
+        //liftEncoders[0] = bulkData.getMotorCurrentPosition(manip.getLl());
+        //liftEncoders[1] = bulkData2.getMotorCurrentPosition(manip.getLr());
 
         // get sensors
         //      - gyro
         //      - REV 2m Distance Sensor
 
-        sensorVals.put("Previous Lift Encoder Average", robot.getManipulator().getLiftEncoderAverage());
+        //sensorVals.put("Previous Lift Encoder Average", robot.getManipulator().getLiftEncoderAverage());
         sensorVals.put("Previous Time", robot.timer.milliseconds());
         sensorVals.put("Current Angle", sensors.getFirstAngle());
-        sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage(sensorVals.get("Current Angle")));
+        sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverageES(sensorVals.get("Current Angle")));
 
         sensorVals.put("X", sensors.getXDistance());
         sensorVals.put("Y", sensors.getYDistance());
@@ -104,20 +102,21 @@ public class HardwareThread implements Runnable {
             }
 
 
-            sensorVals.put("Current Drivetrain Encoder Average", drivetrain.getEncoderAverage(angle));
+            sensorVals.put("Current Drivetrain Encoder Average", drivetrain.getEncoderAverageES(angle));
             sensorVals.put("Current Lift Encoder Average", manip.getLiftEncoderAverage());
             sensorVals.put("Current Time", robot.timer.milliseconds());
 
             //caching?
-            drivetrainEncoders[0] = bulkData.getMotorCurrentPosition(drivetrain.getFl());
-            drivetrainEncoders[1] = bulkData2.getMotorCurrentPosition(drivetrain.getFr());
-            drivetrainEncoders[2] = bulkData.getMotorCurrentPosition(drivetrain.getBl());
-            drivetrainEncoders[3] = bulkData2.getMotorCurrentPosition(drivetrain.getBr());
+            drivetrainEncoders[0] = Math.abs(bulkData.getMotorCurrentPosition(drivetrain.getFl()));
+            drivetrainEncoders[1] = Math.abs(bulkData2.getMotorCurrentPosition(drivetrain.getFr()));
+            drivetrainEncoders[2] = Math.abs(bulkData.getMotorCurrentPosition(drivetrain.getBl()));
+            drivetrainEncoders[3] = Math.abs(bulkData2.getMotorCurrentPosition(drivetrain.getBr()));
 
             drivetrain.setEncoderVals(drivetrainEncoders);
+            sensorVals.put("Current Drivetrain Encoder Average", drivetrain.getEncoderAverageES(angle));
 
-            liftEncoders[0] = bulkData.getMotorCurrentPosition(manip.getIl());
-            liftEncoders[1] = bulkData2.getMotorCurrentPosition(manip.getIr());
+            //liftEncoders[0] = bulkData.getMotorCurrentPosition(manip.getIl());
+            //liftEncoders[1] = bulkData2.getMotorCurrentPosition(manip.getIr());
             // update rev 2m distance
             sensorVals.put("X", sensors.getXDistance());
             sensorVals.put("Y", sensors.getYDistance());

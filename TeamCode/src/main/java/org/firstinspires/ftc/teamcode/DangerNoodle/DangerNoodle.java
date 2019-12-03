@@ -32,8 +32,11 @@ public class DangerNoodle implements Robot {
     public ElapsedTime timer;
     private Map<String, Double> sensorVals;
 
+
     private HardwareThread hardwareThread;
     private ElapsedTime masterTime;
+    private double LEFT, RIGHT, FORWARD, BACKWARD;
+    private boolean blue;
 
 
 
@@ -42,7 +45,7 @@ public class DangerNoodle implements Robot {
      */
     // TODO: Add Exception Handling/Logging using RobotLog.i();
     // TODO: Determine Hardware Thread Bug
-    public DangerNoodle(LinearOpMode opMode){
+    public DangerNoodle(LinearOpMode opMode, boolean blue, boolean foundation){
         try {
             skyPos = new int[2];
             timer = new ElapsedTime();
@@ -63,11 +66,36 @@ public class DangerNoodle implements Robot {
             this.opMode.telemetry.addLine("DRIVETRAIN INIT FAILED");
             this.opMode.telemetry.update();
         }
+        this.blue = blue;
+        if (blue && foundation) {
+            LEFT = Math.PI;
+            RIGHT = 0;
+            FORWARD = Math.PI / 2;
+            BACKWARD = 3* Math.PI / 2;
+        } else if (blue){
+            LEFT = Math.PI;
+            RIGHT = 0;
+            FORWARD = Math.PI / 2;
+            BACKWARD = 3 * Math.PI / 2;
+        } else if (foundation){
+            LEFT = Math.PI;
+            RIGHT = 0;
+            FORWARD = Math.PI / 2;
+            BACKWARD = 3 * Math.PI / 2;
+        } else {
+            LEFT = Math.PI;
+            RIGHT = 0;
+            FORWARD = Math.PI / 2;
+            BACKWARD = 3 * Math.PI / 2;
+        }
+
         isMoving = false;
         hardwareThread = new HardwareThread(this, sensorVals);
         opMode.telemetry.addLine("DangerNoodle Init Completed");
         opMode.telemetry.update();
     }
+    public double getX(){return sensorVals.get("X");}
+    public double getY(){return sensorVals.get("Y");}
     public DangerNoodle(OpMode opMode){
         try {
             timer = new ElapsedTime();
@@ -115,30 +143,65 @@ public class DangerNoodle implements Robot {
     }
 
     @Override
-    public void moveFoundation(boolean direction) {
-        if (direction) {
+    public void moveFoundation(boolean blue) throws InterruptedException {
+
+        manipulator.setFangs(false);
+
+        if (blue){
+
+            drivetrain.move(0.6,0, BACKWARD,200,2,0.1);
+
+            Thread.sleep(1000);
+            opMode.idle();
+
+            drivetrain.move(0.6,0, RIGHT,1500,2,0.1);
+
+            Thread.sleep(1000);
+            opMode.idle();
+
+            drivetrain.move(0.3,0, BACKWARD,1235,5,0.05);
+
+            Thread.sleep(300);
+            opMode.idle();
+
+            //drivetrain.correctHeading(3);
+
+            Thread.sleep(1000);
+
+            manipulator.setFangs(true);
+
             /*
-            // Latches onto foundation
-            lFang.setPosition(SERVO_LOCK);
-            rFang.setPosition(SERVO_LOCK);
 
-            // Moves to zone (needs to be calculated)
-            drivetrain.moveForward(1.5, 1, 5);
+            Thread.sleep(1000);
 
-            // Unlocks
-            lFang.setPosition(SERVO_UNLOCK);
-            rFang.setPosition(SERVO_UNLOCK);
+            drivetrain.move(1,0, LEFT, 1000,6,0.1);
+
+             */
+            Thread.sleep(1000);
+
+            drivetrain.turnPID(90,0.6 / (Math.PI/2),0,0,0,false);
+
+
+
         } else {
+            drivetrain.move(0.6,0, BACKWARD,200,2,0.1);
 
-            lFang.setPosition(SERVO_LOCK);
-            rFang.setPosition(SERVO_LOCK);
-            drivetrain.moveForward(1.5, 1, 5);
-            lFang.setPosition(SERVO_UNLOCK);
-            rFang.setPosition(SERVO_UNLOCK);
-            */
+            Thread.sleep(1000);
+
+            drivetrain.move(0.6,0, LEFT,1500,2,0.1);
+
+            Thread.sleep(1000);
+
+            drivetrain.move(0.3,0, BACKWARD,1225,5,0.05);
+
+            Thread.sleep(300);
+
+            //drivetrain.turnPID((Math.PI/2 -));
+
+            Thread.sleep(1000);
+
+            manipulator.setFangs(false);
         }
-
-
     }
 
     @Override
@@ -219,8 +282,8 @@ public class DangerNoodle implements Robot {
     public String toString(){
         String output = "DANGERNOODLE OUTPUT\n";
         output += "\tTIMER (ms): " + masterTime.milliseconds();
-        output += "\tSENSOR VALS:";
-        output += "\n\t\tDT Encoder Average" + sensorVals.get("Current Drivetrain Encoder Average");
+        output += "\n\tSENSOR VALS:";
+        output += "\n\t\tDT Encoder Average: " + sensorVals.get("Current Drivetrain Encoder Average");
         output += "\n\t\tX: " + sensorVals.get("X") + "\tY:" + sensorVals.get("Y");
         return output;
     }

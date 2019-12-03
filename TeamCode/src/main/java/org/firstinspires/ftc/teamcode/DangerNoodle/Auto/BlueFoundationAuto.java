@@ -36,7 +36,7 @@ public class BlueFoundationAuto extends LinearOpMode {
         Thread.sleep(300);
 
         double angle = drivetrain.getSensors().getFirstAngle();
-        drivetrain.correctHeading((0.5 / angle), (0.2/angle),2);
+        //drivetrain.correctHeading((0.5 / angle), (0.2/angle),2);
 
         // Move Forward
         drivetrain.move(0.4, 0, (3 * Math.PI/2), 1400, 4,0.1);

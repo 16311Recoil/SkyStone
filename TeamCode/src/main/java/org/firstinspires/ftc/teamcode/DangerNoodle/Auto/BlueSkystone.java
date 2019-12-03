@@ -69,7 +69,7 @@ public class BlueSkystone extends LinearOpMode {
 
             case 1:
                 angle = dt.getSensors().getFirstAngle();
-                dt.correctHeading((0.5 / angle), (0.2/angle),7);
+                //dt.correctHeading((0.5 / angle), (0.2/angle),7);
 
                 dt.move(0.2,0, Math.PI/2, 1100,5,0.1);
 
@@ -111,7 +111,7 @@ public class BlueSkystone extends LinearOpMode {
                 Thread.sleep(3000);
 
                 angle = dt.getSensors().getFirstAngle();
-                dt.correctHeading((0.5 / angle), (0.2/angle),7);
+                //dt.correctHeading((0.5 / angle), (0.2/angle),7);
 
                 Thread.sleep(300);
 

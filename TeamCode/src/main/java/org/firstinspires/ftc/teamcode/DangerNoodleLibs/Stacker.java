@@ -45,7 +45,7 @@ public class Stacker {
     private final double TIME_FOR_INTAKE = 3;
     private final double TIME_FOR_GANTRY_IN = 0; //TODO: Test for Times
     private final double TIME_FOR_GANTRY_OUT = 0;
-    private final double CLOSED_PINCHER_SERVO_POSITION = 0.9;
+    private final double CLOSED_PINCHER_SERVO_POSITION = 0.75;
     private final double OPEN_PICHER_SERVO_POSITION = 0;
     private final double[] ARM_POSITIONS = new double[]{0, 0.55, 0.9};
     private int armSpot = 1;
@@ -69,7 +69,7 @@ public class Stacker {
     private boolean changeDpadUp2 = false;
     private boolean changeDpadDown2 = false;
     private boolean changeDpadLeft2 = false;
-    private boolean cnangeDpadRight2 = false;
+    private boolean changeDpadRight2 = false;
     private boolean telePincherToggle = false;
     private boolean teleFangToggle = false;
     private boolean teleLiftMax = false;
@@ -143,7 +143,8 @@ public class Stacker {
         il.setDirection(DcMotor.Direction.FORWARD);
         ir.setDirection(DcMotor.Direction.REVERSE);
 
-
+        gl.setDirection(CRServo.Direction.FORWARD);
+        gr.setDirection(CRServo.Direction.REVERSE);
 
         lFang.setDirection(Servo.Direction.FORWARD);
         rFang.setDirection(Servo.Direction.REVERSE);
@@ -379,16 +380,42 @@ public class Stacker {
             setLiftPower(0);
         }
     }
+
+    /*private void liftControl(double power) {  //TODO: Update with encoder stops, use LIFT_BLOCK[liftMaxSpot] when doing so
+        if ((opMode_iterative.gamepad2.right_trigger != 0) && (getLiftEncoderAverage() < LIFT_BLOCK[liftMaxSpot])){
+            setLiftPower(opMode_iterative.gamepad2.right_trigger);
+        }
+        else if ((opMode_iterative.gamepad2.left_trigger != 0) && (getLiftEncoderAverage() > 0)){
+            setLiftPower(-opMode_iterative.gamepad2.left_trigger);
+        }
+        else if ((opMode_iterative.gamepad1.right_bumper) && (getLiftEncoderAverage() < LIFT_BLOCK[liftMaxSpot])){
+            setLiftPower(power);
+        }
+        else if ((opMode_iterative.gamepad1.left_bumper) && (getLiftEncoderAverage() > 0)) {
+            setLiftPower(-power);
+        }
+        else{
+            setLiftPower(0);
+        }
+    }*/
+
     private void liftMaxControl(){
-        if (opMode_iterative.gamepad2.dpad_up && !changeDpadUp2 && (liftMaxSpot < 2)){ //TODO Update this number for the max size of LIFT_BLOCK
+        if (opMode_iterative.gamepad2.dpad_up && !changeDpadUp2 && (liftMaxSpot < LIFT_BLOCK.length)){ //TODO Update this number for the max size of LIFT_BLOCK
             liftMaxSpot++;
         }
         if (opMode_iterative.gamepad2.dpad_down && !changeDpadDown2 && liftMaxSpot > 0){
             liftMaxSpot--;
         }
-
         changeDpadUp2 = opMode_iterative.gamepad2.dpad_up;
         changeDpadDown2 = opMode_iterative.gamepad2.dpad_down;
+    }
+    private void macControl(){
+        if (opMode_iterative.gamepad2.dpad_left && !changeDpadLeft2){
+            macIn();
+        }
+        if (opMode_iterative.gamepad2.dpad_right && !changeDpadRight2){
+            macOut();
+        }
     }
 
     private void intakeControl(double power){

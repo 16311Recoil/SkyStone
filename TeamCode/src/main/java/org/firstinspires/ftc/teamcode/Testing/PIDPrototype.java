@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.util.RobotLog;
 import java.util.Map;
 import java.util.TreeMap;
 
-@Autonomous(name="Basic: PIDPrototype", group="Linear Opmode")
+@Autonomous(name="PIDPrototype", group="Linear Opmode")
 //@Disabled
 public class PIDPrototype extends LinearOpMode {
     private ElapsedTime runtime;
@@ -33,13 +33,19 @@ public class PIDPrototype extends LinearOpMode {
         {
             try {
                 drivetrain = new Drivetrain(this, runtime, new TreeMap<String, Double>());
+                telemetry.addData("Current Angle", drivetrain.sensorVals.get("Current Angle"));
+                telemetry.update();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
         waitForStart();
 
-        drivetrain.turnPID(90,(0.86 / 90),0,0.65 / 90,6.5,false);
+        try {
+            drivetrain.turnPID(Math.toRadians(90),(0.86 / Math.toRadians(90)),0,0.65 / Math.toRadians(90),5,false);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
 
     }

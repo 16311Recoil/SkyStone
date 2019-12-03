@@ -50,7 +50,7 @@ public class Drivetrain {
 
     // Instance Variables
 
-    private DcMotor fl, fr, bl, br;
+    private ExpansionHubMotor fl, fr, bl, br;
     private ElapsedTime drivetrainClock;
     public Map<String, Double> sensorVals;
     public double[] encoderVals;
@@ -81,10 +81,10 @@ public class Drivetrain {
         drivetrainClock = new ElapsedTime();
         currentState = State.FULL_SPEED;
 
-        fl = this.opMode.hardwareMap.dcMotor.get("fl");
-        fr = this.opMode.hardwareMap.dcMotor.get("fr");
-        bl = this.opMode.hardwareMap.dcMotor.get("bl");
-        br = this.opMode.hardwareMap.dcMotor.get("br");
+        fl = (ExpansionHubMotor) this.opMode.hardwareMap.dcMotor.get("fl");
+        fr = (ExpansionHubMotor) this.opMode.hardwareMap.dcMotor.get("fr");
+        bl = (ExpansionHubMotor) this.opMode.hardwareMap.dcMotor.get("bl");
+        br = (ExpansionHubMotor) this.opMode.hardwareMap.dcMotor.get("br");
 
         // encoderVals[FRONT_LEFT] = expansionHub.getBulkInputData().getMotorCurrentPosition(fl);
         // encoderVals[FRONT_RIGHT] = expansionHub.getBulkInputData().getMotorCurrentPosition(fr);
@@ -133,10 +133,10 @@ public class Drivetrain {
 
         currentState = State.FULL_SPEED;
 
-        fl = this.opMode_iterative.hardwareMap.dcMotor.get("fl");
-        fr = this.opMode_iterative.hardwareMap.dcMotor.get("fr");
-        bl = this.opMode_iterative.hardwareMap.dcMotor.get("bl");
-        br = this.opMode_iterative.hardwareMap.dcMotor.get("br");
+        fl = (ExpansionHubMotor) this.opMode_iterative.hardwareMap.dcMotor.get("fl");
+        fr = (ExpansionHubMotor) this.opMode_iterative.hardwareMap.dcMotor.get("fr");
+        bl = (ExpansionHubMotor) this.opMode_iterative.hardwareMap.dcMotor.get("bl");
+        br = (ExpansionHubMotor) this.opMode_iterative.hardwareMap.dcMotor.get("br");
 
 
         //encoderVals[FRONT_LEFT] = expansionHub.getBulkInputData().getMotorCurrentPosition(fl);
@@ -243,7 +243,7 @@ public class Drivetrain {
         return fl;
     }
 
-    public void setFl(DcMotor fl) {
+    public void setFl(ExpansionHubMotor fl) {
         this.fl = fl;
     }
 
@@ -251,7 +251,7 @@ public class Drivetrain {
         return fr;
     }
 
-    public void setFr(DcMotor fr) {
+    public void setFr(ExpansionHubMotor fr) {
         this.fr = fr;
     }
 
@@ -259,7 +259,7 @@ public class Drivetrain {
         return bl;
     }
 
-    public void setBl(DcMotor bl) {
+    public void setBl(ExpansionHubMotor bl) {
         this.bl = bl;
     }
 
@@ -267,9 +267,10 @@ public class Drivetrain {
         return br;
     }
 
-    public void setBr(DcMotor br) {
-        this.br = br;
+    public void movveStrafeDS(){
+
     }
+
 
     public double[] getEncoderVals() {
         return encoderVals;
@@ -296,7 +297,7 @@ public class Drivetrain {
     // consistently reporting a motion-dependent value rather than a static value or 0 due to wire
     // entanglement, broken encoder, etc,
     public double getEncoderAverage(double angle) {
-        getEncoders();
+        //getEncoders();
         double encoderAverage = 0;
         int counter = 0;
         for (int i = 0; i < encoderVals.length; i++) {
@@ -363,15 +364,20 @@ public class Drivetrain {
         }
         setAllMotors(0);
     }
-    public void correctHeading(double p, double d, double timeout) {
+    public void correctHeading(double timeout) {
 
-        pidControlller.setReset(true);
-        pidControlller.setCoeffs(p, 0, d);
-
-        ElapsedTime t_i = new ElapsedTime();
         double currAngle = sensors.getFirstAngle();
         double target = 0;
-        while (!inBounds(currAngle, -1,1) && Math.abs(currAngle) > 0.3 && t_i.seconds() < timeout && opMode.opModeIsActive()) {
+
+        pidControlller.setReset(true);
+        pidControlller.setCoeffs(0.5/currAngle, 0,0.2/currAngle);
+
+        ElapsedTime t_i = new ElapsedTime();
+
+        opMode.telemetry.addData("Curr Angle", currAngle);
+        opMode.telemetry.update();
+
+        while (!inBounds(currAngle, -1,1) &&  t_i.seconds() < timeout && opMode.opModeIsActive()) {
             turn(pidControlller.iteration(currAngle, t_i.seconds()), !((Math.signum(currAngle)) > 0));
             currAngle = sensors.getFirstAngle();
             sensorVals.put("Current Angle", currAngle);
@@ -380,8 +386,6 @@ public class Drivetrain {
             opMode.telemetry.addData("INSIDE LOOP: error", currAngle);
             opMode.telemetry.addData("LOOP SPEED", loopCount/t_i.seconds());
             opMode.telemetry.update();
-
-            currAngle = sensors.getFirstAngle();
             loopCount++;
 
         }
@@ -442,13 +446,45 @@ public class Drivetrain {
         resetEncoders();
         ElapsedTime timer = new ElapsedTime();
         double initPos = getEncoderAverageES(Math.toRadians(sensors.getFirstAngle()));
+        // Bounds calculated by the percentTolerance
+        double low_bound = distance * (1 - percentTolerance);
+        double high_bound = distance * (1 + percentTolerance);
+        // Loop Condition
+        timer.reset();
+        boolean loopCondition = Math.abs(initPos - getEncoderAverageES(angle)) < low_bound
+                && (timer.seconds() < timeout)
+                && opMode.opModeIsActive();
+        // Calculate motor powers
+        setPowers(v_d, v_theta, angle);
+
+        // Scale Motors while conserving ratios between them
+        scaleMotors();
+
+        timer.reset();
+        while (loopCondition) {
+            fl.setPower(powers[FRONT_LEFT]);
+            fr.setPower(powers[FRONT_RIGHT]);
+            bl.setPower(powers[BACK_LEFT]);
+            br.setPower(powers[BACK_RIGHT]);
+
+            loopCondition = Math.abs(initPos - getEncoderAverageES(angle)) < low_bound
+                    && (timer.seconds() < timeout)
+                    && opMode.opModeIsActive();
+        }
+        setAllMotors(0);
+    }
+    //fs
+    public void moveStrafeY(double v_d, double v_theta, double angle, double distance, double timeout, double percentTolerance) {
+        resetEncoders();
+        ElapsedTime timer = new ElapsedTime();
+        double initPos = sensorVals.get("Y");
 
         // Bounds calculated by the percentTolerance
         double low_bound = distance * (1 - percentTolerance);
         double high_bound = distance * (1 + percentTolerance);
 
         // Loop Condition
-        boolean loopCondition = !inBounds(Math.abs(initPos - getEncoderAverageES(angle)), low_bound, high_bound )
+        boolean loopCondition = !inBounds(initPos - sensorVals.get("Y"), low_bound, high_bound )
                 && (timer.seconds() < timeout) && opMode.opModeIsActive();
 
         // Calculate motor powers
@@ -465,7 +501,42 @@ public class Drivetrain {
             bl.setPower(powers[BACK_LEFT]);
             br.setPower(powers[BACK_RIGHT]);
 
-            loopCondition = !inBounds(Math.abs(initPos - getEncoderAverageES(angle)), low_bound, high_bound )
+            opMode.telemetry.addData("Y:", sensorVals.get("Y"));
+            opMode.telemetry.update();
+
+            loopCondition = !inBounds(initPos - sensorVals.get("Y"), low_bound, high_bound )
+                    && (timer.seconds() < timeout) && opMode.opModeIsActive();
+        }
+        setAllMotors(0);
+    }
+    public void moveStrafeX(double v_d, double v_theta, double angle, double distance, double timeout, double percentTolerance) {
+        resetEncoders();
+        ElapsedTime timer = new ElapsedTime();
+        double initPos = sensorVals.get("X");
+
+        // Bounds calculated by the percentTolerance
+        double low_bound = distance * (1 - percentTolerance);
+        double high_bound = distance * (1 + percentTolerance);
+
+        // Loop Condition
+        boolean loopCondition = !inBounds(sensorVals.get("X"), low_bound, high_bound )
+                && (timer.seconds() < timeout) && opMode.opModeIsActive();
+
+        // Calculate motor powers
+        setPowers(v_d, v_theta, angle);
+
+        // Scale Motors while conserving ratios between them
+        scaleMotors();
+
+        timer.reset();
+        while (loopCondition) {
+
+            fl.setPower(powers[FRONT_LEFT]);
+            fr.setPower(powers[FRONT_RIGHT]);
+            bl.setPower(powers[BACK_LEFT]);
+            br.setPower(powers[BACK_RIGHT]);
+
+            loopCondition = !inBounds(sensorVals.get("X"), low_bound, high_bound )
                     && (timer.seconds() < timeout) && opMode.opModeIsActive();
         }
         setAllMotors(0);
@@ -616,7 +687,40 @@ public class Drivetrain {
      * @param timeout - time in seconds before timeout
      * @param right   - boolean to turn left or right
      */
-    public void turnPID(double dTheta, double k_p, double k_i, double k_d, double timeout, boolean right) {
+    public void turnPID(double dTheta, double k_p, double k_i, double k_d, double timeout, boolean right) throws InterruptedException {
+        pidControlller.setReset(true);
+        pidControlller.setCoeffs(k_p, k_i, k_d);
+
+        double theta_i = sensors.getFirstAngle();
+        sensorVals.put("Current Angle", theta_i);
+
+        double target = dTheta + theta_i;
+
+        ElapsedTime t_i = new ElapsedTime();
+
+        pidControlller.setT_i(0);
+        pidControlller.setTarget(target);
+
+        double error = target;
+        opMode.telemetry.addData("t_i", t_i);
+        opMode.telemetry.addData("error", error);
+        opMode.telemetry.update();
+
+        Thread.sleep(3000);
+
+        while (Math.abs(error) > 0.3 && t_i.seconds() < timeout && opMode.opModeIsActive()) {
+            sensorVals.put("Current Angle", sensors.getFirstAngle());
+            error = target - sensorVals.get("Current Angle");
+            if (error > 0)
+                turn(pidControlller.iteration(error, t_i.seconds()), right);
+
+            opMode.telemetry.addData("ERROR", error);
+            opMode.telemetry.update();
+        }
+
+    }
+    /*
+        public void turnPID(double dTheta, double k_p, double k_i, double k_d, double timeout, boolean right) {
         pidControlller.setReset(true);
         pidControlller.setCoeffs(k_p, k_i, k_d);
 
@@ -634,22 +738,18 @@ public class Drivetrain {
         opMode.telemetry.addData("t_i", t_i);
         opMode.telemetry.addData("error", error);
         opMode.telemetry.update();
-
         while (Math.abs(error) > 0.3 && t_i.seconds() < timeout && opMode.opModeIsActive()) {
             if (error > 0)
                 turn(pidControlller.iteration(error, t_i.seconds()), !right);
-            else
-                turn(pidControlller.iteration(error, t_i.seconds()), right);
-
             error = target - sensors.getFirstAngle();
 
             opMode.telemetry.addData("INSIDE LOOP: t_i", t_i);
-            opMode.telemetry.addData("TIME PER LOOP: loops/ns" , loopCount++/t_i.nanoseconds());
             opMode.telemetry.addData("INSIDE LOOP: error", error);
             opMode.telemetry.update();
         }
 
     }
+     */
 
     /*
      monitorEncoders();
