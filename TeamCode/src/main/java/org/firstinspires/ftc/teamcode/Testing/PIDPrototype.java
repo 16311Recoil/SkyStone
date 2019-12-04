@@ -42,7 +42,7 @@ public class PIDPrototype extends LinearOpMode {
         waitForStart();
 
         try {
-            drivetrain.turnPID(Math.toRadians(90),(0.86 / Math.toRadians(90)),0,0.65 / Math.toRadians(90),5,false);
+            drivetrain.turnPID(90,(0.7 / 90),0,0,5,false);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

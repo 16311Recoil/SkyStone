@@ -151,38 +151,41 @@ public class DangerNoodle implements Robot {
 
             drivetrain.move(0.6,0, BACKWARD,200,2,0.1);
 
-            Thread.sleep(1000);
+            Thread.sleep(400);
             opMode.idle();
 
             drivetrain.move(0.6,0, RIGHT,1500,2,0.1);
 
-            Thread.sleep(1000);
+            Thread.sleep(400);
             opMode.idle();
 
-            drivetrain.move(0.3,0, BACKWARD,1235,5,0.05);
+            drivetrain.move(0.25,0, BACKWARD,1235,5,0.05);
 
             Thread.sleep(300);
             opMode.idle();
 
             //drivetrain.correctHeading(3);
 
-            Thread.sleep(1000);
+            Thread.sleep(400);
 
             manipulator.setFangs(true);
-
-            /*
 
             Thread.sleep(1000);
 
             drivetrain.move(1,0, LEFT, 1000,6,0.1);
 
-             */
-            Thread.sleep(1000);
+            Thread.sleep(400);
 
-            drivetrain.turnPID(90,0.6 / (Math.PI/2),0,0,0,false);
+            drivetrain.turnPID(90,(0.8 / 90),0,0,5,false);
 
+            Thread.sleep(400);
 
+            drivetrain.move(0.75,0, BACKWARD, 1000,6,0.1);
 
+            Thread.sleep(400);
+
+            drivetrain.move(0.8, 0,RIGHT, 2400,5,0.05);
+            
         } else {
             drivetrain.move(0.6,0, BACKWARD,200,2,0.1);
 

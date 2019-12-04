@@ -711,8 +711,8 @@ public class Drivetrain {
         while (Math.abs(error) > 0.3 && t_i.seconds() < timeout && opMode.opModeIsActive()) {
             sensorVals.put("Current Angle", sensors.getFirstAngle());
             error = target - sensorVals.get("Current Angle");
-            if (error > 0)
-                turn(pidControlller.iteration(error, t_i.seconds()), right);
+
+            turn(pidControlller.iteration(error, t_i.seconds()), !right);
 
             opMode.telemetry.addData("ERROR", error);
             opMode.telemetry.update();
