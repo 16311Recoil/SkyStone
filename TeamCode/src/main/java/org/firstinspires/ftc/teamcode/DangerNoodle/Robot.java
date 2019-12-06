@@ -15,7 +15,7 @@ public interface Robot {
       3. Drives to the foundation.
       4. Releases Skystone onto the foundation.
      */
-    void moveFoundation(boolean direction) throws InterruptedException;
+    void moveFoundation(boolean blue, boolean skybridge) throws InterruptedException;
     /*
     moveFoundation() method takes a direction, whether it is moving the foundation towards the wall
     or away from the field wall and latches onto the foundation (assuming the robot is in correct

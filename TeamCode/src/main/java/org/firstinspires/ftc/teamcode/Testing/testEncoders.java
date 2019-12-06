@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 import java.util.TreeMap;
 
 @Autonomous(name="Basic: 0AutoPrototype", group="Linear Opmode")
-
+@Disabled
 public class testEncoders extends LinearOpMode{
 
         public DangerNoodle dangerNoodle;
@@ -27,7 +27,7 @@ public class testEncoders extends LinearOpMode{
 
             waitForStart();
 
-            dangerNoodle.moveFoundation(true);
+            dangerNoodle.moveFoundation(true, true);
 
 
 

@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Autonomous
-        (name = "ParkLeftF", group = "ControlledGroup")
-public class ParkAuto extends LinearOpMode {
+        (name = "ParkRightC", group = "ControlledGroup")
+public class ParkAutoInsideBlue extends LinearOpMode {
     Drivetrain drivetrain;
     Stacker manipulator;
 
@@ -22,11 +22,11 @@ public class ParkAuto extends LinearOpMode {
 
         waitForStart();
 
-        drivetrain.move(0.6,0, 3 * Math.PI / 2,900,2,0.1);
+        drivetrain.move(0.6,0, 3 * Math.PI / 2,25,2,0.1);
 
         Thread.sleep(1000);
 
-        drivetrain.move(0.6,0, 0 ,1500,2,0.1);
+        drivetrain.move(0.6,0, Math.PI ,1500,2,0.1);
 
         Thread.sleep(1000);
 

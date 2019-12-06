@@ -5,9 +5,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.DangerNoodle.DangerNoodle;
 
-@Autonomous(name="RedFoundationAutoF", group="Linear Opmode")
+@Autonomous(name="BlueFoundationAutoC", group="Linear Opmode")
 
-public class RedFoundationAuto extends LinearOpMode{
+public class BlueFoundationAutoWall extends LinearOpMode{
 
         public DangerNoodle dangerNoodle;
         private double STRAFE = 4.881889763779528;
@@ -19,7 +19,7 @@ public class RedFoundationAuto extends LinearOpMode{
 
             waitForStart();
 
-            dangerNoodle.moveFoundation(false, true);
+            dangerNoodle.moveFoundation(true, false);
 
 
 

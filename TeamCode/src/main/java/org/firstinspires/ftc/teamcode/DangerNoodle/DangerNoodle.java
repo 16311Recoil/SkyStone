@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.DangerNoodle;
 
+import android.drm.DrmStore;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -10,6 +12,7 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.BitmapVision;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.HardwareThread;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
+import org.firstinspires.ftc.teamcode.R;
 import org.openftc.revextensions2.RevBulkData;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.ExpansionHubMotor;
@@ -143,7 +146,7 @@ public class DangerNoodle implements Robot {
     }
 
     @Override
-    public void moveFoundation(boolean blue) throws InterruptedException {
+    public void moveFoundation(boolean blue, boolean skybridge) throws InterruptedException {
 
         manipulator.setFangs(false);
 
@@ -152,17 +155,17 @@ public class DangerNoodle implements Robot {
             drivetrain.move(0.6,0, BACKWARD,200,2,0.1);
 
             Thread.sleep(400);
-            opMode.idle();
 
-            drivetrain.move(0.6,0, RIGHT,1500,2,0.1);
+
+            drivetrain.move(0.35,0, RIGHT,1300,2,0.1);
 
             Thread.sleep(400);
-            opMode.idle();
 
-            drivetrain.move(0.25,0, BACKWARD,1235,5,0.05);
+
+            drivetrain.move(0.25,0, BACKWARD,1215,5,0.05);
 
             Thread.sleep(300);
-            opMode.idle();
+
 
             //drivetrain.correctHeading(3);
 
@@ -172,38 +175,116 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(1000);
 
-            drivetrain.move(1,0, LEFT, 1000,6,0.1);
+            drivetrain.move(1,0, FORWARD, 1200,6,0.1);
 
             Thread.sleep(400);
 
-            drivetrain.turnPID(90,(0.8 / 90),0,0,5,false);
+            drivetrain.turnPID(0,(0.8 / 88),0,(0.0 / 88),4,true);
+
+            Thread.sleep(1000);
+
+            drivetrain.turnPID(90,(0.85 / 88),0,(0.2 / 88),5,false);
 
             Thread.sleep(400);
 
-            drivetrain.move(0.75,0, BACKWARD, 1000,6,0.1);
+            manipulator.setFangs(true); //checking
 
             Thread.sleep(400);
 
-            drivetrain.move(0.8, 0,RIGHT, 2400,5,0.05);
+            drivetrain.move(0.9,0, BACKWARD, 2000,6, 0.1);
+
+            Thread.sleep(500);
+
+            manipulator.setFangs(false);
+
+            Thread.sleep(1000);
+            if (skybridge) {
+                drivetrain.move(0.35, 0, LEFT, 360, 4, 0.05);
+
+                Thread.sleep(1000);
+
+                drivetrain.move(.6, 0, FORWARD, 1550, 6, 0.05);
+            }
+            else {
+                drivetrain.move(0.35, 0, RIGHT, 1100, 6, 0.1);
+
+                Thread.sleep(400);
+
+                drivetrain.move(0.35, 0, LEFT, 50, 3, 0.1);
+
+                Thread.sleep(300);
+
+                drivetrain.move(0.6, 0, FORWARD, 1550, 6, 0.05);
+            }
+
+
             
         } else {
             drivetrain.move(0.6,0, BACKWARD,200,2,0.1);
 
-            Thread.sleep(1000);
+            Thread.sleep(400);
 
-            drivetrain.move(0.6,0, LEFT,1500,2,0.1);
 
-            Thread.sleep(1000);
+            drivetrain.move(0.35,0, LEFT,1300,2,0.1);
 
-            drivetrain.move(0.3,0, BACKWARD,1225,5,0.05);
+            Thread.sleep(400);
+
+
+            drivetrain.move(0.25,0, BACKWARD,1215,5,0.05);
 
             Thread.sleep(300);
 
-            //drivetrain.turnPID((Math.PI/2 -));
+
+            //drivetrain.correctHeading(3);
+
+            Thread.sleep(400);
+
+            manipulator.setFangs(true);
 
             Thread.sleep(1000);
 
+            drivetrain.move(1,0, FORWARD, 1200,6,0.1);
+
+            Thread.sleep(400);
+
+            drivetrain.turnPID(0,(0.8 / 88),0,(0.0 / 88),4,true);
+
+            Thread.sleep(400);
+
+            drivetrain.turnPID(90,(0.8 / 88),0,(0.0 / 88),4,true);
+
+            Thread.sleep(400);
+
+            manipulator.setFangs(true); //checking
+
+            Thread.sleep(300);
+
+            drivetrain.move(0.9,0, BACKWARD, 2000,6, 0.1);
+
+            Thread.sleep(500);
+
             manipulator.setFangs(false);
+
+            Thread.sleep(1000);
+
+            if (skybridge){
+                drivetrain.move(0.35, 0, RIGHT, 360, 4, 0.05);
+
+                Thread.sleep(300);
+
+                drivetrain.move(.6, 0, FORWARD, 1550, 6, 0.05);
+            }
+            else {
+                drivetrain.move(0.35, 0, LEFT, 1100, 6, 0.1);
+
+                Thread.sleep(400);
+
+                drivetrain.move(0.35, 0, RIGHT, 50, 3, 0.1);
+
+                Thread.sleep(300);
+
+                drivetrain.move(0.6, 0, FORWARD, 1550, 6, 0.05);
+            }
         }
     }
 

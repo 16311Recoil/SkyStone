@@ -50,11 +50,11 @@ public class Stacker {
     private final double[] ARM_POSITIONS = new double[]{0, 0.55, 0.9};
     private int armSpot = 1;
     private int armRotation = -1;
-    private int liftMaxSpot = 0;
+    private int liftMaxSpot = 1;
     private final double INCHES_TO_SERVO = 0;//TODO: Test conversions for inches in gantry movement to servo position
-    private final double LIFT_MAX = 0; //TODO: Test for Max Encoder Limit on Lift
-    private final double[] LIFT_BLOCK = new double[]{0, 0, 0}; //TODO: Test for encoder readings at each block height
-    private final double LIFT_MIN = 0; //TODO: Test for Min Encoder Limit on Lift
+    private final double LIFT_MAX = -8500; //TODO: Test for Max Encoder Limit on Lift
+    private final double[] LIFT_BLOCK = new double[]{600, -8500}; //TODO: Test for encoder readings at each block height
+    private final double LIFT_MIN = 600; //TODO: Test for Min Encoder Limit on Lift
     private static final double SERVO_LOCK = 1; // Needs to be tested;
     private static final double SERVO_UNLOCK = 0; // Needs to be tested;
 
@@ -367,7 +367,7 @@ public class Stacker {
         if (opMode_iterative.gamepad2.right_trigger != 0){
             setLiftPower(opMode_iterative.gamepad2.right_trigger);
         }
-        else if (opMode_iterative.gamepad2.left_trigger != 0){
+        else if (opMode_iterative.gamepad2.left_trigger != 0) {
             setLiftPower(-opMode_iterative.gamepad2.left_trigger);
         }
         else if (opMode_iterative.gamepad1.left_bumper){
@@ -382,17 +382,17 @@ public class Stacker {
     }
 
     /*private void liftControl(double power) {  //TODO: Update with encoder stops, use LIFT_BLOCK[liftMaxSpot] when doing so
-        if ((opMode_iterative.gamepad2.right_trigger != 0) && (getLiftEncoderAverage() < LIFT_BLOCK[liftMaxSpot])){
+        if ((opMode_iterative.gamepad2.right_trigger != 0) && (getLiftEncoderAverage() > LIFT_BLOCK[liftMaxSpot])){
             setLiftPower(opMode_iterative.gamepad2.right_trigger);
         }
-        else if ((opMode_iterative.gamepad2.left_trigger != 0) && (getLiftEncoderAverage() > 0)){
+        else if ((opMode_iterative.gamepad2.left_trigger != 0) && (getLiftEncoderAverage() < LIFT_BLOCK[0])){
             setLiftPower(-opMode_iterative.gamepad2.left_trigger);
         }
-        else if ((opMode_iterative.gamepad1.right_bumper) && (getLiftEncoderAverage() < LIFT_BLOCK[liftMaxSpot])){
-            setLiftPower(power);
-        }
-        else if ((opMode_iterative.gamepad1.left_bumper) && (getLiftEncoderAverage() > 0)) {
+        else if (opMode_iterative.gamepad1.left_bumper && (getLiftEncoderAverage() < LIFT_BLOCK[0])){
             setLiftPower(-power);
+        }
+        else if (opMode_iterative.gamepad1.right_bumper && (getLiftEncoderAverage() > LIFT_BLOCK[liftMaxSpot])) {
+            setLiftPower(power);
         }
         else{
             setLiftPower(0);

@@ -96,8 +96,8 @@ public class LiftPrototype extends OpMode {
             // step (using the FTC Robot Controller app on the phone).
             ll  = hardwareMap.get(DcMotor.class, "ll");
             lr  = hardwareMap.get(DcMotor.class, "lr");
-            gl  = hardwareMap.get(Servo.class, "gl");
-            gr = hardwareMap.get(Servo.class, "gr");
+            //gl  = hardwareMap.get(Servo.class, "gl");
+            //gr = hardwareMap.get(Servo.class, "gr");
 
             // Most robots need the motor on one side to be reversed to drive forward
             // Reverse the motor that runs backwards when connected directly to the battery
@@ -145,7 +145,7 @@ public class LiftPrototype extends OpMode {
             //drivetrain.moveTelop(gamepad1.left_stick_x, gamepad1.left_stick_y, gamepad1.right_stick_x);
             //liftControlD1();
             liftControlD2(1);
-            gantry();
+            //gantry();
         }
 
         /*
@@ -171,12 +171,13 @@ public class LiftPrototype extends OpMode {
             ll.setPower(power);
             lr.setPower(power);
         }
-        if ((gamepad1.x && !changeX)){
-            telemetry.addData("Encoder:", getLiftEncoderAverage());
+        else {
+            telemetry.update();
+            ll.setPower(0);
+            lr.setPower(0);
         }
+        telemetry.addData("Encoder:", getLiftEncoderAverage());
         telemetry.update();
-        ll.setPower(0);
-        lr.setPower(0);
     }
     public  double getLiftEncoderAverage() {
         double counter = 0;
@@ -188,13 +189,13 @@ public class LiftPrototype extends OpMode {
         }
         return (ll.getCurrentPosition() + lr.getCurrentPosition() / (2 - counter));
     }
-    public void gantry(){
+    /*public void gantry(){
         if (gamepad1.a){
             gl.setPosition(1);
             gr.setPosition(1);
         }
 
-    }
+    }*/
 }
 
 

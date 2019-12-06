@@ -59,7 +59,9 @@ public class Drivetrain {
     private Sensors sensors;
     private double maxPower = 1;
     private double minPower = 0.05;
-    private int stateCounter = 2;
+    private int multCounter = 1;
+    private double[] multipliers = {0.3, 0.55 , 1};
+    private String[] multipiersTelemetry = {"LOW POWER", "REGULAR POWER", "HIGH POWER"};
     private double prevEncoder;
     private boolean isMoving;
     //private ExpansionHubEx expansionHub;
@@ -332,7 +334,7 @@ public class Drivetrain {
                 return 0;
             }
         } else if (angle == 0) {
-            return (encoderVals[FRONT_RIGHT] + encoderVals[BACK_LEFT] * 0.5);
+            return (encoderVals[FRONT_RIGHT] + encoderVals[BACK_LEFT]) * 0.5;
         } else if (angle > 0 && angle < Math.PI / 2) {
             return (encoderVals[FRONT_LEFT] + encoderVals[BACK_RIGHT]) * 0.5;
         } else if (angle > Math.PI / 2 && angle < Math.PI) {
@@ -710,11 +712,16 @@ public class Drivetrain {
 
         while (Math.abs(error) > 0.3 && t_i.seconds() < timeout && opMode.opModeIsActive()) {
             sensorVals.put("Current Angle", sensors.getFirstAngle());
-            error = target - sensorVals.get("Current Angle");
 
-            turn(pidControlller.iteration(error, t_i.seconds()), !right);
+            error = target - Math.abs(sensorVals.get("Current Angle"));
+
+            double power = Range.clip(pidControlller.iteration(error, t_i.seconds()) + 0.2,-1,1);
+
+            turn(power, !right);
 
             opMode.telemetry.addData("ERROR", error);
+            opMode.telemetry.addData("POWER", power);
+
             opMode.telemetry.update();
         }
 
@@ -796,7 +803,7 @@ public class Drivetrain {
             v_d = 0;
         if (v_d > 0.95)
             v_d = 1;
-        checkState();
+        toggleSpeed();
 
         if (currentState.equals(State.FULL_SPEED))
             multiplier = 1;
@@ -817,35 +824,24 @@ public class Drivetrain {
         return Range.clip(0.0308 * Math.exp(4.3891 * v_d), 0.05, 1);
     }
 
-    public void checkState() {
+    public void toggleSpeed() {
 
-        if ((opMode_iterative.gamepad1.dpad_down && !changeDpadDown) && stateCounter > 0) {
-            stateCounter--;
+        if ((opMode_iterative.gamepad1.dpad_down && !changeDpadDown) && multCounter > 0) {
+            multCounter--;
         }
-        if ((opMode_iterative.gamepad1.dpad_up && !changeDpadUp) && stateCounter < 3) {
-            stateCounter++;
+        else if ((opMode_iterative.gamepad1.dpad_up && !changeDpadUp) && multCounter < 2) {
+            multCounter++;
         }
-        if (stateCounter == 1) {
-            opMode_iterative.telemetry.addLine("LOW_SPEED");
-            currentState = State.LOW_SPEED;
-            multiplier = 0.25;
-        }
-        if (stateCounter == 2) {
-            opMode_iterative.telemetry.addLine("REGULAR SPEED MODE");
-            currentState = State.REGULAR_SPEED;
-            multiplier = 0.65;
-        }
-        if (stateCounter == 3) {
-            opMode_iterative.telemetry.addLine("FULL SPEED");
-            currentState = State.FULL_SPEED;
-            multiplier = 1;
-        }
+        multiplier = multipliers[multCounter];
+        opMode_iterative.telemetry.addLine(multipiersTelemetry[multCounter]);
+
         if (opMode_iterative.gamepad1.left_stick_button && opMode_iterative.gamepad1.b) {
             opMode_iterative.telemetry.addLine("H_SCALE");
             currentState = State.H_SCALE_POWER;
         }
-        changeDpadDown = !changeDpadDown;
-        changeDpadUp = !changeDpadUp;
+        changeDpadDown = opMode_iterative.gamepad1.dpad_down;
+        changeDpadUp = opMode_iterative.gamepad1.dpad_up;
+        opMode_iterative.telemetry.update();
     }
 
     public void moveTelop2(double x, double y, double z) {

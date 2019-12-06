@@ -33,8 +33,8 @@ public class TeleOP extends OpMode {
     @Override
     public void loop() {
         drivetrain.moveTelop2(gamepad1.right_stick_x, -gamepad1.right_stick_y, gamepad1.left_stick_x);
-        drivetrain.checkState();
-        stacker.stackerTeleControl(0.85,1,1);
+        drivetrain.toggleSpeed();
+        stacker.stackerTeleControl(0.5,1,1);
         telemetry.update();
 
     }
