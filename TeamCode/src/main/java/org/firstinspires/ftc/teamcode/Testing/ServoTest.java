@@ -9,32 +9,35 @@ import com.qualcomm.robotcore.hardware.Servo;
 //@Disabled
 public class ServoTest extends LinearOpMode {
 
-    private Servo armRotater;
-    private Servo pincher;
+    private Servo rFang;
+    private Servo lFang;
     private double pos = .0;
     private boolean changeA = false;
     private boolean changeB = false;
     private boolean changeXOR = true;
     @Override
     public void runOpMode() throws InterruptedException {
-        pincher = hardwareMap.servo.get("pincher");
-        //armRotater = hardwareMap.servo.get("gr");
+        rFang = hardwareMap.servo.get("rFang");
+        lFang = hardwareMap.servo.get("lFang");
 
-        pincher.setDirection(Servo.Direction.REVERSE);
+        rFang.setDirection(Servo.Direction.REVERSE);
+        lFang.setDirection(Servo.Direction.FORWARD);
 
 
 
 
         //pincher.setPosition(0);
         //armRotater.setPosition(0.1);
-        pincher.setPosition(0);
+        rFang.setPosition(0);
+        lFang.setPosition(0);
 
         waitForStart();
 
         while (opModeIsActive()){
-            pincher.setPosition(0.8);
-            //armRotater.setPosition(.5);
-            telemetry.addData("Position", pincher.getPosition());
+            rFang.setPosition(0.32);
+            lFang.setPosition(0.32);
+            //armRotater.setPosit2on(.5);
+            telemetry.addData("Position", rFang.getPosition());
             //telemetry.addData("Position2", armRotater.getPosition());
             telemetry.update();
 

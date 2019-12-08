@@ -162,6 +162,8 @@ public class DangerNoodle implements Robot {
             Thread.sleep(400);
 
 
+            Thread.sleep(400);
+
             drivetrain.move(0.25,0, BACKWARD,1215,5,0.05);
 
             Thread.sleep(300);
@@ -179,7 +181,6 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(400);
 
-            drivetrain.turnPID(0,(0.8 / 88),0,(0.0 / 88),4,true);
 
             Thread.sleep(1000);
 
@@ -237,17 +238,12 @@ public class DangerNoodle implements Robot {
 
             //drivetrain.correctHeading(3);
 
-            Thread.sleep(400);
 
             manipulator.setFangs(true);
 
             Thread.sleep(1000);
 
             drivetrain.move(1,0, FORWARD, 1200,6,0.1);
-
-            Thread.sleep(400);
-
-            drivetrain.turnPID(0,(0.8 / 88),0,(0.0 / 88),4,true);
 
             Thread.sleep(400);
 

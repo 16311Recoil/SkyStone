@@ -55,8 +55,8 @@ public class Stacker {
     private final double LIFT_MAX = -8500; //TODO: Test for Max Encoder Limit on Lift
     private final double[] LIFT_BLOCK = new double[]{600, -8500}; //TODO: Test for encoder readings at each block height
     private final double LIFT_MIN = 600; //TODO: Test for Min Encoder Limit on Lift
-    private static final double SERVO_LOCK = 1; // Needs to be tested;
-    private static final double SERVO_UNLOCK = 0; // Needs to be tested;
+    private static final double SERVO_LOCK = 0; // Needs to be tested;
+    private static final double SERVO_UNLOCK = 0.32; // Needs to be tested;
 
     private boolean changeX = false;
     private boolean changeY = false;
@@ -95,8 +95,8 @@ public class Stacker {
         gl = this.opMode.hardwareMap.crservo.get("gl");
         gr = this.opMode.hardwareMap.crservo.get("gr");
 
-        lFang.setDirection(Servo.Direction.REVERSE);
-        rFang.setDirection(Servo.Direction.FORWARD);
+        lFang.setDirection(Servo.Direction.FORWARD);
+        rFang.setDirection(Servo.Direction.REVERSE);
 
         ll.setDirection(DcMotor.Direction.FORWARD);
         lr.setDirection(DcMotor.Direction.REVERSE);
@@ -335,15 +335,21 @@ public class Stacker {
     }
     public void fangControl(){
         if(((opMode_iterative.gamepad1.x && !changeX) || (opMode_iterative.gamepad2.x && !changeX2)) &&  !teleFangToggle){
+            setFangs(false);
+
+            teleFangToggle = !teleFangToggle;
+            opMode_iterative.telemetry.addLine("FANGS LOCKED");
+            opMode_iterative.telemetry.update();
+        }
+        else if (((opMode_iterative.gamepad1.x && !changeX2) || (opMode_iterative.gamepad2.y && !changeY2)) &&  teleFangToggle){
             setFangs(true);
             teleFangToggle = !teleFangToggle;
-        }
-        else if (((opMode_iterative.gamepad1.x && !changeX) || (opMode_iterative.gamepad2.x && !changeX2)) &&  teleFangToggle){
-            setFangs(false);
-            teleFangToggle = !teleFangToggle;
+            opMode_iterative.telemetry.addLine("FANGS UNLOCKED");
+            opMode_iterative.telemetry.update();
         }
         changeX = opMode_iterative.gamepad1.x;
         changeX2 = opMode_iterative.gamepad2.x;
+        changeY2 = opMode_iterative.gamepad2.y;
 
     }
     public void gantryController(double power) {
