@@ -23,6 +23,9 @@ public class Stacker {
     private boolean changeLtrigger;
     private boolean changeLBumper;
     private boolean changeRBumper;
+    private double lPower;
+    private boolean lock;
+    private final double gravity = 0.2;
 
     private enum State{
         DIRECT,
@@ -73,7 +76,6 @@ public class Stacker {
     private boolean changeDpadRight2 = false;
     private boolean telePincherToggle = false;
     private boolean teleFangToggle = false;
-    private boolean teleLiftMax = false;
     private boolean buttonA;
     private boolean buttonB;
     private boolean buttonX;
@@ -81,6 +83,7 @@ public class Stacker {
 
 
     public Stacker(LinearOpMode opMode) {
+        lock = false;
         this.opMode = opMode;
         opMode.telemetry.addLine("Stacker Init Started");
         opMode.telemetry.update();
@@ -371,6 +374,7 @@ public class Stacker {
         }
     }
     private void liftControl(double power) {  //TODO: Update with encoder stops, use LIFT_BLOCK[liftMaxSpot] when doing so
+        /*
         if (opMode_iterative.gamepad2.right_trigger != 0){
             setLiftPower(opMode_iterative.gamepad2.right_trigger);
         }
@@ -386,6 +390,38 @@ public class Stacker {
         else{
             setLiftPower(0);
         }
+       */
+        lPower = opMode_iterative.gamepad2.right_trigger;
+        if (opMode_iterative.gamepad2.right_trigger != 0){
+            setLiftPower(Range.clip(lPower, -1, 1));
+        }
+        else if (opMode_iterative.gamepad2.left_trigger != 0){
+            setLiftPower(-0.5 * Range.clip(lPower, -1, 1));
+
+        }
+        else if (opMode_iterative.gamepad1.left_bumper){
+            setLiftPower(-0.5 * Range.clip(lPower, -1, 1));
+        }
+        else if (opMode_iterative.gamepad1.right_bumper) {
+            setLiftPower(-0.5 * Range.clip(lPower, -1, 1));
+        }
+        else if(opMode_iterative.gamepad1.right_stick_button && opMode_iterative.gamepad2.right_stick_button){
+            if (lock){
+                lock = false;
+            }
+            lock = true;
+        }
+        else {
+            opMode_iterative.telemetry.update();
+            if (!lock){
+                ll.setPower(0);
+                lr.setPower(0);
+            } else{
+                ll.setPower(gravity);
+                lr.setPower(gravity);
+            }
+        }
+        opMode_iterative.telemetry.update();
     }
 
     /*private void liftControl(double power) {  //TODO: Update with encoder stops, use LIFT_BLOCK[liftMaxSpot] when doing so

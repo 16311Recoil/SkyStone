@@ -14,27 +14,21 @@ import java.util.TreeMap;
 @TeleOp
         (name = "TeleOp", group = "controlled")
 public class TeleOP extends OpMode {
-    //DangerNoodle teleOp;
-    Drivetrain drivetrain;
-    Stacker stacker;
+    DangerNoodle teleOp;
+
     ElapsedTime teleOpTime = new ElapsedTime();
 
     @Override
     public void init() {
-        try {
-            drivetrain = new Drivetrain(this, new ElapsedTime(), new TreeMap<String, Double>());
-            stacker = new Stacker(this);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        teleOp = new DangerNoodle(this);
+        telemetry.addLine("INIT FINISHED");
+        telemetry.update();
 
     }
 
     @Override
     public void loop() {
-        drivetrain.moveTelop2(gamepad1.right_stick_x, -gamepad1.right_stick_y, gamepad1.left_stick_x);
-        drivetrain.toggleSpeed();
-        stacker.stackerTeleControl(0.6,1,1);
+        teleOp.teleopControls();
         telemetry.update();
 
     }

@@ -341,6 +341,12 @@ public class DangerNoodle implements Robot {
     }
     */
 
+    public void teleopControls(){
+        drivetrain.moveTelop2(opMode_iterative.gamepad1.right_stick_x, -opMode_iterative.gamepad1.right_stick_y, opMode_iterative.gamepad1.left_stick_x);
+        drivetrain.toggleSpeed();
+        manipulator.stackerTeleControl(0.6,1,1);
+    }
+
     public LinearOpMode getOpMode() {
         return opMode;
     }
