@@ -2,19 +2,20 @@ package org.firstinspires.ftc.teamcode.Testing;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_TO_POSITION;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 
 
 @TeleOp
         (name="Lift Test", group="Iterative Opmode")
 
 public class LiftPrototype extends OpMode {
-    private enum State{
-            DIRECT,
-            L_SPEED,
-            H_SPEED
-        }
 
         // Declare OpMode members.
         private ElapsedTime runtime;
@@ -23,6 +24,7 @@ public class LiftPrototype extends OpMode {
         private double power = 0;
         private double gravity = 0.2;
         private boolean lock = false;
+
 
 
 
@@ -43,6 +45,23 @@ public class LiftPrototype extends OpMode {
             lr.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
             power += gravity;
+
+
+            ll.setMode(RUN_USING_ENCODER);
+            Thread.yield();
+            lr.setMode(RUN_USING_ENCODER);
+            Thread.yield();
+
+
+            ll.setMode(STOP_AND_RESET_ENCODER);
+            Thread.yield();
+            lr.setMode(STOP_AND_RESET_ENCODER);
+            Thread.yield();
+
+            ll.setMode(RUN_WITHOUT_ENCODER);
+            Thread.yield();
+            lr.setMode(RUN_WITHOUT_ENCODER);
+            Thread.yield();
 
             telemetry.addData("Status", "Initialized");
         }
@@ -66,26 +85,28 @@ public class LiftPrototype extends OpMode {
         public void stop() {
         }
     private void liftControlD2() {
-        if (gamepad1.right_trigger != 0){
-            power = gamepad1.right_trigger;
-            ll.setPower(Range.clip(power, -1, 1));
-            lr.setPower(Range.clip(power, -1, 1));
-            telemetry.addData("POWER", ll.getPower());
+        power = .5;
+        if (gamepad2.right_trigger != 0){
+            ll.setPower(gamepad2.right_trigger);
+            lr.setPower(gamepad2.right_trigger);
         }
-        else if (gamepad1.left_trigger != 0){
-            ll.setPower(-Range.clip(power, -1, 1));
-            lr.setPower(-Range.clip(power, -1, 1));
-            telemetry.addData("POWER", -ll.getPower());
+        else if (gamepad2.left_trigger != 0){
+            ll.setPower(-gamepad2.left_trigger * 0.35);
+            lr.setPower(-gamepad2.left_trigger * 0.35);
         }
-        else if (gamepad1.left_bumper){
-            ll.setPower(-power);
-            lr.setPower(-power);
+        else if (gamepad2.left_bumper){
+            ll.setPower(0.35 * -power);
+            lr.setPower(0.35 * -power);
         }
-        else if (gamepad1.right_bumper) {
+        else if (gamepad2.right_bumper) {
             ll.setPower(power);
             lr.setPower(power);
         }
-        else if(gamepad1.right_stick_button){
+        else {
+            ll.setPower(0);
+            lr.setPower(0);
+        }
+        /*else if(gamepad1.right_stick_button){
             if (lock){
                 lock = false;
             }
@@ -100,18 +121,27 @@ public class LiftPrototype extends OpMode {
                 ll.setPower(gravity);
                 lr.setPower(gravity);
             }
-        }
+        }*/
+        telemetry.addData("Encoder", getLiftEncoderAverage());
+        telemetry.addData("LL", ll.getCurrentPosition());
+        telemetry.addData("LR", lr.getCurrentPosition());
         telemetry.update();
     }
     public  double getLiftEncoderAverage() {
         double counter = 0;
+
         if (ll.getCurrentPosition() == 0) {
             counter += 1;
         }
         if (lr.getCurrentPosition() == 0) {
             counter += 1;
         }
-        return (ll.getCurrentPosition() + lr.getCurrentPosition() / (2 - counter));
+        return ((ll.getCurrentPosition() + lr.getCurrentPosition()) / (2 - counter));
+    }
+    public void resetLiftEncoders(){
+        ll.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lr.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
     }
 }
 

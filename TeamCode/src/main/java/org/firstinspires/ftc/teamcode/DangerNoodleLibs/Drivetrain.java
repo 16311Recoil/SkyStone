@@ -366,33 +366,17 @@ public class Drivetrain {
         }
         setAllMotors(0);
     }
-    public void correctHeading(double timeout) {
-
-        double currAngle = sensors.getFirstAngle();
-        double target = 0;
-
-        pidControlller.setReset(true);
-        pidControlller.setCoeffs(0.5/currAngle, 0,0.2/currAngle);
-
-        ElapsedTime t_i = new ElapsedTime();
-
-        opMode.telemetry.addData("Curr Angle", currAngle);
+    public void correctHeading(double power, double header, double timeout ) { //pidControlller.setCoeffs(0.5/currAngle, 0,0.2/currAngle);
+        double currentAngle = sensors.getFirstAngle();
+        boolean turnRight = (currentAngle > 0);
+        double heading = header - currentAngle;
+        opMode.telemetry.addData("Header", header);
+        opMode.telemetry.addData("CurrentAngle", currentAngle);
+        opMode.telemetry.addData("ChangeAngle", heading);
         opMode.telemetry.update();
-
-        while (!inBounds(currAngle, -1,1) &&  t_i.seconds() < timeout && opMode.opModeIsActive()) {
-            turn(pidControlller.iteration(currAngle, t_i.seconds()), !((Math.signum(currAngle)) > 0));
-            currAngle = sensors.getFirstAngle();
-            sensorVals.put("Current Angle", currAngle);
-
-            opMode.telemetry.addData("INSIDE LOOP: t_i", t_i);
-            opMode.telemetry.addData("INSIDE LOOP: error", currAngle);
-            opMode.telemetry.addData("LOOP SPEED", loopCount/t_i.seconds());
-            opMode.telemetry.update();
-            loopCount++;
-
-        }
-        setAllMotors(0);
+        turnGyro(power, heading, turnRight, timeout);
     }
+
     public double correctHeading2(double p, double d, ElapsedTime t_i, double target, double currAngle) {
 
         pidControlller.setReset(true);
@@ -404,6 +388,7 @@ public class Drivetrain {
         }
         return 0;
     }
+
 
     private boolean inBounds(double num, double lowBound, double highBound) {
         if (num >= lowBound && num <= highBound)
@@ -861,6 +846,8 @@ public class Drivetrain {
             powers[BACK_LEFT] /= maxPower;
             powers[BACK_RIGHT] /= maxPower;
         }
+
+
         fl.setPower(multiplier * powers[FRONT_LEFT]);
         fr.setPower(multiplier * powers[FRONT_RIGHT]);
         br.setPower(multiplier * powers[BACK_RIGHT]);

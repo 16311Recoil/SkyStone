@@ -148,6 +148,8 @@ public class DangerNoodle implements Robot {
     @Override
     public void moveFoundation(boolean blue, boolean skybridge) throws InterruptedException {
 
+        double heading = getDrivetrain().getSensors().getFirstAngle();
+
         manipulator.setFangs(false);
 
         if (blue){
@@ -161,10 +163,11 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(400);
 
+            //drivetrain.correctHeading(0.3, heading, 4);
 
             Thread.sleep(400);
 
-            drivetrain.move(0.25,0, BACKWARD,1215,5,0.05);
+            drivetrain.move(0.25,0, BACKWARD,1200,5,0.05);
 
             Thread.sleep(300);
 
@@ -225,16 +228,17 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(400);
 
-
             drivetrain.move(0.35,0, LEFT,1300,2,0.1);
 
             Thread.sleep(400);
 
+            //drivetrain.correctHeading(0.3, heading, 4);
+
+            //Thread.sleep(400);
 
             drivetrain.move(0.25,0, BACKWARD,1215,5,0.05);
 
             Thread.sleep(300);
-
 
             //drivetrain.correctHeading(3);
 

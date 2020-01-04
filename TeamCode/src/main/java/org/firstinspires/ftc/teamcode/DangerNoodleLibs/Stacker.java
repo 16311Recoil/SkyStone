@@ -15,6 +15,9 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.teamcode.Testing.LiftPrototype;
 
 import static android.os.SystemClock.sleep;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER;
+import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.STOP_AND_RESET_ENCODER;
 
 
 public class Stacker {
@@ -46,8 +49,8 @@ public class Stacker {
     private Servo lFang;
     private Servo rFang;
     private final double TIME_FOR_INTAKE = 3;
-    private final double TIME_FOR_GANTRY_IN = 0; //TODO: Test for Times
-    private final double TIME_FOR_GANTRY_OUT = 0;
+    private final double TIME_FOR_GANTRY_IN = 2.5; //TODO: Test for Times
+    private final double TIME_FOR_GANTRY_OUT = 2.5;
     private final double CLOSED_PINCHER_SERVO_POSITION = 0.75;
     private final double OPEN_PICHER_SERVO_POSITION = 0;
     private final double[] ARM_POSITIONS = new double[]{0, 0.55, 0.9};
@@ -57,10 +60,10 @@ public class Stacker {
     private int liftEncoderVal = 0;
     private final double INCHES_TO_SERVO = 0;//TODO: Test conversions for inches in gantry movement to servo position
     private final double LIFT_MAX = -8500; //TODO: Test for Max Encoder Limit on Lift
-    private final double[] LIFT_BLOCK = new double[]{600, -8500}; //TODO: Test for encoder readings at each block height
+    private final double[] LIFT_BLOCK = new double[]{200, -1200}; //TODO: Test for encoder readings at each block height
     private final double LIFT_MIN = 600; //TODO: Test for Min Encoder Limit on Lift
-    private static final double SERVO_LOCK = 0; // Needs to be tested;
-    private static final double SERVO_UNLOCK = 0.32; // Needs to be tested;
+    private static final double SERVO_LOCK = 0.32; // Needs to be tested;
+    private static final double SERVO_UNLOCK = 0; // Needs to be tested;
 
     private boolean changeX = false;
     private boolean changeY = false;
@@ -123,6 +126,7 @@ public class Stacker {
         opMode.telemetry.update();
         currentState = State.DIRECT;
 
+
     }
     public Stacker(OpMode opMode){
         this.opMode_iterative = opMode;
@@ -162,6 +166,21 @@ public class Stacker {
         opMode_iterative.telemetry.addLine("Stacker Init Completed");
         opMode_iterative.telemetry.update();
 
+        ll.setMode(RUN_USING_ENCODER);
+        Thread.yield();
+        lr.setMode(RUN_USING_ENCODER);
+        Thread.yield();
+
+
+        ll.setMode(STOP_AND_RESET_ENCODER);
+        Thread.yield();
+        lr.setMode(STOP_AND_RESET_ENCODER);
+        Thread.yield();
+
+        ll.setMode(RUN_WITHOUT_ENCODER);
+        Thread.yield();
+        lr.setMode(RUN_WITHOUT_ENCODER);
+        Thread.yield();
     }
 
     public DcMotor getIl() {
@@ -271,13 +290,13 @@ public class Stacker {
 
     public void setLiftPosition(double power, double position) {
         double currentPos = getLiftEncoderAverage();
-        if (currentPos < position) {
-            while (currentPos < position) {
+        if (currentPos > position) {
+            while (currentPos > position) {
                 setLiftPower(power);
             }
         }
         else {
-            while (currentPos > position) {
+            while (currentPos < position) {
                 setLiftPower(-power);
             }
         }
@@ -296,6 +315,7 @@ public class Stacker {
                 setGantryPower(-power);
             }
         }
+        setGantryPower(0);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -303,13 +323,18 @@ public class Stacker {
 
     public double getLiftEncoderAverage() {
         double counter = 0;
-        if (ll.getCurrentPosition() == 0) {
+        double llEncoder = ll.getCurrentPosition();
+        double lrEncoder = lr.getCurrentPosition();
+        if (llEncoder == 0 && lrEncoder == 0){
+            return 0;
+        }
+        if (llEncoder == 0) {
             counter += 1;
         }
-        if (lr.getCurrentPosition() == 0) {
+        if (lrEncoder == 0) {
             counter += 1;
         }
-        return (ll.getCurrentPosition() + lr.getCurrentPosition() / (2 - counter));
+        return ((llEncoder + lrEncoder) / (2 - counter));
     }
     public double inchToServo(double inches){
         return (inches * INCHES_TO_SERVO);
@@ -373,90 +398,28 @@ public class Stacker {
             setGantryPower(0);
         }
     }
+
     private void liftControl(double power) {  //TODO: Update with encoder stops, use LIFT_BLOCK[liftMaxSpot] when doing so
-        /*
         if (opMode_iterative.gamepad2.right_trigger != 0){
-            setLiftPower(opMode_iterative.gamepad2.right_trigger);
-        }
-        else if (opMode_iterative.gamepad2.left_trigger != 0) {
-            setLiftPower(-opMode_iterative.gamepad2.left_trigger * 0.5);
-        }
-        else if (opMode_iterative.gamepad1.left_bumper){
-            setLiftPower(-power * 0.5);
-        }
-        else if (opMode_iterative.gamepad1.right_bumper) {
-            setLiftPower(power);
-        }
-        else{
-            setLiftPower(0);
-        }
-       */
-        lPower = opMode_iterative.gamepad2.right_trigger;
-        if (opMode_iterative.gamepad2.right_trigger != 0){
-            setLiftPower(Range.clip(lPower, -1, 1));
-        }
-        else if (opMode_iterative.gamepad2.left_trigger != 0){
-            setLiftPower(-0.5 * Range.clip(lPower, -1, 1));
-
-        }
-        else if (opMode_iterative.gamepad1.left_bumper){
-            setLiftPower(-0.5 * Range.clip(lPower, -1, 1));
-        }
-        else if (opMode_iterative.gamepad1.right_bumper) {
-            setLiftPower(-0.5 * Range.clip(lPower, -1, 1));
-        }
-        else if(opMode_iterative.gamepad1.right_stick_button && opMode_iterative.gamepad2.right_stick_button){
-            if (lock){
-                lock = false;
-            }
-            lock = true;
-        }
-        else {
-            opMode_iterative.telemetry.update();
-            if (!lock){
-                ll.setPower(0);
-                lr.setPower(0);
-            } else{
-                ll.setPower(gravity);
-                lr.setPower(gravity);
-            }
-        }
-        opMode_iterative.telemetry.update();
-    }
-
-    /*private void liftControl(double power) {  //TODO: Update with encoder stops, use LIFT_BLOCK[liftMaxSpot] when doing so
-        if (opMode_iterative.gamepad2.right_trigger != 0){
-            liftEncoderVal += opMode_iterative.gamepad2.right_trigger * 10;
-        }
-        else if (opMode_iterative.gamepad2.left_trigger != 0) {
-            liftEncoderVal -= opMode_iterative.gamepad2.left_trigger * 10;
-        }
-        else if (opMode_iterative.gamepad1.left_bumper){
-            liftEncoderVal -= Math.round(power) * 10;
-        }
-        else if (opMode_iterative.gamepad1.right_bumper) {
-            liftEncoderVal += Math.round(power) * 10;
-        }
-        setLiftPosition(power, liftEncoderVal);
-    }*/
-
-    /*private void liftControl(double power) {  //TODO: Update with encoder stops, use LIFT_BLOCK[liftMaxSpot] when doing so
-        if ((opMode_iterative.gamepad2.right_trigger != 0) && (getLiftEncoderAverage() > LIFT_BLOCK[liftMaxSpot])){
             setLiftPower(opMode_iterative.gamepad2.right_trigger);
         }
         else if ((opMode_iterative.gamepad2.left_trigger != 0) && (getLiftEncoderAverage() < LIFT_BLOCK[0])){
-            setLiftPower(-opMode_iterative.gamepad2.left_trigger);
+            setLiftPower(-opMode_iterative.gamepad2.left_trigger * 0.35);
         }
         else if (opMode_iterative.gamepad1.left_bumper && (getLiftEncoderAverage() < LIFT_BLOCK[0])){
-            setLiftPower(-power);
+            setLiftPower(-power * 0.35);
         }
-        else if (opMode_iterative.gamepad1.right_bumper && (getLiftEncoderAverage() > LIFT_BLOCK[liftMaxSpot])) {
+        else if (opMode_iterative.gamepad1.right_bumper) {
             setLiftPower(power);
         }
         else{
             setLiftPower(0);
         }
-    }*/
+        opMode_iterative.telemetry.addData("Lift encoders", getLiftEncoderAverage());
+        opMode_iterative.telemetry.addData("LL", ll.getCurrentPosition());
+        opMode_iterative.telemetry.addData("LR", lr.getCurrentPosition());
+        opMode_iterative.telemetry.update();
+    }
 
     private void liftMaxControl(){
         if (opMode_iterative.gamepad2.dpad_up && !changeDpadUp2 && (liftSpotCurrentMax < LIFT_BLOCK.length)){ //TODO Update this number for the max size of LIFT_BLOCK
@@ -502,6 +465,7 @@ public class Stacker {
         intakeControl(intakePower);
         liftControl(liftPower);
         gantryController(gantryPower);
+        macControl();
     }
     public void buttonMapping(){
     }
@@ -516,12 +480,10 @@ public class Stacker {
     }
 ////////////////////////////////////// Auto Macros //////////////////////////////////////////////////////////////////////////
     public void macOut(){
-        setPincherPosition(true);
-        sleep(500);
-        setLiftPosition(1, LIFT_BLOCK[0]);
+        setLiftPosition(1, -500);
         sleep(500);
         setGantryPosition(1, false);
-        sleep(500);
+        sleep(1500);
         setArmPosition(0);
     }
     public void macIn(){
