@@ -149,6 +149,7 @@ public class DangerNoodle implements Robot {
     public void moveFoundation(boolean blue, boolean skybridge) throws InterruptedException {
 
         double heading = getDrivetrain().getSensors().getFirstAngle();
+        opMode.telemetry.addData("InitAngle", heading);
 
         manipulator.setFangs(false);
 
@@ -158,7 +159,6 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(400);
 
-
             drivetrain.move(0.35,0, RIGHT,1300,2,0.1);
 
             Thread.sleep(400);
@@ -167,7 +167,7 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(400);
 
-            drivetrain.move(0.25,0, BACKWARD,1200,5,0.05);
+            drivetrain.move(0.25,0, BACKWARD,1180,5,0.05);
 
             Thread.sleep(300);
 
@@ -183,7 +183,6 @@ public class DangerNoodle implements Robot {
             drivetrain.move(1,0, FORWARD, 1200,6,0.1);
 
             Thread.sleep(400);
-
 
             Thread.sleep(1000);
 
@@ -203,7 +202,14 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(1000);
             if (skybridge) {
-                drivetrain.move(0.35, 0, LEFT, 360, 4, 0.05);
+
+                // Move to wall
+
+                drivetrain.move(0.35, 0, RIGHT, 1300, 4, 0.05);
+
+                Thread.sleep(300);
+
+                drivetrain.move(0.35, 0, LEFT, 1200, 4, 0.05);
 
                 Thread.sleep(1000);
 
@@ -228,7 +234,7 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(400);
 
-            drivetrain.move(0.35,0, LEFT,1300,2,0.1);
+            drivetrain.move(0.35,0, LEFT,1250,2,0.1);
 
             Thread.sleep(400);
 
@@ -236,7 +242,7 @@ public class DangerNoodle implements Robot {
 
             //Thread.sleep(400);
 
-            drivetrain.move(0.25,0, BACKWARD,1215,5,0.05);
+            drivetrain.move(0.25,0, BACKWARD,1180,5,0.05);
 
             Thread.sleep(300);
 
@@ -251,7 +257,7 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(400);
 
-            drivetrain.turnPID(90,(0.8 / 88),0,(0.0 / 88),4,true);
+            drivetrain.turnPID(90,(0.85 / 88),0,(0.2 / 88),4,true);
 
             Thread.sleep(400);
 

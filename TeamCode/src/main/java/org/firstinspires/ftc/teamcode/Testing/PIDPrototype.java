@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 @Autonomous(name="PIDPrototype", group="Linear Opmode")
-//@Disabled
+
 public class PIDPrototype extends LinearOpMode {
     private ElapsedTime runtime;
     private ElapsedTime timerPID;
@@ -42,7 +42,7 @@ public class PIDPrototype extends LinearOpMode {
         waitForStart();
 
         try {
-            drivetrain.turnPID(90,(0.7 / 90),0,0,5,false);
+            drivetrain.turnPID(90,(0.85 / 88),0,(0.2 / 88),5,false);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
