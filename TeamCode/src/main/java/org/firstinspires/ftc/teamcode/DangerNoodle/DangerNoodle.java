@@ -17,6 +17,7 @@ import org.openftc.revextensions2.RevBulkData;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.ExpansionHubMotor;
 
+import java.util.FormatFlagsConversionMismatchException;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +27,7 @@ public class DangerNoodle implements Robot {
     // Instance Variables
     private Drivetrain drivetrain;
     private Stacker manipulator;
-    private BitmapVision bmv;
+    //private BitmapVision bmv;
     private LinearOpMode opMode;
     private OpMode opMode_iterative;
     private int[] skyPos;
@@ -56,7 +57,7 @@ public class DangerNoodle implements Robot {
             this.sensorVals = new ConcurrentHashMap<String, Double>();
             drivetrain = new Drivetrain(opMode, timer, sensorVals);
             manipulator = new Stacker(opMode);
-            bmv = new BitmapVision(opMode);
+            //bmv = new BitmapVision(opMode);
             masterTime = new ElapsedTime();
 
             //hardwareThread = new HardwareThread(this, sensorVals);
@@ -124,6 +125,7 @@ public class DangerNoodle implements Robot {
     // Wait for robot
     @Override
     public void scan() {
+        /*
         while(!opMode.isStarted() && skyPos[1] == 0){
             skyPos = bmv.getSkyPos();
         }
@@ -133,8 +135,9 @@ public class DangerNoodle implements Robot {
             opMode.telemetry.addLine("MIDDLE");
         else
             opMode.telemetry.addLine("RIGHT");
-
+   */
     }
+
 
 
     @Override
@@ -167,7 +170,7 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(400);
 
-            drivetrain.move(0.25,0, BACKWARD,1180,5,0.05);
+            drivetrain.move(0.25,0, BACKWARD,1170,5,0.05);
 
             Thread.sleep(300);
 
@@ -209,18 +212,18 @@ public class DangerNoodle implements Robot {
 
                 Thread.sleep(300);
 
-                drivetrain.move(0.35, 0, LEFT, 1200, 4, 0.05);
+                drivetrain.move(0.35, 0, LEFT, 965, 4, 0.05);
 
                 Thread.sleep(1000);
 
                 drivetrain.move(.6, 0, FORWARD, 1550, 6, 0.05);
             }
             else {
-                drivetrain.move(0.35, 0, RIGHT, 1100, 6, 0.1);
+                drivetrain.move(0.35, 0, RIGHT, 1300, 6, 0.1);
 
                 Thread.sleep(400);
 
-                drivetrain.move(0.35, 0, LEFT, 50, 3, 0.1);
+                drivetrain.move(0.35, 0, LEFT, 25, 3, 0.1);
 
                 Thread.sleep(300);
 
@@ -234,7 +237,7 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(400);
 
-            drivetrain.move(0.35,0, LEFT,1250,2,0.1);
+            drivetrain.move(0.4,0, LEFT,1520,2,0.05);
 
             Thread.sleep(400);
 
@@ -242,7 +245,7 @@ public class DangerNoodle implements Robot {
 
             //Thread.sleep(400);
 
-            drivetrain.move(0.25,0, BACKWARD,1180,5,0.05);
+            drivetrain.move(0.25,0, BACKWARD,1170,5,0.05);
 
             Thread.sleep(300);
 
@@ -253,7 +256,7 @@ public class DangerNoodle implements Robot {
 
             Thread.sleep(1000);
 
-            drivetrain.move(1,0, FORWARD, 1200,6,0.1);
+            drivetrain.move(1,0, FORWARD, 1250,6,0.1);
 
             Thread.sleep(400);
 
@@ -274,24 +277,150 @@ public class DangerNoodle implements Robot {
             Thread.sleep(1000);
 
             if (skybridge){
-                drivetrain.move(0.35, 0, RIGHT, 360, 4, 0.05);
+                /*drivetrain.move(0.35, 0, LEFT, 1300, 4, 0.05);
 
                 Thread.sleep(300);
 
-                drivetrain.move(.6, 0, FORWARD, 1550, 6, 0.05);
+                drivetrain.move(0.375, 0, RIGHT, 730, 4, 0.00);
+
+                Thread.sleep(300);
+
+                drivetrain.move(.6, 0, FORWARD, 1550, 6, 0.05);*/
             }
             else {
-                drivetrain.move(0.35, 0, LEFT, 1100, 6, 0.1);
+                drivetrain.move(0.35, 0, LEFT, 1300, 6, 0.1);
 
                 Thread.sleep(400);
 
-                drivetrain.move(0.35, 0, RIGHT, 50, 3, 0.1);
+                drivetrain.move(0.25, 0, RIGHT, 25, 3, 0.1);
 
                 Thread.sleep(300);
 
                 drivetrain.move(0.6, 0, FORWARD, 1550, 6, 0.05);
             }
         }
+    }
+
+    public void skystone(boolean blue, boolean skybridge, int position) throws InterruptedException{
+
+        if (blue){
+            switch (position) {
+                case 2:
+                    drivetrain.move(0.4,0, BACKWARD,200,2,0.1);
+
+                    Thread.sleep(400);
+
+                    drivetrain.move(0.35,0, LEFT,135,2,0.05);
+
+                    Thread.sleep(400);
+
+                    /*manipulator.setLiftPosition(0.4, -300);
+
+                    Thread.sleep(400);
+
+                    manipulator.setGantryPosition(1, false);
+
+                    Thread.sleep(2700);
+
+                    drivetrain.move(0.35,0, BACKWARD, 800, 4, 0.1);
+
+                    Thread.sleep(400);
+
+                    manipulator.setLiftPosition(0.8,200);
+
+                    Thread.sleep(400);
+
+                    manipulator.setPincherPosition(true);
+
+                    Thread.sleep(400);
+
+                    manipulator.setLiftPosition(0.4,-300);
+
+                    Thread.sleep(400);
+
+                    manipulator.setArmPosition(0);
+
+                    Thread.sleep(400);
+
+                    manipulator.setArmPosition(0);
+
+                    Thread.sleep(400);
+
+                    manipulator.setGantryPosition(1,true);
+
+                    Thread.sleep(2700);
+
+                    drivetrain.move(0.6,0, FORWARD,200,2,0.1);*/
+
+                    break;
+
+                case 1:
+                    break;
+
+                case 0:
+                    break;
+            }
+        }
+
+        else {
+            switch (position) {
+                case 2:
+                    drivetrain.move(0.4,0, BACKWARD,200,2,0.1);
+
+                    Thread.sleep(300);
+
+                    drivetrain.move(0.35,0, RIGHT,135,2,0.01);
+                    Thread.sleep(300);
+
+                    manipulator.setLiftPosition(0.7, -600);
+
+                    Thread.sleep(600);
+
+                    manipulator.setGantryPosition(1, false);
+
+                    Thread.sleep(2700);
+                /*
+                    drivetrain.move(0.35,0, BACKWARD, 800, 4, 0.1);
+
+                    Thread.sleep(400);
+
+                    manipulator.setLiftPosition(0.8,200);
+
+                    Thread.sleep(400);
+
+                    manipulator.setPincherPosition(true);
+
+                    Thread.sleep(400);
+
+                    manipulator.setLiftPosition(0.4,-300);
+
+                    Thread.sleep(400);
+
+                    manipulator.setArmPosition(0);
+
+                    Thread.sleep(400);
+
+                    manipulator.setArmPosition(0);
+
+                    Thread.sleep(400);
+
+                    manipulator.setGantryPosition(1,true);
+
+                    Thread.sleep(2700);
+
+                    drivetrain.move(0.6,0, FORWARD,200,2,0.1);*/
+
+                    break;
+
+                case 1:
+                    break;
+
+                case 0:
+                    break;
+
+            }
+        }
+
     }
 
     @Override
@@ -354,7 +483,7 @@ public class DangerNoodle implements Robot {
     public void teleopControls(){
         drivetrain.moveTelop2(opMode_iterative.gamepad1.right_stick_x, -opMode_iterative.gamepad1.right_stick_y, opMode_iterative.gamepad1.left_stick_x);
         drivetrain.toggleSpeed();
-        manipulator.stackerTeleControl(0.6,1,1);
+        manipulator.stackerTeleControl(0.6, 0.5,1,1);
     }
 
     public LinearOpMode getOpMode() {
@@ -373,7 +502,7 @@ public class DangerNoodle implements Robot {
     }
     public void teleOp(){
         drivetrain.moveTelop2(opMode_iterative.gamepad1.left_stick_x, opMode_iterative.gamepad1.left_stick_y, opMode_iterative.gamepad1.right_stick_x);
-        manipulator.stackerTeleControl(0.75,1,.75);
+        manipulator.stackerTeleControl(0.75,1,1,.75);
     }
     public String toString(){
         String output = "DANGERNOODLE OUTPUT\n";

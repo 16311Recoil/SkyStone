@@ -65,7 +65,7 @@ public class DrivetrainPrototype extends OpMode {
     public void loop() {
         tele.moveTelop2(gamepad1.right_stick_x, -gamepad1.right_stick_y, gamepad1.left_stick_x);
         tele.toggleSpeed();
-        s.stackerTeleControl(0.75,0.75,0);
+        s.stackerTeleControl(0.75,0.75,1,0);
         telemetry.update();
     }
  }

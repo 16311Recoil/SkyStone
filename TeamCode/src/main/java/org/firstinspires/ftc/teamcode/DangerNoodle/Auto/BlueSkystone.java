@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.DangerNoodle.DangerNoodle;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.BitmapVision;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
@@ -14,27 +15,31 @@ import java.util.concurrent.ConcurrentHashMap;
 @Autonomous
         (name = "Blue Skystone Auto", group = "Controlled")
 public class BlueSkystone extends LinearOpMode {
-    Drivetrain dt;
-    BitmapVision bmv;
-    Stacker manip;
+    Drivetrain drivetrain;
+    BitmapVision vision;
+    Stacker manipulator;
+    DangerNoodle dangerNoodle;
     private int skyPos;
 
 
     @Override
     public void runOpMode() throws InterruptedException {
-        dt = new Drivetrain(this, new ElapsedTime(), new ConcurrentHashMap<String, Double>());
-        bmv = new BitmapVision(this);
-        manip = new Stacker(this);
+        dangerNoodle = new DangerNoodle(this, true,true);
 
         while(!isStarted()) {
-            skyPos = bmv.getSkyPos()[0];
+            skyPos = 2;
             telemetry.addData("SKY POS", skyPos);
             telemetry.update();
         }
 
         waitForStart();
 
-        switch (skyPos){
+        dangerNoodle.skystone(true,true, 2);
+
+
+
+//--------------------------------------------------------------------------------------------------------------------------------------------
+        /*switch (skyPos){
             case 2:
 
                dt.move(0.4,0,0, 700,3,0.1);
@@ -124,7 +129,7 @@ public class BlueSkystone extends LinearOpMode {
                 break;
 
 
-        }
+        }*/
 
     }
 }

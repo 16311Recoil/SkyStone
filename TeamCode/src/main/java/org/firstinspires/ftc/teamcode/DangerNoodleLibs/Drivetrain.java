@@ -71,8 +71,6 @@ public class Drivetrain {
 
 
     public Drivetrain(LinearOpMode opMode, ElapsedTime timer, Map<String, Double> sensorVals) throws InterruptedException {
-
-
         this.opMode = opMode;
         sensors = new Sensors(this.opMode);
         powers = new double[NUM_MOTORS];
@@ -453,6 +451,13 @@ public class Drivetrain {
             fr.setPower(powers[FRONT_RIGHT]);
             bl.setPower(powers[BACK_LEFT]);
             br.setPower(powers[BACK_RIGHT]);
+
+            opMode.telemetry.addData("Encoder Average", initPos - getEncoderAverageES(angle));
+            opMode.telemetry.addData("FL", initPos - encoderVals[FRONT_LEFT]);
+            opMode.telemetry.addData("FR", initPos - encoderVals[FRONT_RIGHT]);
+            opMode.telemetry.addData("BL", initPos - encoderVals[BACK_LEFT]);
+            opMode.telemetry.addData("BR", initPos- encoderVals[BACK_RIGHT]);
+            opMode.telemetry.update();
 
             loopCondition = Math.abs(initPos - getEncoderAverageES(angle)) < low_bound
                     && (timer.seconds() < timeout)
