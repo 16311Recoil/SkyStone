@@ -6,6 +6,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
+
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_TO_POSITION;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_USING_ENCODER;
 import static com.qualcomm.robotcore.hardware.DcMotor.RunMode.RUN_WITHOUT_ENCODER;
@@ -24,6 +26,9 @@ public class LiftPrototype extends OpMode {
         private double power = 0;
         private double gravity = 0.2;
         private boolean lock = false;
+        private boolean changeA = false;
+        private boolean changeB = false;
+        Stacker lift = new Stacker(this);
 
 
 
@@ -34,6 +39,7 @@ public class LiftPrototype extends OpMode {
          */
         @Override
         public void init() {
+
             runtime = new ElapsedTime();
 
             ll  = hardwareMap.get(DcMotor.class, "ll");
@@ -85,47 +91,15 @@ public class LiftPrototype extends OpMode {
         public void stop() {
         }
     private void liftControlD2() {
-        power = .5;
-        if (gamepad2.right_trigger != 0){
-            ll.setPower(gamepad2.right_trigger);
-            lr.setPower(gamepad2.right_trigger);
+        if (gamepad1.a && !changeA){
+            lift.macOut();
         }
-        else if (gamepad2.left_trigger != 0){
-            ll.setPower(-gamepad2.left_trigger * 0.35);
-            lr.setPower(-gamepad2.left_trigger * 0.35);
+        if(gamepad1.b && !changeB){
+            lift.macIn();
         }
-        else if (gamepad2.left_bumper){
-            ll.setPower(0.35 * -power);
-            lr.setPower(0.35 * -power);
-        }
-        else if (gamepad2.right_bumper) {
-            ll.setPower(power);
-            lr.setPower(power);
-        }
-        else {
-            ll.setPower(0);
-            lr.setPower(0);
-        }
-        /*else if(gamepad1.right_stick_button){
-            if (lock){
-                lock = false;
-            }
-            lock = true;
-        }
-        else {
-            telemetry.update();
-            if (!lock){
-                ll.setPower(0);
-                lr.setPower(0);
-            } else{
-                ll.setPower(gravity);
-                lr.setPower(gravity);
-            }
-        }*/
-        telemetry.addData("Encoder", getLiftEncoderAverage());
-        telemetry.addData("LL", ll.getCurrentPosition());
-        telemetry.addData("LR", lr.getCurrentPosition());
-        telemetry.update();
+        changeA = gamepad1.a;
+        changeB = gamepad1.b;
+
     }
     public  double getLiftEncoderAverage() {
         double counter = 0;
