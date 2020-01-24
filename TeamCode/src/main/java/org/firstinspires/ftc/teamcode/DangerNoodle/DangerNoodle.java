@@ -34,7 +34,7 @@ public class DangerNoodle implements Robot {
 
     private boolean isMoving;
     public ElapsedTime timer;
-    private Map<String, Double> sensorVals;
+    private ConcurrentHashMap<String, Double> sensorVals;
 
 
     private HardwareThread hardwareThread;
@@ -59,6 +59,8 @@ public class DangerNoodle implements Robot {
             manipulator = new Stacker(opMode);
             //bmv = new BitmapVision(opMode);
             masterTime = new ElapsedTime();
+            hardwareThread = new HardwareThread(this, this.sensorVals);
+
 
             //hardwareThread = new HardwareThread(this, sensorVals);
             //hardwareThread.run();
@@ -497,7 +499,7 @@ public class DangerNoodle implements Robot {
         return sensorVals;
     }
 
-    public void setSensorVals(Map<String, Double> sensorVals) {
+    public void setSensorVals(ConcurrentHashMap<String, Double> sensorVals) {
         this.sensorVals = sensorVals;
     }
     public void teleOp(){

@@ -1,13 +1,17 @@
 package org.firstinspires.ftc.teamcode.DangerNoodleLibs;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.teamcode.DangerNoodle.DangerNoodle;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.RevBulkData;
 import org.jetbrains.annotations.*;
 
+import java.util.Arrays;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class HardwareThread implements Runnable {
     private Thread thread;
@@ -19,7 +23,7 @@ public class HardwareThread implements Runnable {
 
     private LinearOpMode opMode;
 
-    private double[] drivetrainEncoders;
+    private int[] drivetrainEncoders;
     private double[] liftEncoders;
 
     private final ExpansionHubEx expansionHubEx, expansionHubEx2;
@@ -29,14 +33,14 @@ public class HardwareThread implements Runnable {
 
 
 
-    public HardwareThread(@NotNull DangerNoodle robot, Map<String, Double> sensorVals) throws NullPointerException{
-        drivetrainEncoders = new double[4];
+    public HardwareThread(@NotNull DangerNoodle robot, ConcurrentHashMap<String, Double> sensorVals) throws NullPointerException{
+        start();
+
+        drivetrainEncoders = new int[4];
         liftEncoders = new double[2];
 
         this.opMode = robot.getOpMode();
 
-        opMode.telemetry.addLine("Thread Init Started");
-        opMode.telemetry.update();
 
         this.sensorVals = sensorVals;
         this.robot = robot;
@@ -51,14 +55,12 @@ public class HardwareThread implements Runnable {
         bulkData = expansionHubEx.getBulkInputData();
         bulkData2 = expansionHubEx2.getBulkInputData();
 
-        start();
-
         drivetrain.resetEncoders();
 
-        drivetrainEncoders[0] = bulkData.getMotorCurrentPosition(drivetrain.getFl());
-        drivetrainEncoders[1] = bulkData2.getMotorCurrentPosition(drivetrain.getFr());
-        drivetrainEncoders[2] = bulkData.getMotorCurrentPosition(drivetrain.getBl());
-        drivetrainEncoders[3] = bulkData2.getMotorCurrentPosition(drivetrain.getBr());
+        drivetrainEncoders[0] = bulkData.getMotorCurrentPosition(drivetrain.getFr());
+        drivetrainEncoders[1] = bulkData2.getMotorCurrentPosition(drivetrain.getFl());
+        drivetrainEncoders[2] = bulkData.getMotorCurrentPosition(drivetrain.getBr());
+        drivetrainEncoders[3] = bulkData2.getMotorCurrentPosition(drivetrain.getBl());
 
 
         // initialize lift encoders
@@ -68,17 +70,15 @@ public class HardwareThread implements Runnable {
         // get sensors
         //      - gyro
         //      - REV 2m Distance Sensor
+        sensorVals.put("X", sensors.getXDistance());
+        sensorVals.put("Y", sensors.getYDistance());
 
         //sensorVals.put("Previous Lift Encoder Average", robot.getManipulator().getLiftEncoderAverage());
         sensorVals.put("Previous Time", robot.timer.milliseconds());
         sensorVals.put("Current Angle", sensors.getFirstAngle());
-        sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverageES(sensorVals.get("Current Angle")));
+        sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage(sensorVals.get("Current Angle")));
 
-        sensorVals.put("X", sensors.getXDistance());
-        sensorVals.put("Y", sensors.getYDistance());
 
-        opMode.telemetry.addLine("Thread Init Completed");
-        opMode.telemetry.update();
 
     }
     public void start(){
@@ -94,15 +94,18 @@ public class HardwareThread implements Runnable {
             bulkData = expansionHubEx.getBulkInputData();
             bulkData2 = expansionHubEx2.getBulkInputData();
             double angle;
-            try{
+            try {
                 angle = sensorVals.get("Current Angle");
-            } catch (NullPointerException E){
+            } catch (NullPointerException E) {
                 opMode.telemetry.addLine("Gyro Angle Not Set - NullPtr");
                 angle = Math.PI / 2;
             }
 
+            opMode.telemetry.addLine("STUCK IN HARDWARE THREAD");
+            opMode.telemetry.update();
 
-            sensorVals.put("Current Drivetrain Encoder Average", drivetrain.getEncoderAverageES(angle));
+
+            sensorVals.put("Current Drivetrain Encoder Average", getEncoderAverage());
             sensorVals.put("Current Lift Encoder Average", manip.getLiftEncoderAverage());
             sensorVals.put("Current Time", robot.timer.milliseconds());
 
@@ -112,15 +115,38 @@ public class HardwareThread implements Runnable {
             drivetrainEncoders[2] = Math.abs(bulkData.getMotorCurrentPosition(drivetrain.getBl()));
             drivetrainEncoders[3] = Math.abs(bulkData2.getMotorCurrentPosition(drivetrain.getBr()));
 
+            RobotLog.vv("BULK READ MESSAGE","BULK READING");
+            RobotLog.i(Arrays.toString(drivetrainEncoders));
+
+
             drivetrain.setEncoderVals(drivetrainEncoders);
-            sensorVals.put("Current Drivetrain Encoder Average", drivetrain.getEncoderAverageES(angle));
+            sensorVals.put("FL", 1.0 * bulkData.getMotorCurrentPosition(drivetrain.getFl()));
+            sensorVals.put("Current Drivetrain Encoder Average", drivetrain.getEncoderAverage(angle));
+
+            sensorVals.put("X", sensors.getXDistance());
+            sensorVals.put("Y", sensors.getYDistance());
+            thread.yield();
 
             //liftEncoders[0] = bulkData.getMotorCurrentPosition(manip.getIl());
             //liftEncoders[1] = bulkData2.getMotorCurrentPosition(manip.getIr());
             // update rev 2m distance
-            sensorVals.put("X", sensors.getXDistance());
-            sensorVals.put("Y", sensors.getYDistance());
         }
 
+    }
+    public double getEncoderAverage() {
+        double encoderAverage = 0;
+        int counter = 0;
+        for (int i = 0; i < drivetrainEncoders.length; i++) {
+            if (drivetrainEncoders[i] == 0) {
+                counter++;
+            }
+            encoderAverage += drivetrainEncoders[i];
+        }
+        if (counter == 4)
+            return 0;
+        else {
+            encoderAverage /= (4 - counter);
+            return encoderAverage;
+        }
     }
 }

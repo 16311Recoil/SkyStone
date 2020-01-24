@@ -1,23 +1,15 @@
 package org.firstinspires.ftc.teamcode.DangerNoodleLibs;
 
-import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.util.RobotLog;
 
-import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.ExpansionHubMotor;
-import org.openftc.revextensions2.RevBulkData;
 
-
-
-import java.lang.Math;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.TreeMap;
 
 public class Drivetrain {
     private boolean encoderStrafe;
@@ -53,7 +45,7 @@ public class Drivetrain {
     private ExpansionHubMotor fl, fr, bl, br;
     private ElapsedTime drivetrainClock;
     public Map<String, Double> sensorVals;
-    public double[] encoderVals;
+    public int[] encoderVals;
     private double[] powers;
     private PID pidControlller;
     private Sensors sensors;
@@ -74,7 +66,7 @@ public class Drivetrain {
         this.opMode = opMode;
         sensors = new Sensors(this.opMode);
         powers = new double[NUM_MOTORS];
-        encoderVals = new double[NUM_MOTORS];
+        encoderVals = new int[NUM_MOTORS];
 
         // Tracks Sensor Vals.
         this.sensorVals = sensorVals;
@@ -122,7 +114,7 @@ public class Drivetrain {
         this.opMode_iterative = opMode;
         sensors = new Sensors(this.opMode_iterative);
         double[] powers = new double[NUM_MOTORS];
-        encoderVals = new double[4];
+        encoderVals = new int[NUM_MOTORS];
 
         opMode_iterative.telemetry.addLine("Drivetrain update");
         opMode_iterative.telemetry.update();
@@ -210,6 +202,94 @@ public class Drivetrain {
         encoderVals[BACK_RIGHT] = br.getCurrentPosition();
     }
 
+    public void moveNoBR(double v_d, double v_theta, double angle, double distance, double timeout, double percentTolerance) {
+        resetEncoders();
+        ElapsedTime timer = new ElapsedTime();
+        double initPos = getEncoderAverageES(Math.toRadians(sensors.getFirstAngle()));
+        // Bounds calculated by the percentTolerance
+        double low_bound = distance * (1 - percentTolerance);
+        // Loop Condition
+        timer.reset();
+        boolean loopCondition = Math.abs(initPos - getEncoderAverageES(angle)) < low_bound
+                && (timer.seconds() < timeout)
+                && opMode.opModeIsActive();
+        // Calculate motor powers
+        setPowers(v_d, v_theta, angle);
+
+        // Scale Motors while conserving ratios between them
+        scaleMotors();
+        int loopCount = 0;
+        double finishTime = timer.seconds();
+
+        timer.reset();
+        while (loopCondition) {
+            fl.setPower(powers[FRONT_LEFT]);
+            fr.setPower(powers[FRONT_RIGHT]);
+            bl.setPower(powers[BACK_LEFT]);
+            br.setPower(powers[BACK_RIGHT]);
+
+            loopCondition = Math.abs(initPos - getEncoderAverageES(angle)) < low_bound
+                    && (timer.seconds() < timeout)
+                    && opMode.opModeIsActive();
+            loopCount++;
+            finishTime = timer.seconds();
+
+        }
+        setAllMotors(0);
+        opMode.telemetry.addData("Displacement", Math.abs(getEncoderAverageES(Math.PI/2)) - initPos);
+        opMode.telemetry.addData("Loop Speed", loopCount / finishTime);
+        opMode.telemetry.update();
+    }
+
+    /**
+     * Move or strafe in the cardinal directions with the option to turn while doing so
+     *
+     * @param v_d     - Desired Velocity
+     * @param v_theta - Desired Rotational Velocity
+     * @param angle   - Desired Angle
+     * @param distance - Desired distance in encoder ticks
+     * @param timeout - maximum time for the movement
+     * @param percentTolerance  - acceptable percentage of error.
+     */
+    public void move(double v_d, double v_theta, double angle, double distance, double timeout, double percentTolerance) {
+        ElapsedTime timer = new ElapsedTime();
+        double initPos = getEncoderAverage(Math.toRadians(sensorVals.get("Current Angle")));
+        // Bounds calculated by the percentTolerance
+        double low_bound = distance * (1 - percentTolerance);
+        double high_bound = distance * (1 + percentTolerance);
+        // Loop Condition
+        timer.reset();
+        boolean loopCondition = Math.abs(initPos - getEncoderAverage(angle)) < low_bound
+                && (timer.seconds() < timeout)
+                && opMode.opModeIsActive();
+        opMode.telemetry.addData("Looop Cnditiop", loopCondition);
+        opMode.telemetry.update();
+        // Calculate motor powers
+        setPowers(v_d, v_theta, angle);
+
+        // Scale Motors while conserving ratios between them
+        scaleMotors();
+
+        timer.reset();
+        int loopCount = 0;
+        double finishTime = timer.seconds();
+        while (loopCondition) {
+            fl.setPower(powers[FRONT_LEFT]);
+            fr.setPower(powers[FRONT_RIGHT]);
+            bl.setPower(powers[BACK_LEFT]);
+            br.setPower(powers[BACK_RIGHT]);
+
+            loopCondition = Math.abs(initPos - getEncoderAverage(angle)) < low_bound
+                    && (timer.seconds() < timeout)
+                    && opMode.opModeIsActive();
+            loopCount++;
+            finishTime = timer.seconds();
+        }
+        setAllMotors(0);
+        opMode.telemetry.addData("Displacement", Math.abs(getEncoderAverage(Math.PI/2)) - initPos);
+        opMode.telemetry.addData("Loop Speed", loopCount / finishTime);
+        opMode.telemetry.update();
+    }
 
     /**
      * Basic turn method to turn left or right
@@ -231,73 +311,11 @@ public class Drivetrain {
         }
     }
 
-    public State getCurrentState() {
-        return currentState;
-    }
-
-    public void setCurrentState(State currentState) {
-        this.currentState = currentState;
-    }
-
-    public DcMotor getFl() {
-        return fl;
-    }
-
-    public void setFl(ExpansionHubMotor fl) {
-        this.fl = fl;
-    }
-
-    public DcMotor getFr() {
-        return fr;
-    }
-
-    public void setFr(ExpansionHubMotor fr) {
-        this.fr = fr;
-    }
-
-    public DcMotor getBl() {
-        return bl;
-    }
-
-    public void setBl(ExpansionHubMotor bl) {
-        this.bl = bl;
-    }
-
-    public DcMotor getBr() {
-        return br;
-    }
-
-    public void movveStrafeDS(){
-
-    }
-
-
-    public double[] getEncoderVals() {
-        return encoderVals;
-    }
-
-    public void setEncoderVals(double[] encoderVals) {
-        this.encoderVals = encoderVals;
-    }
-
-    public void setBr(ExpansionHubMotor br) {
-        this.br = br;
-    }
-
-    public Sensors getSensors() {
-        return sensors;
-    }
-
-    public void setSensors(Sensors sensors) {
-        this.sensors = sensors;
-    }
-
     //FIXME : Update getEncoderAverage() to better calibrate encoder movements: create a measure for
     // ensuring that the change of the change in encocer movements- indicates that the encoder is
     // consistently reporting a motion-dependent value rather than a static value or 0 due to wire
     // entanglement, broken encoder, etc,
     public double getEncoderAverage(double angle) {
-        //getEncoders();
         double encoderAverage = 0;
         int counter = 0;
         for (int i = 0; i < encoderVals.length; i++) {
@@ -306,13 +324,18 @@ public class Drivetrain {
             }
             encoderAverage += encoderVals[i];
         }
-        try {
-            return (encoderAverage / (4 - counter));
-        } catch (ArithmeticException E) {
+        if (counter == 4) {
             return 0;
         }
-    }
+        else {
+            encoderAverage /= (4 - counter);
+            return encoderAverage;
 
+        }
+
+
+
+    }
     public double getEncoderAverageES(double angle) {
         getEncoders();
         double encoderAverage = 0;
@@ -344,7 +367,6 @@ public class Drivetrain {
         else
             return (encoderVals[FRONT_LEFT] + encoderVals[BACK_LEFT]) * 0.5;
     }
-
 
     /**
      * Move forward using Encoder Feedback
@@ -416,123 +438,6 @@ public class Drivetrain {
 
     }
 
-
-    /**
-     * Move or strafe in the cardinal directions with the option to turn while doing so
-     *
-     * @param v_d     - Desired Velocity
-     * @param v_theta - Desired Rotational Velocity
-     * @param angle   - Desired Angle
-     * @param distance - Desired distance in encoder ticks
-     * @param timeout - maximum time for the movement
-     * @param percentTolerance  - acceptable percentage of error.
-     */
-    public void move(double v_d, double v_theta, double angle, double distance, double timeout, double percentTolerance) {
-        resetEncoders();
-        ElapsedTime timer = new ElapsedTime();
-        double initPos = getEncoderAverageES(Math.toRadians(sensors.getFirstAngle()));
-        // Bounds calculated by the percentTolerance
-        double low_bound = distance * (1 - percentTolerance);
-        double high_bound = distance * (1 + percentTolerance);
-        // Loop Condition
-        timer.reset();
-        boolean loopCondition = Math.abs(initPos - getEncoderAverageES(angle)) < low_bound
-                && (timer.seconds() < timeout)
-                && opMode.opModeIsActive();
-        // Calculate motor powers
-        setPowers(v_d, v_theta, angle);
-
-        // Scale Motors while conserving ratios between them
-        scaleMotors();
-
-        timer.reset();
-        while (loopCondition) {
-            fl.setPower(powers[FRONT_LEFT]);
-            fr.setPower(powers[FRONT_RIGHT]);
-            bl.setPower(powers[BACK_LEFT]);
-            br.setPower(powers[BACK_RIGHT]);
-
-            opMode.telemetry.addData("Encoder Average", initPos - getEncoderAverageES(angle));
-            opMode.telemetry.addData("FL", initPos - encoderVals[FRONT_LEFT]);
-            opMode.telemetry.addData("FR", initPos - encoderVals[FRONT_RIGHT]);
-            opMode.telemetry.addData("BL", initPos - encoderVals[BACK_LEFT]);
-            opMode.telemetry.addData("BR", initPos- encoderVals[BACK_RIGHT]);
-            opMode.telemetry.update();
-
-            loopCondition = Math.abs(initPos - getEncoderAverageES(angle)) < low_bound
-                    && (timer.seconds() < timeout)
-                    && opMode.opModeIsActive();
-        }
-        setAllMotors(0);
-    }
-    //fs
-    public void moveStrafeY(double v_d, double v_theta, double angle, double distance, double timeout, double percentTolerance) {
-        resetEncoders();
-        ElapsedTime timer = new ElapsedTime();
-        double initPos = sensorVals.get("Y");
-
-        // Bounds calculated by the percentTolerance
-        double low_bound = distance * (1 - percentTolerance);
-        double high_bound = distance * (1 + percentTolerance);
-
-        // Loop Condition
-        boolean loopCondition = !inBounds(initPos - sensorVals.get("Y"), low_bound, high_bound )
-                && (timer.seconds() < timeout) && opMode.opModeIsActive();
-
-        // Calculate motor powers
-        setPowers(v_d, v_theta, angle);
-
-        // Scale Motors while conserving ratios between them
-        scaleMotors();
-
-        timer.reset();
-        while (loopCondition) {
-
-            fl.setPower(powers[FRONT_LEFT]);
-            fr.setPower(powers[FRONT_RIGHT]);
-            bl.setPower(powers[BACK_LEFT]);
-            br.setPower(powers[BACK_RIGHT]);
-
-            opMode.telemetry.addData("Y:", sensorVals.get("Y"));
-            opMode.telemetry.update();
-
-            loopCondition = !inBounds(initPos - sensorVals.get("Y"), low_bound, high_bound )
-                    && (timer.seconds() < timeout) && opMode.opModeIsActive();
-        }
-        setAllMotors(0);
-    }
-    public void moveStrafeX(double v_d, double v_theta, double angle, double distance, double timeout, double percentTolerance) {
-        resetEncoders();
-        ElapsedTime timer = new ElapsedTime();
-        double initPos = sensorVals.get("X");
-
-        // Bounds calculated by the percentTolerance
-        double low_bound = distance * (1 - percentTolerance);
-        double high_bound = distance * (1 + percentTolerance);
-
-        // Loop Condition
-        boolean loopCondition = !inBounds(sensorVals.get("X"), low_bound, high_bound )
-                && (timer.seconds() < timeout) && opMode.opModeIsActive();
-
-        // Calculate motor powers
-        setPowers(v_d, v_theta, angle);
-
-        // Scale Motors while conserving ratios between them
-        scaleMotors();
-
-        timer.reset();
-        while (loopCondition) {
-
-            fl.setPower(powers[FRONT_LEFT]);
-            fr.setPower(powers[FRONT_RIGHT]);
-            bl.setPower(powers[BACK_LEFT]);
-            br.setPower(powers[BACK_RIGHT]);
-
-            loopCondition = !inBounds(sensorVals.get("X"), low_bound, high_bound )
-                    && (timer.seconds() < timeout) && opMode.opModeIsActive();
-        }
-        setAllMotors(0);
-    }
     public void moveToHeading(double v_d, double distance, double timeout, double angle, double percentTolerance) {
         PID rotational = new PID();
         PID linear = new PID();
@@ -870,5 +775,67 @@ public class Drivetrain {
         opMode.telemetry.addData("Gyro Angle:", sensors.getFirstAngle());
         opMode.telemetry.update();
 
+    }
+
+    /* GENERATED CODE */
+    public State getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(State currentState) {
+        this.currentState = currentState;
+    }
+
+    public DcMotor getFl() {
+        return fl;
+    }
+
+    public void setFl(ExpansionHubMotor fl) {
+        this.fl = fl;
+    }
+
+    public DcMotor getFr() {
+        return fr;
+    }
+
+    public void setFr(ExpansionHubMotor fr) {
+        this.fr = fr;
+    }
+
+    public DcMotor getBl() {
+        return bl;
+    }
+
+    public void setBl(ExpansionHubMotor bl) {
+        this.bl = bl;
+    }
+
+    public DcMotor getBr() {
+        return br;
+    }
+
+    public void movveStrafeDS(){
+
+    }
+
+
+    public int[] getEncoderVals() {
+        return encoderVals;
+    }
+
+    public void setEncoderVals(int[] encoderVals) {
+        this.encoderVals = encoderVals;
+    }
+
+    public void setBr(ExpansionHubMotor br) {
+        this.br = br;
+    }
+
+    public Sensors getSensors() {
+        return sensors;
+    }
+
+    public void setSensors(Sensors sensors) {
+        this.sensors = sensors;
     }
 }

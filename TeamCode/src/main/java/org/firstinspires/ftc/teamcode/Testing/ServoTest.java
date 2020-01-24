@@ -21,8 +21,8 @@ public class ServoTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         //rFang = hardwareMap.servo.get("rFang");
         //lFang = hardwareMap.servo.get("lFang");
-        //armRotater = hardwareMap.servo.get("armRotater");
-        pincher = hardwareMap.servo.get("pincher");
+        armRotater = hardwareMap.servo.get("armRotater");
+        //pincher = hardwareMap.servo.get("pincher");
 
         //rFang.setDirection(Servo.Direction.REVERSE);
         //lFang.setDirection(Servo.Direction.FORWARD);
@@ -30,8 +30,8 @@ public class ServoTest extends LinearOpMode {
 
 
 
-        pincher.setPosition(0);
-        //armRotater.setPosition(0.03);
+        //pincher.setPosition(0);
+        armRotater.setPosition(0.13);
         //rFang.setPosition(0);
         //lFang.setPosition(0);
 
@@ -40,8 +40,8 @@ public class ServoTest extends LinearOpMode {
         while (opModeIsActive()){
             //rFang.setPosition(0.32);
             //lFang.setPosition(0.32);
-            //armRotater.setPosition(.7);
-            pincher.setPosition(1);
+            armRotater.setPosition(.7);
+        //    pincher.setPosition(1);
             //telemetry.addData("Position", rFang.getPosition());
             telemetry.addData("Position2", armRotater.getPosition());
             telemetry.update();
