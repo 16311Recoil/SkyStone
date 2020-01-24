@@ -54,7 +54,7 @@ public class Stacker {
     private final double TIME_FOR_GANTRY_OUT = 2.5;
     private final double CLOSED_PINCHER_SERVO_POSITION = 0.75;
     private final double OPEN_PICHER_SERVO_POSITION = 0;
-    private final double[] ARM_POSITIONS = new double[]{0.7, 0.33, 0.03}; //out pos, mid pos, in robot pos.
+    private final double[] ARM_POSITIONS = new double[]{0.80, 0.43, 0.13}; //out pos, mid pos, in robot pos.
     private int armSpot = 1;
     private int armRotation = -1;
     private int liftSpotCurrentMax = 1;
@@ -387,10 +387,10 @@ public class Stacker {
 
     }
     public void gantryController(double power) {
-        if (opMode_iterative.gamepad2.left_bumper){
+        if (opMode_iterative.gamepad2.right_bumper){
             setGantryPower(power);
         }
-        else if (opMode_iterative.gamepad2.right_bumper){
+        else if (opMode_iterative.gamepad2.left_bumper){
             setGantryPower(-power);
         }
         else if (opMode_iterative.gamepad1.y){
@@ -410,7 +410,7 @@ public class Stacker {
             setLiftPower(opMode_iterative.gamepad2.right_trigger * 0.85);
         }
         else if ((opMode_iterative.gamepad2.left_trigger != 0) && (getLiftEncoderAverage() < LIFT_BLOCK[0])){
-            setLiftPower(-opMode_iterative.gamepad2.left_trigger * 0.01);
+            setLiftPower(-opMode_iterative.gamepad2.left_trigger * 0.05);
         }
         else if (opMode_iterative.gamepad1.left_bumper && (getLiftEncoderAverage() < LIFT_BLOCK[0])){
             setLiftPower(-power * 0.01);
