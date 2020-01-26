@@ -106,11 +106,10 @@ public class HardwareThread implements Runnable {
             sensorVals.put("Current Lift Encoder Average", manip.getLiftEncoderAverage());
             sensorVals.put("Current Time", robot.timer.milliseconds());
 
-            //caching?
-            drivetrainEncoders[0] = Math.abs(bulkData.getMotorCurrentPosition(drivetrain.getFl()));
-            drivetrainEncoders[1] = Math.abs(bulkData2.getMotorCurrentPosition(drivetrain.getFr()));
-            drivetrainEncoders[2] = Math.abs(bulkData.getMotorCurrentPosition(drivetrain.getBl()));
-            drivetrainEncoders[3] = Math.abs(bulkData2.getMotorCurrentPosition(drivetrain.getBr()));
+            drivetrainEncoders[0] = bulkData.getMotorCurrentPosition(drivetrain.getFr());
+            drivetrainEncoders[1] = bulkData2.getMotorCurrentPosition(drivetrain.getFl());
+            drivetrainEncoders[2] = bulkData.getMotorCurrentPosition(drivetrain.getBr());
+            drivetrainEncoders[3] = bulkData2.getMotorCurrentPosition(drivetrain.getBl());
 
             RobotLog.vv("BULK READ MESSAGE","BULK READING");
             RobotLog.i(Arrays.toString(drivetrainEncoders));
