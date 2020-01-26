@@ -40,7 +40,7 @@ public class AutoPrototype extends LinearOpMode {
     @Override
     public void runOpMode() {
 
+
         }
 
     }
-}

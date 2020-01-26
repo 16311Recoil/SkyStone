@@ -59,6 +59,7 @@ public class SensorREV2mDistance extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+
         // you can use this as a regular DistanceSensor.
         sensorRange = hardwareMap.get(DistanceSensor.class, "sensor_range");
 

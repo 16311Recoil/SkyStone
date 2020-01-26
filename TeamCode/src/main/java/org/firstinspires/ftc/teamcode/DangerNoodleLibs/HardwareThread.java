@@ -77,9 +77,6 @@ public class HardwareThread implements Runnable {
         sensorVals.put("Previous Time", robot.timer.milliseconds());
         sensorVals.put("Current Angle", sensors.getFirstAngle());
         sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage(sensorVals.get("Current Angle")));
-
-
-
     }
     public void start(){
         if (thread == null){

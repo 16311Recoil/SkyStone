@@ -12,6 +12,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.DangerNoodle.DangerNoodle;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.HardwareThread;
+import org.openftc.revextensions2.ExpansionHubEx;
+import org.openftc.revextensions2.RevBulkData;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -23,17 +25,35 @@ public class DistanceSensorTest extends LinearOpMode {
     HardwareThread thread;
     DangerNoodle noodle;
     ConcurrentHashMap<String, Double> sensorVals;
+    private RevBulkData bulkData, bulkData2;
     @Override
     public void runOpMode() throws InterruptedException {
+        final ExpansionHubEx expansionHubEx = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 1");
+        final ExpansionHubEx expansionHubEx2 = hardwareMap.get(ExpansionHubEx.class, "Expansion Hub 2");
+
+        bulkData = expansionHubEx.getBulkInputData();
+        bulkData2 = expansionHubEx2.getBulkInputData();
+
+
         sensorVals = new ConcurrentHashMap<>();
         noodle = new DangerNoodle(this);
+
+        sensorVals.put("FL", 1.0 * bulkData.getMotorCurrentPosition(noodle.getDrivetrain().getFl()));
+        sensorVals.put("Fr", 1.0 * bulkData.getMotorCurrentPosition(noodle.getDrivetrain().getFr()));
+        sensorVals.put("Bl", 1.0 * bulkData.getMotorCurrentPosition(noodle.getDrivetrain().getBl()));
+        sensorVals.put("Br", 1.0 * bulkData.getMotorCurrentPosition(noodle.getDrivetrain().getBr()));
 
         waitForStart();
 
         while (opModeIsActive()){
 
-            telemetry.addData("X", noodle.getSensorVals().get("X"));
-            telemetry.addData("Y", noodle.getSensorVals().get("Y"));
+            sensorVals.put("FL", 1.0 * bulkData.getMotorCurrentPosition(noodle.getDrivetrain().getFl()));
+            sensorVals.put("Fr", 1.0 * bulkData.getMotorCurrentPosition(noodle.getDrivetrain().getFr()));
+            sensorVals.put("Bl", 1.0 * bulkData.getMotorCurrentPosition(noodle.getDrivetrain().getBl()));
+            sensorVals.put("Br", 1.0 * bulkData.getMotorCurrentPosition(noodle.getDrivetrain().getBr()));
+
+
+            telemetry.addData("Y", noodle.getDrivetrain().getSensors().getYDistance());
             telemetry.addData("Angle", noodle.getDrivetrain().getSensors().getFirstAngle());
             telemetry.addData("Current Encoder Average", sensorVals.get("Current Encoder Average"));
             telemetry.addData("FL", sensorVals.get("FL"));
