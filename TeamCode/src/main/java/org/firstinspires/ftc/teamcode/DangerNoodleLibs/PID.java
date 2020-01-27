@@ -13,7 +13,7 @@ public class PID {
     private boolean reset;
     private double t_i;
 
-    private double MAX_SUM = 0.0; // test sum
+    private double MAX_SUM = 100; // test sum
 
     public PID() {
         k_i = 0.0;

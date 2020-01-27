@@ -24,6 +24,7 @@ public class DrivetrainPrototype extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private Drivetrain tele;
     private Stacker s;
+    double heading;
 
 
     /*
@@ -41,6 +42,12 @@ public class DrivetrainPrototype extends OpMode {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+        heading = tele.getSensors().getFirstAngle();
+
+        telemetry.addData("Init Angle", heading);
+        telemetry.update();
+
     }
 
     /*
@@ -63,9 +70,20 @@ public class DrivetrainPrototype extends OpMode {
      */
     @Override
     public void loop() {
-        tele.moveTelop2(gamepad1.right_stick_x, -gamepad1.right_stick_y, gamepad1.left_stick_x);
-        tele.toggleSpeed();
-        s.stackerTeleControl(0.75,0.75,1,0);
+        try {
+            tele.turnPID(48,0.7,0.15,0,5, true);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        tele.correctTo(.3, heading,0);
+
         telemetry.update();
     }
  }

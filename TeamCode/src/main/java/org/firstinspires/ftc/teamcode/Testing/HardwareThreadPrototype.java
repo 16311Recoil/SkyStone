@@ -22,7 +22,8 @@ public class HardwareThreadPrototype extends LinearOpMode {
         //hThread = new HardwareThread(dangerNoodle, dummy);
         waitForStart();
         while (!isStopRequested()) {
-            telemetry.addData("FL", dangerNoodle.getSensorVals().get(""));
+            telemetry.addData("FL", dangerNoodle.getSensorVals().get("FL"));
+            telemetry.addData("X", dangerNoodle.getDrivetrain().getSensors().getXDistance());
             telemetry.update();
         }
     }

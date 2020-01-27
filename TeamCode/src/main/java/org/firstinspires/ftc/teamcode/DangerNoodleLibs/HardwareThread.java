@@ -34,7 +34,6 @@ public class HardwareThread implements Runnable {
 
 
     public HardwareThread(@NotNull DangerNoodle robot, ConcurrentHashMap<String, Double> sensorVals) throws NullPointerException{
-        start();
 
         drivetrainEncoders = new int[4];
         liftEncoders = new double[2];
@@ -57,10 +56,10 @@ public class HardwareThread implements Runnable {
 
         drivetrain.resetEncoders();
 
-        drivetrainEncoders[0] = bulkData.getMotorCurrentPosition(drivetrain.getFr());
-        drivetrainEncoders[1] = bulkData2.getMotorCurrentPosition(drivetrain.getFl());
-        drivetrainEncoders[2] = bulkData.getMotorCurrentPosition(drivetrain.getBr());
-        drivetrainEncoders[3] = bulkData2.getMotorCurrentPosition(drivetrain.getBl());
+        drivetrainEncoders[0] = bulkData2.getMotorCurrentPosition(drivetrain.getFr());
+        drivetrainEncoders[1] = bulkData.getMotorCurrentPosition(drivetrain.getFl());
+        drivetrainEncoders[2] = bulkData2.getMotorCurrentPosition(drivetrain.getBr());
+        drivetrainEncoders[3] = bulkData.getMotorCurrentPosition(drivetrain.getBl());
 
 
         // initialize lift encoders
@@ -77,6 +76,9 @@ public class HardwareThread implements Runnable {
         sensorVals.put("Previous Time", robot.timer.milliseconds());
         sensorVals.put("Current Angle", sensors.getFirstAngle());
         sensorVals.put("Previous Drivetrain Encoder Average", drivetrain.getEncoderAverage(sensorVals.get("Current Angle")));
+
+        start();
+
     }
     public void start(){
         if (thread == null){
@@ -106,10 +108,10 @@ public class HardwareThread implements Runnable {
             sensorVals.put("Current Lift Encoder Average", manip.getLiftEncoderAverage());
             sensorVals.put("Current Time", robot.timer.milliseconds());
 
-            drivetrainEncoders[0] = bulkData.getMotorCurrentPosition(drivetrain.getFr());
-            drivetrainEncoders[1] = bulkData2.getMotorCurrentPosition(drivetrain.getFl());
-            drivetrainEncoders[2] = bulkData.getMotorCurrentPosition(drivetrain.getBr());
-            drivetrainEncoders[3] = bulkData2.getMotorCurrentPosition(drivetrain.getBl());
+            drivetrainEncoders[0] = bulkData2.getMotorCurrentPosition(drivetrain.getFr());
+            drivetrainEncoders[1] = bulkData.getMotorCurrentPosition(drivetrain.getFl());
+            drivetrainEncoders[2] = bulkData2.getMotorCurrentPosition(drivetrain.getBr());
+            drivetrainEncoders[3] = bulkData.getMotorCurrentPosition(drivetrain.getBl());
 
             RobotLog.vv("BULK READ MESSAGE","BULK READING");
             RobotLog.i(Arrays.toString(drivetrainEncoders));

@@ -386,15 +386,27 @@ public class Drivetrain {
         }
         setAllMotors(0);
     }
-    public void correctHeading(double power, double header, double timeout ) { //pidControlller.setCoeffs(0.5/currAngle, 0,0.2/currAngle);
+    public void correctTo(double power, double desiredAngle, double timeout ) throws InterruptedException { //pidControlller.setCoeffs(0.5/currAngle, 0,0.2/currAngle);
         double currentAngle = sensors.getFirstAngle();
-        boolean turnRight = (currentAngle > 0);
-        double heading = header - currentAngle;
-        opMode.telemetry.addData("Header", header);
+        double turnAmount = desiredAngle - currentAngle;
+        boolean turnRight = (turnAmount > 0);
+
+        //turnGyro(currentAngle, power, turnAmount, turnRight, timeout);
+        turnPID(turnAmount, 0.3 / turnAmount, 0,0.1 / turnAmount,5,turnRight);
+
+        opMode.telemetry.addData("Header", desiredAngle);
         opMode.telemetry.addData("CurrentAngle", currentAngle);
-        opMode.telemetry.addData("ChangeAngle", heading);
+        opMode.telemetry.addData("ChangeAngle", turnAmount);
         opMode.telemetry.update();
-        turnGyro(power, heading, turnRight, timeout);
+
+    }
+    public void testCorrectTo(double heading) throws InterruptedException {
+
+        turnPID(48,0.3 / 48,0,0,5, true);
+
+        Thread.sleep(4000);
+
+        correctTo(.3, heading, 10);
     }
 
     public double correctHeading2(double p, double d, ElapsedTime t_i, double target, double currAngle) {
@@ -536,15 +548,14 @@ public class Drivetrain {
      * @param target - target angle
      * @param right  - boolean to right or left
      */
-    public void turnGyro(double power, double target, boolean right, double timeout) {
-        double angle = sensors.getFirstAngle(); //TODO: Replacement for getting gyro angles
+    public void turnGyro(double initAngle, double power, double target, boolean right, double timeout) { //inputs target and turns that many degrees left or right
+        //TODO: Replacement for getting gyro angles
         ElapsedTime timer = new ElapsedTime();
-        while (Math.abs(angle - sensors.getFirstAngle()) < target && right && timer.seconds() < timeout) {
-            turn(power, true);
+
+        while (Math.abs(initAngle - sensors.getFirstAngle()) < Math.abs(target) && timer.seconds() < timeout) {
+            turn(power, right);
         }
-        while (!right && Math.abs(angle - sensors.getFirstAngle()) < target&& timer.seconds() < timeout) {
-            turn(power, false);
-        }
+        setAllMotors(0);
     }
 
     /**
@@ -603,7 +614,7 @@ public class Drivetrain {
         opMode.telemetry.addData("error", error);
         opMode.telemetry.update();
 
-        Thread.sleep(3000);
+        Thread.yield();
 
         while (Math.abs(error) > 0.3 && t_i.seconds() < timeout && opMode.opModeIsActive()) {
             sensorVals.put("Current Angle", sensors.getFirstAngle());

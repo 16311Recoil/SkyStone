@@ -15,6 +15,7 @@ import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Sensors;
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
 
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -31,16 +32,29 @@ import java.util.TreeMap;
  */
 
 @Autonomous(name="Basic: AutoPrototype", group="Linear Opmode")
-@Disabled
 public class AutoPrototype extends LinearOpMode {
-
-
-
+    Drivetrain dt;
+    double heading;
 
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
 
+        // Tell the driver that initialization is complete.
+        telemetry.addData("Status", "Initialized");
 
+        try {
+            dt = new Drivetrain(this, new ElapsedTime(), new TreeMap<String, Double>());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
+        heading = dt.getSensors().getFirstAngle();
+
+        telemetry.addData("Init Angle", heading);
+        telemetry.update();
+
+        waitForStart();
+
+        dt.testCorrectTo(heading);
     }
+ }

@@ -308,19 +308,25 @@ public class DangerNoodle implements Robot {
         if (blue){
             switch (position) {
                 case 2:
-                    drivetrain.move(0.4,0, FORWARD,450,2,0.1);
+                    drivetrain.move(0.4,0, FORWARD,1080,2,0.1);
 
                     Thread.sleep(400);
 
-                    drivetrain.move(0.35,0, RIGHT,400,2,0.05);
+                    drivetrain.turnPID(19, (0.275 / 13),(0.015 / 13), 0, 2, false);
+
+                    Thread.sleep(1000);
+
+                    drivetrain.move(0.4,0, FORWARD,200,2,0.1);
 
                     Thread.sleep(400);
 
-                    drivetrain.move(0.4,0, FORWARD,500,2,0.1);
+                    manipulator.setIntakePower(-0.6);
 
                     Thread.sleep(400);
 
-                    drivetrain.turnPID(25, (0.4 / 25),(0.1 /25), 0, 6, false);
+                    drivetrain.move(0.35,0, FORWARD,720,2,0.1);
+
+                    Thread.sleep(2200);
 
                     /*manipulator.setLiftPosition(0.4, -300);
 
@@ -363,9 +369,57 @@ public class DangerNoodle implements Robot {
                     break;
 
                 case 1:
+                    drivetrain.move(0.4,0, FORWARD,450,2,0.1);
+
+                    Thread.sleep(400);
+
+                    drivetrain.move(0.35,0, LEFT,265,2,0.00);
+
+                    Thread.sleep(400);
+
+                    drivetrain.move(0.4,0, FORWARD,640,2,0.05);
+
+                    Thread.sleep(400);
+
+                    drivetrain.turnPID(20, (0.275 / 20),(0.015 / 20), 0, 2, true);
+
+                    Thread.sleep(400);
+
+                    manipulator.setIntakePower(-0.6);
+
+                    Thread.sleep(400);
+
+                    drivetrain.move(0.35,0, FORWARD,645,2,0.1);
+
+                    Thread.sleep(2200);
                     break;
 
                 case 0:
+
+                    drivetrain.move(0.4,0, FORWARD,450,2,0.1);
+
+                    Thread.sleep(400);
+
+                    drivetrain.moveNoBR(0.35,0, LEFT,21, 2,0.00);
+
+                    Thread.sleep(400);
+
+                    drivetrain.move(0.4,0, FORWARD,630,2,0.05);
+
+                    Thread.sleep(400);
+
+                    drivetrain.turnPID(17, (0.275 / 17),(0.015 / 17), 0, 2, true);
+
+                    Thread.sleep(400);
+
+                    manipulator.setIntakePower(-0.6);
+
+                    Thread.sleep(400);
+
+                    drivetrain.move(0.4,0, FORWARD,645,2,0.1);
+
+                    Thread.sleep(2200);
+
                     break;
             }
         }

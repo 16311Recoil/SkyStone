@@ -68,6 +68,8 @@ public class Sensors {
         gyro = this.iterative.hardwareMap.get(BNO055IMU.class, "imu");
         gyro.initialize(parameters);
 
+
+
         X_distanceSensor = opMode.hardwareMap.get(DistanceSensor.class, "xDistance");
         Y_distanceSensor = opMode.hardwareMap.get(DistanceSensor.class, "yDistance");
 
@@ -99,14 +101,15 @@ public class Sensors {
     }
     public double getThirdAngle()
     {
+        //sensorRange.getDistance(DistanceUnit.MM))
         updateGyro();
         return angles.thirdAngle;
     }
     public double getXDistance(){
-        return X_distanceSensor.getDistance(DistanceUnit.INCH);
+        return X_sensorTimeOfFlight.getDistance(DistanceUnit.INCH);
     }
     public double getYDistance() {
-        return Y_distanceSensor.getDistance(DistanceUnit.INCH);
+        return Y_sensorTimeOfFlight.getDistance(DistanceUnit.INCH);
     }
 
 }
