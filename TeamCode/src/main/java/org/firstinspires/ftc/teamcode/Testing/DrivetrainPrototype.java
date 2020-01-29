@@ -82,7 +82,7 @@ public class DrivetrainPrototype extends OpMode {
             e.printStackTrace();
         }
 
-        tele.correctTo(.3, heading,0);
+        //tele.correctTo(.3, heading,0);
 
         telemetry.update();
     }

@@ -55,6 +55,6 @@ public class AutoPrototype extends LinearOpMode {
 
         waitForStart();
 
-        dt.testCorrectTo(heading);
+       // dt.testCorrectTo(heading);
     }
  }

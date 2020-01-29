@@ -34,7 +34,7 @@ public class BlueSkystone extends LinearOpMode {
 
         waitForStart();
 
-        dangerNoodle.skystone(true,true, 2);
+        dangerNoodle.skystone(true,true, 0);
 
 
 

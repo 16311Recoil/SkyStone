@@ -52,8 +52,8 @@ public class Stacker {
     private final double TIME_FOR_INTAKE = 3;
     private final double TIME_FOR_GANTRY_IN = 2.5; //TODO: Test for Times
     private final double TIME_FOR_GANTRY_OUT = 2.5;
-    private final double CLOSED_PINCHER_SERVO_POSITION = 0.75;
-    private final double OPEN_PICHER_SERVO_POSITION = 0;
+    private final double CLOSED_PINCHER_SERVO_POSITION = 0;
+    private final double OPEN_PICHER_SERVO_POSITION = 0.75;
     private final double[] ARM_POSITIONS = new double[]{0.80, 0.43, 0.13}; //out pos, mid pos, in robot pos.
     private int armSpot = 1;
     private int armRotation = -1;
@@ -62,7 +62,7 @@ public class Stacker {
     private final double INCHES_TO_SERVO = 0;//TODO: Test conversions for inches in gantry movement to servo position
     private final double LIFT_MAX = -8500; //TODO: Test for Max Encoder Limit on Lift
     private final double[] LIFT_BLOCK = new double[]{20000, -1200}; //TODO: Test for encoder readings at each block height
-    private final double LIFT_MIN = 600; //TODO: Test for Min Encoder Limit on Lift
+    private final double LIFT_MIN = -200; //TODO: Test for Min Encoder Limit on Lift
     private static final double SERVO_LOCK = 0.32; // Needs to be tested;
     private static final double SERVO_UNLOCK = 0; // Needs to be tested;
 
@@ -291,16 +291,17 @@ public class Stacker {
         setArmPosition(armSpot);
     }
 
-    public void setLiftPosition(double power, double position) {
+    public void setLiftPosition(double power, double position, double timeout) {
+        ElapsedTime timer = new ElapsedTime();
         double currentPos = getLiftEncoderAverage();
         if (currentPos > position) {
-            while (currentPos > position) {
+            while ((currentPos > position) && (timer.seconds() < timeout)) {
                 setLiftPower(power);
                 currentPos = getLiftEncoderAverage();
             }
         }
         else {
-            while (currentPos < position) {
+            while ((currentPos < position) && (timer.seconds() < timeout)) {
                 setLiftPower(-power);
                 currentPos = getLiftEncoderAverage();
             }
@@ -312,12 +313,12 @@ public class Stacker {
         ElapsedTime timer = new ElapsedTime();
         if (in) {
             while (timer.seconds() < TIME_FOR_GANTRY_IN) {
-                setGantryPower(power);
+                setGantryPower(-power);
             }
         }
         else {
             while (timer.seconds() < TIME_FOR_GANTRY_OUT) {
-                setGantryPower(-power);
+                setGantryPower(power);
             }
         }
         setGantryPower(0);
@@ -503,19 +504,18 @@ public class Stacker {
     }
 ////////////////////////////////////// Auto Macros //////////////////////////////////////////////////////////////////////////
     public void macOut(){
-        setLiftPosition(1, -500);
-        sleep(500);
+        setPincherPosition(true);
+        setLiftPosition(1, -500, 3);
         setGantryPosition(1, false);
-        sleep(1500);
-        setArmPosition(0);
+        setArmPosition(2);
     }
     public void macIn(){
         setPincherPosition(true);
-        setArmPosition(2);
+        setArmPosition(0);
         sleep(500);
         setGantryPosition(1,true);
         sleep(500);
-        setLiftPosition(1, LIFT_MIN);
+        setLiftPosition(1, LIFT_MIN, 3);
     }
 }
 

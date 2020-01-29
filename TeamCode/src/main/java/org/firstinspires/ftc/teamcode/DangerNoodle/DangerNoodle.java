@@ -308,11 +308,11 @@ public class DangerNoodle implements Robot {
         if (blue){
             switch (position) {
                 case 2:
-                    drivetrain.move(0.4,0, FORWARD,1080,2,0.1);
+                    drivetrain.move(0.4,0, FORWARD,1030,2,0.1);
 
                     Thread.sleep(400);
 
-                    drivetrain.turnPID(19, (0.275 / 13),(0.015 / 13), 0, 2, false);
+                    drivetrain.turnPID(20, (0.275 / 20),(0.015 / 20), 0, 2, false);
 
                     Thread.sleep(1000);
 
@@ -373,15 +373,15 @@ public class DangerNoodle implements Robot {
 
                     Thread.sleep(400);
 
-                    drivetrain.move(0.35,0, LEFT,265,2,0.00);
+                    drivetrain.move(0.30,0, LEFT,190,2,0.00);
 
                     Thread.sleep(400);
 
-                    drivetrain.move(0.4,0, FORWARD,640,2,0.05);
+                    drivetrain.move(0.35,0, FORWARD,515,2,0.05);
 
                     Thread.sleep(400);
 
-                    drivetrain.turnPID(20, (0.275 / 20),(0.015 / 20), 0, 2, true);
+                    drivetrain.turnPID(20, (0.250 / 20),(0.015 / 20), 0, 2, true);
 
                     Thread.sleep(400);
 
@@ -396,19 +396,15 @@ public class DangerNoodle implements Robot {
 
                 case 0:
 
-                    drivetrain.move(0.4,0, FORWARD,450,2,0.1);
+                    drivetrain.move(0.4,0, FORWARD,990,2,0.1);
 
                     Thread.sleep(400);
 
-                    drivetrain.moveNoBR(0.35,0, LEFT,21, 2,0.00);
+                    drivetrain.turnPID(9, (0.26 / 9),(0.001 / 9), 0, 2, true);
 
-                    Thread.sleep(400);
+                    Thread.sleep(1000);
 
-                    drivetrain.move(0.4,0, FORWARD,630,2,0.05);
-
-                    Thread.sleep(400);
-
-                    drivetrain.turnPID(17, (0.275 / 17),(0.015 / 17), 0, 2, true);
+                    drivetrain.move(0.4,0, FORWARD,200,2,0.1);
 
                     Thread.sleep(400);
 
@@ -416,7 +412,7 @@ public class DangerNoodle implements Robot {
 
                     Thread.sleep(400);
 
-                    drivetrain.move(0.4,0, FORWARD,645,2,0.1);
+                    drivetrain.move(0.35,0, FORWARD,720,2,0.1);
 
                     Thread.sleep(2200);
 
@@ -552,7 +548,7 @@ public class DangerNoodle implements Robot {
     */
 
     public void teleopControls(){
-        drivetrain.moveTelop2(opMode_iterative.gamepad1.left_stick_x, -opMode_iterative.gamepad1.left_stick_y, opMode_iterative.gamepad1.right_stick_x);
+        drivetrain.moveTelop2(opMode_iterative.gamepad1.right_stick_x, -opMode_iterative.gamepad1.right_stick_y, opMode_iterative.gamepad1.left_stick_x);
         drivetrain.toggleSpeed();
         manipulator.stackerTeleControl(0.6, 0.5,1,1);
     }
