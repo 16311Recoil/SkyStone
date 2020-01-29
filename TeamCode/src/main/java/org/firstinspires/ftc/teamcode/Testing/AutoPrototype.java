@@ -3,20 +3,9 @@ package org.firstinspires.ftc.teamcode.Testing;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
-import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-import com.qualcomm.robotcore.util.Range;
-import com.qualcomm.robotcore.util.RobotLog;
-
 import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Drivetrain;
-import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Sensors;
-import org.firstinspires.ftc.teamcode.DangerNoodleLibs.Stacker;
-
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
-
 
 /**
  * This file contains an minimal example of a Linear "OpMode". An OpMode is a 'program' that runs in either
