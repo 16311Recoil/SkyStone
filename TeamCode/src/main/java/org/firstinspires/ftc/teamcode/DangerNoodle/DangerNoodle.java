@@ -139,6 +139,9 @@ public class DangerNoodle implements Robot {
             opMode.telemetry.addLine("RIGHT");
    */
     }
+
+
+
     @Override
     public void retrieval(double distance) {
         manipulator.setIntakePower(1);
@@ -228,6 +231,9 @@ public class DangerNoodle implements Robot {
 
                 drivetrain.move(0.6, 0, FORWARD, 1550, 6, 0.05);
             }
+
+
+            
         } else {
             drivetrain.move(0.6,0, BACKWARD,200,2,0.1);
 
@@ -296,6 +302,7 @@ public class DangerNoodle implements Robot {
             }
         }
     }
+
     public void skystone(boolean blue, boolean skybridge, int position) throws InterruptedException{
 
         if (blue){
@@ -393,7 +400,7 @@ public class DangerNoodle implements Robot {
 
                     Thread.sleep(400);
 
-                    drivetrain.turnPID(7, (0.2 / 7),(0.000 / 9), 0, 2, true);
+                    drivetrain.turnPID(9, (0.26 / 9),(0.001 / 9), 0, 2, true);
 
                     Thread.sleep(1000);
 
@@ -412,6 +419,7 @@ public class DangerNoodle implements Robot {
                     break;
             }
         }
+
         else {
             switch (position) {
                 case 2:

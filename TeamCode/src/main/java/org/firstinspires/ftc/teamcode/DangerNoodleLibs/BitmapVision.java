@@ -27,8 +27,8 @@ import static android.graphics.Color.red;
 
  */
 public class BitmapVision {
-    private static final double LEFT_THRESHOLD_RATIO = 0.460;
-    private static final double RIGHT_THRESHOLD_RATIO = 0.795;
+    private static final double LEFT_THRESHOLD_RATIO = 0.278;
+    private static final double RIGHT_THRESHOLD_RATIO = 0.670;
     private VuforiaLocalizer vuforia;
     private LinearOpMode opMode;
     private int[] skyPos;
@@ -39,8 +39,8 @@ public class BitmapVision {
     // pixels.
     private final int X_MIN_THRESHOLD = 90 / aspectRatio;
     private final int X_MAX_THRESHOLD = 1200 / aspectRatio;
-    private final int Y_MIN_THRESHOLD = 410 / aspectRatio;
-    private final int Y_MAX_THRESHOLD = 1100 / aspectRatio;
+    private final int Y_MIN_THRESHOLD = 165 / aspectRatio;
+    private final int Y_MAX_THRESHOLD = 410 / aspectRatio;
 
     // Threshold value for the X position of each stone (depends on orientation of webcam/scanning
     // position
@@ -144,14 +144,14 @@ public class BitmapVision {
         opMode.telemetry.update();
 
         if (averageX / image.getWidth() < LEFT_THRESHOLD_RATIO) {
-            skyPos[0] = 1;
-            skyPos[1] = 2;
+            skyPos[0] = 0;
+            skyPos[1] = 3;
         } else if (averageX / image.getWidth()> RIGHT_THRESHOLD_RATIO){
             skyPos[0] = 2;
             skyPos[1] = 5;
         } else {
-            skyPos[0] = 0;
-            skyPos[1] = 3;
+            skyPos[0] = 1;
+            skyPos[1] = 2;
         }
     }
     public int[] getSkyPos(){
