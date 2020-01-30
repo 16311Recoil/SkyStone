@@ -610,9 +610,7 @@ public class Drivetrain {
         pidControlller.setTarget(target);
 
         double error = target;
-        opMode.telemetry.addData("t_i", t_i);
-        opMode.telemetry.addData("error", error);
-        opMode.telemetry.update();
+
 
         Thread.yield();
 
@@ -625,6 +623,7 @@ public class Drivetrain {
 
             turn(power, !right);
 
+            opMode.telemetry.addData("Target", target);
             opMode.telemetry.addData("ERROR", error);
             opMode.telemetry.addData("POWER", power);
 
