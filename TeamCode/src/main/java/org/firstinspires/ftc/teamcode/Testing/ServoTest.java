@@ -31,7 +31,7 @@ public class ServoTest extends LinearOpMode {
 
 
         //pincher.setPosition(0);
-        armRotater.setPosition(0.13);
+        armRotater.setPosition(0);
         //rFang.setPosition(0);
         //lFang.setPosition(0);
 
@@ -40,7 +40,7 @@ public class ServoTest extends LinearOpMode {
         while (opModeIsActive()){
             //rFang.setPosition(0.32);
             //lFang.setPosition(0.32);
-            armRotater.setPosition(.7);
+            armRotater.setPosition(1);
         //    pincher.setPosition(1);
             //telemetry.addData("Position", rFang.getPosition());
             telemetry.addData("Position2", armRotater.getPosition());

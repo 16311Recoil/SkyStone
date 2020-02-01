@@ -54,7 +54,7 @@ public class Stacker {
     private final double TIME_FOR_GANTRY_OUT = 2.5;
     private final double CLOSED_PINCHER_SERVO_POSITION = 0;
     private final double OPEN_PICHER_SERVO_POSITION = 0.75;
-    private final double[] ARM_POSITIONS = new double[]{0.80, 0.43, 0.13}; //out pos, mid pos, in robot pos.
+    private final double[] ARM_POSITIONS = new double[]{0.01, 0.37, 1}; //out pos, mid pos, in robot pos.
     private int armSpot = 1;
     private int armRotation = -1;
     private int liftSpotCurrentMax = 1;
@@ -78,6 +78,7 @@ public class Stacker {
     private boolean changeDpadDown2 = false;
     private boolean changeDpadLeft2 = false;
     private boolean changeDpadRight2 = false;
+    private boolean changeIntakeR2 = false;
     private boolean telePincherToggle = false;
     private boolean teleFangToggle = false;
     private boolean buttonA;
@@ -376,7 +377,7 @@ public class Stacker {
             opMode_iterative.telemetry.addLine("FANGS LOCKED");
             opMode_iterative.telemetry.update();
         }
-        else if (((opMode_iterative.gamepad1.x && !changeX2) || (opMode_iterative.gamepad2.y && !changeY2)) &&  teleFangToggle){
+        else if (((opMode_iterative.gamepad1.x && !changeX) || (opMode_iterative.gamepad2.y && !changeY2)) &&  teleFangToggle){
             setFangs(true);
             teleFangToggle = !teleFangToggle;
             opMode_iterative.telemetry.addLine("FANGS UNLOCKED");
@@ -406,15 +407,15 @@ public class Stacker {
     }
 
     private void liftControl(double power) {  //TODO: Update with encoder stops, use LIFT_BLOCK[liftMaxSpot] when doing so
-        liftLock();
+        //liftLock();
         if (opMode_iterative.gamepad2.right_trigger != 0){
             setLiftPower(opMode_iterative.gamepad2.right_trigger * 0.85);
         }
-        else if ((opMode_iterative.gamepad2.left_trigger != 0) && (getLiftEncoderAverage() < LIFT_BLOCK[0])){
+        else if ((opMode_iterative.gamepad2.left_trigger != 0)){
             setLiftPower(-opMode_iterative.gamepad2.left_trigger * 0.05);
         }
-        else if (opMode_iterative.gamepad1.left_bumper && (getLiftEncoderAverage() < LIFT_BLOCK[0])){
-            setLiftPower(-power * 0.01);
+        else if (opMode_iterative.gamepad1.left_bumper){
+            setLiftPower(-power * 0.05);
         }
         else if (opMode_iterative.gamepad1.right_bumper) {
             setLiftPower(power * 0.85);
@@ -435,10 +436,10 @@ public class Stacker {
     }
 
     public void armZeroControl () {
-        if (opMode_iterative.gamepad2.dpad_down && !changeDpadDown2){
+        if ((opMode_iterative.gamepad2.right_stick_y > 0) && !changeIntakeR2){
             setArmPosition(2);
         }
-        changeDpadDown2 = opMode_iterative.gamepad2.dpad_down;
+        changeIntakeR2 = (opMode_iterative.gamepad2.right_stick_y > 0);
     }
 
 
@@ -489,6 +490,7 @@ public class Stacker {
         gantryController(gantryPower);
         macControl();
         armZeroControl();
+        liftMaxControl();
 
     }
     public void buttonMapping(){

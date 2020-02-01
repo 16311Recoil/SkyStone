@@ -391,22 +391,14 @@ public class Drivetrain {
         double turnAmount = desiredAngle - currentAngle;
         boolean turnRight = (turnAmount > 0);
 
-        //turnGyro(currentAngle, power, turnAmount, turnRight, timeout);
-        turnPID(turnAmount, 0.3 / turnAmount, 0,0.1 / turnAmount,5,turnRight);
+        turnGyro(currentAngle, power, turnAmount, turnRight, timeout);
+        //turnPID(turnAmount, 0.3 / turnAmount, 0,0.0 / turnAmount,5,turnRight);
 
         opMode.telemetry.addData("Header", desiredAngle);
         opMode.telemetry.addData("CurrentAngle", currentAngle);
         opMode.telemetry.addData("ChangeAngle", turnAmount);
         opMode.telemetry.update();
 
-    }
-    public void testCorrectTo(double heading) throws InterruptedException {
-
-        turnPID(48,0.3 / 48,0,0,5, true);
-
-        Thread.sleep(4000);
-
-        correctTo(.3, heading, 10);
     }
 
     public double correctHeading2(double p, double d, ElapsedTime t_i, double target, double currAngle) {

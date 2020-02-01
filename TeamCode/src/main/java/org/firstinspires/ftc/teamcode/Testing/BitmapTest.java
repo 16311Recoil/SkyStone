@@ -15,6 +15,7 @@ public class BitmapTest extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         BitmapVision bmv = new BitmapVision(this);
         waitForStart();
+
         telemetry.addData("SkyPOS",bmv.getSkyPos()[0]);
         telemetry.update();
 

@@ -27,14 +27,13 @@ public class BlueSkystone extends LinearOpMode {
         dangerNoodle = new DangerNoodle(this, true,true);
 
         while(!isStarted()) {
-            skyPos = 2;
-            telemetry.addData("SKY POS", skyPos);
+            dangerNoodle.scan();
             telemetry.update();
         }
 
         waitForStart();
 
-        dangerNoodle.skystone(true,true, 2);
+        dangerNoodle.skystone(true,true);
 
 
 

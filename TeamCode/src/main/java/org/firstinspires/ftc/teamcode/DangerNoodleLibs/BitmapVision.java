@@ -27,8 +27,8 @@ import static android.graphics.Color.red;
 
  */
 public class BitmapVision {
-    private static final double LEFT_THRESHOLD_RATIO = 0.278;
-    private static final double RIGHT_THRESHOLD_RATIO = 0.670;
+    private static final double LEFT_THRESHOLD_RATIO = 0.445;
+    private static final double RIGHT_THRESHOLD_RATIO = 0.723;
     private VuforiaLocalizer vuforia;
     private LinearOpMode opMode;
     private int[] skyPos;
@@ -39,13 +39,13 @@ public class BitmapVision {
     // pixels.
     private final int X_MIN_THRESHOLD = 90 / aspectRatio;
     private final int X_MAX_THRESHOLD = 1200 / aspectRatio;
-    private final int Y_MIN_THRESHOLD = 165 / aspectRatio;
-    private final int Y_MAX_THRESHOLD = 410 / aspectRatio;
+    private final int Y_MIN_THRESHOLD = 435 / aspectRatio;
+    private final int Y_MAX_THRESHOLD = 720 / aspectRatio;
 
     // Threshold value for the X position of each stone (depends on orientation of webcam/scanning
     // position
-    private final int LEFT_THRESHOLD = 508 / aspectRatio;
-    private final int MIDDLE_THRESHOLD = 935 / aspectRatio;
+    private final int LEFT_THRESHOLD = 600 / aspectRatio;
+    private final int MIDDLE_THRESHOLD = 1022 / aspectRatio;
     private final int RIGHT_THRESHOLD = 1275 / aspectRatio;
 
     private final int RED_THRESHOLD = 121;
@@ -111,8 +111,13 @@ public class BitmapVision {
     }
     private void findSkyPos() throws InterruptedException
     {
+
         Bitmap image = getBitmap();
         ArrayList<Integer> xVals = new ArrayList<Integer>();
+
+        opMode.telemetry.addData("Picture Width", image.getWidth());
+        opMode.telemetry.addData("Picture Height", image.getHeight());
+        opMode.telemetry.update();
 
 
         for (int colNum = 0; colNum < image.getWidth(); colNum++){
@@ -125,15 +130,14 @@ public class BitmapVision {
 
                 if (red <= 30 && green <= 30 && blue <= 30) {
                     xVals.add(colNum);
+                    opMode.telemetry.addData("X val", colNum);
+                    opMode.telemetry.update();
                 }
             }
         }
-
         double averageX = 0;
         for (int n: xVals)
             averageX += n;
-
-
 
         try {
             averageX /= xVals.size();
@@ -145,13 +149,13 @@ public class BitmapVision {
 
         if (averageX / image.getWidth() < LEFT_THRESHOLD_RATIO) {
             skyPos[0] = 0;
-            skyPos[1] = 3;
-        } else if (averageX / image.getWidth()> RIGHT_THRESHOLD_RATIO){
-            skyPos[0] = 2;
-            skyPos[1] = 5;
-        } else {
+
+        } else if (averageX / image.getWidth() < RIGHT_THRESHOLD_RATIO){
             skyPos[0] = 1;
-            skyPos[1] = 2;
+
+        } else {
+            skyPos[0] = 2;
+
         }
     }
     public int[] getSkyPos(){

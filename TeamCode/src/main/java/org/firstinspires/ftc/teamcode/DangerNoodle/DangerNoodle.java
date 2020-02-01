@@ -41,7 +41,7 @@ public class DangerNoodle implements Robot {
     private ElapsedTime masterTime;
     private double LEFT, RIGHT, FORWARD, BACKWARD;
     private boolean blue;
-
+    private BitmapVision bmv;
 
 
     /*
@@ -57,7 +57,7 @@ public class DangerNoodle implements Robot {
             this.sensorVals = new ConcurrentHashMap<String, Double>();
             drivetrain = new Drivetrain(opMode, timer, sensorVals);
             manipulator = new Stacker(opMode);
-            //bmv = new BitmapVision(opMode);
+            bmv = new BitmapVision(opMode);
             masterTime = new ElapsedTime();
             hardwareThread = new HardwareThread(this, this.sensorVals);
 
@@ -127,17 +127,17 @@ public class DangerNoodle implements Robot {
     // Wait for robot
     @Override
     public void scan() {
-        /*
+
         while(!opMode.isStarted() && skyPos[1] == 0){
             skyPos = bmv.getSkyPos();
         }
         if (skyPos[0] == 0)
-            opMode.telemetry.addLine("LEFT");
-        else if (skyPos[1] == 1)
-            opMode.telemetry.addLine("MIDDLE");
-        else
             opMode.telemetry.addLine("RIGHT");
-   */
+        else if (skyPos[1] == 1)
+            opMode.telemetry.addLine("CENTER");
+        else
+            opMode.telemetry.addLine("LEFT");
+
     }
 
 
@@ -147,6 +147,33 @@ public class DangerNoodle implements Robot {
         manipulator.setIntakePower(1);
         drivetrain.moveForward(distance, 0.8,3);
         manipulator.setIntakePower(0);
+
+    }
+
+    public void testCorrectTo() throws InterruptedException {
+
+        double heading = getDrivetrain().getSensors().getFirstAngle();
+
+        drivetrain.turnPID(78, 0.4 / 78, 0.014 / 78, 0, 4, false);
+
+        Thread.sleep(2000);
+
+        drivetrain.correctTo(0.3, heading, 5);
+
+        Thread.sleep(2000);
+
+        opMode.telemetry.addLine("1st done");
+        opMode.telemetry.update();
+
+        drivetrain.turnPID(78, 0.4 / 78, 0.014 / 78, 0, 4, true);
+
+        Thread.sleep(2000);
+
+        drivetrain.correctTo(0.3, heading, 5);
+
+        opMode.telemetry.addLine("1st done");
+        opMode.telemetry.update();
+
 
     }
 
@@ -214,7 +241,7 @@ public class DangerNoodle implements Robot {
 
                 Thread.sleep(300);
 
-                drivetrain.move(0.35, 0, LEFT, 870, 4, 0.05);
+                drivetrain.move(0.4, 0, LEFT, 52, 3.675, 0.05);
 
                 Thread.sleep(1000);
 
@@ -225,7 +252,7 @@ public class DangerNoodle implements Robot {
 
                 Thread.sleep(400);
 
-                drivetrain.move(0.35, 0, LEFT, 5, 3, 0.1);
+                drivetrain.move(0.35, 0, LEFT, 2, 3, 0.1);
 
                 Thread.sleep(300);
 
@@ -283,7 +310,7 @@ public class DangerNoodle implements Robot {
 
                 Thread.sleep(300);
 
-                drivetrain.move(0.375, 0, RIGHT, 730, 4, 0.00);
+                drivetrain.move(0.375, 0, RIGHT, 450, 3.65, 0.00);
 
                 Thread.sleep(300);
 
@@ -303,19 +330,19 @@ public class DangerNoodle implements Robot {
         }
     }
 
-    public void skystone(boolean blue, boolean skybridge, int position) throws InterruptedException{
+    public void skystone(boolean blue, boolean skybridge) throws InterruptedException{
 
         double heading = getDrivetrain().getSensors().getFirstAngle();
         opMode.telemetry.addData("InitAngle", heading);
 
         if (blue){
-            switch (position) {
+            switch (skyPos[0]) {
                 case 2:
                     drivetrain.move(0.4,0, FORWARD,1030,2,0.1);
 
                     Thread.sleep(400);
 
-                    drivetrain.turnPID(20, (0.275 / 20),(0.015 / 20), 0, 3, false);
+                    drivetrain.turnPID(20, (0.276 / 20),(0.015 / 20), 0, 3, false);
 
                     Thread.sleep(1000);
 
@@ -331,13 +358,34 @@ public class DangerNoodle implements Robot {
 
                     Thread.sleep(2200);
 
-                    drivetrain.turnPID(20, (0.175 / 20),(0.0001 / 20), 0, 3, true);
+                    //drivetrain.turnPID(20, (0.175 / 20),(0.0001 / 20), 0, 3, true);
 
-                    //drivetrain.correctTo(0.25, heading,3);
+                    manipulator.setIntakePower(0);
+
+
+                    drivetrain.correctTo(0.245, heading,4);
 
                     Thread.sleep(400);
 
-                    drivetrain.move(0.35,0, BACKWARD,1200,2,0.1);
+                    drivetrain.move(0.35,0, BACKWARD,830,4,0.1);
+
+                    Thread.sleep(400);
+
+                    drivetrain.correctTo(0.25, heading,2);
+
+                    drivetrain.move(0.5,0, LEFT,82,5,0.1);
+
+                    Thread.sleep(400);
+
+                    manipulator.setIntakePower(0.4);
+
+                    Thread.sleep(1500);
+
+                    drivetrain.move(0.25,0, FORWARD,25,2,0.1);
+
+                    drivetrain.correctTo(0.26, heading,2);
+
+                    drivetrain.move(0.5,0, RIGHT,41,5,0.1);
 
                     /*manipulator.setLiftPosition(0.4, -300);
 
@@ -384,7 +432,7 @@ public class DangerNoodle implements Robot {
 
                     Thread.sleep(400);
 
-                    drivetrain.move(0.30,0, LEFT,190,2,0.00);
+                    drivetrain.move(0.30,0, LEFT,224,2.275,0.00);
 
                     Thread.sleep(400);
 
@@ -392,7 +440,7 @@ public class DangerNoodle implements Robot {
 
                     Thread.sleep(400);
 
-                    drivetrain.turnPID(20, (0.250 / 20),(0.015 / 20), 0, 2, true);
+                    drivetrain.turnPID(18, (0.250 / 18),(0.015 / 18), 0, 2, true);
 
                     Thread.sleep(400);
 
@@ -403,6 +451,35 @@ public class DangerNoodle implements Robot {
                     drivetrain.move(0.35,0, FORWARD,645,2,0.1);
 
                     Thread.sleep(2200);
+
+                    manipulator.setIntakePower(0);
+
+                    drivetrain.correctTo(0.245, heading,4);
+
+                    Thread.sleep(400);
+
+                    drivetrain.move(0.35,0, BACKWARD,665,3,0.1);
+
+                    Thread.sleep(400);
+
+                    drivetrain.correctTo(0.245, heading,4);
+
+                    Thread.sleep(400);
+
+                    drivetrain.move(0.4,0, LEFT,147,4,0.1);
+
+                    Thread.sleep(400);
+
+                    manipulator.setIntakePower(0.4);
+
+                    Thread.sleep(1500);
+
+                    drivetrain.correctTo(0.245, heading,4);
+
+                    Thread.sleep(400);
+
+                    drivetrain.move(0.35,0, RIGHT,47,3,0.1);
+
                     break;
 
                 case 0:
@@ -432,7 +509,7 @@ public class DangerNoodle implements Robot {
         }
 
         else {
-            switch (position) {
+            switch (skyPos[0]) {
                 case 2:
                     drivetrain.move(0.4,0, FORWARD,450,2,0.1);
 
